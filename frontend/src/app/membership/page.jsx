@@ -18,9 +18,15 @@ import {
   RefreshCw,
   Check,
   HelpCircle,
+  CreditCard,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { getMySubscriptionApi, getMemberCreditsApi } from '@/lib/api';
+import {
+  getMySubscriptionApi,
+  getMemberCreditsApi,
+  createSubscriptionOrderApi,
+  verifySubscriptionPaymentApi,
+} from '@/lib/api';
 
 function formatDate(dateVal) {
   if (!dateVal) return '—';
@@ -33,6 +39,20 @@ function formatDate(dateVal) {
   });
 }
 
+function loadRazorpayScript() {
+  return new Promise((resolve) => {
+    if (typeof window !== 'undefined' && window.Razorpay) {
+      return resolve(true);
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 const MEMBERSHIP_PLANS = [
   {
     code: 'THREE_MONTHS',
@@ -42,6 +62,8 @@ const MEMBERSHIP_PLANS = [
     durationText: '3 Months (90 Days)',
     priceText: 'Price announced soon',
     priceSub: 'Official tariffs published upon launch',
+    sandboxPriceText: '₹1.00 (100 paise)',
+    sandboxNote: 'Temporary sandbox test amount — not official tariff',
     featured: false,
     icon: Sparkles,
     features: [
@@ -60,6 +82,8 @@ const MEMBERSHIP_PLANS = [
     durationText: '6 Months (180 Days)',
     priceText: 'Price announced soon',
     priceSub: 'Official tariffs published upon launch',
+    sandboxPriceText: '₹2.00 (200 paise)',
+    sandboxNote: 'Temporary sandbox test amount — not official tariff',
     featured: true,
     icon: Crown,
     features: [
@@ -81,6 +105,8 @@ export default function MembershipPage() {
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [creditData, setCreditData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [processingPlan, setProcessingPlan] = useState(null);
+  const [checkoutNotice, setCheckoutNotice] = useState(null);
 
   const loadMembershipDetails = useCallback(async () => {
     setLoading(true);
@@ -132,6 +158,155 @@ export default function MembershipPage() {
   const hasSubscription = subscriptionData?.hasSubscription && Boolean(subscription);
   const subscriptionStatus = subscription?.status || 'none';
   const credits = creditData?.credits;
+
+  const handleInitiateCheckout = async (plan) => {
+    setCheckoutNotice(null);
+
+    // 1. Authentication check
+    if (!currentUser) {
+      router.push('/login?redirect=/membership');
+      return;
+    }
+
+    // 2. Existing active subscription check (renewal rules pending confirmation)
+    if (hasSubscription && subscriptionStatus === 'active') {
+      setCheckoutNotice({
+        type: 'info',
+        message: 'You currently have an active subscription. Subscription renewal features will be available soon.',
+      });
+      return;
+    }
+
+    setProcessingPlan(plan.code);
+    setCheckoutNotice({
+      type: 'loading',
+      message: `Creating payment order for ${plan.name}...`,
+    });
+
+    try {
+      // Step A: Request server to create Razorpay Order
+      const orderRes = await createSubscriptionOrderApi(plan.code);
+
+      if (!orderRes.success) {
+        setCheckoutNotice({
+          type: 'error',
+          message: orderRes.message || 'Unable to create payment order. Online checkout is currently disabled.',
+        });
+        setProcessingPlan(null);
+        return;
+      }
+
+      const { orderId, amount, currency, planName, keyId } = orderRes.data || {};
+      if (!orderId || !keyId) {
+        setCheckoutNotice({
+          type: 'error',
+          message: 'Received invalid order response from the payment server.',
+        });
+        setProcessingPlan(null);
+        return;
+      }
+
+      // Step B: Load Razorpay Checkout modal script
+      const scriptReady = await loadRazorpayScript();
+      if (!scriptReady) {
+        setCheckoutNotice({
+          type: 'error',
+          message: 'Failed to load Razorpay payment checkout script. Please check your connection.',
+        });
+        setProcessingPlan(null);
+        return;
+      }
+
+      setCheckoutNotice({
+        type: 'loading',
+        message: 'Opening Razorpay test payment window...',
+      });
+
+      // Step C: Initialize Razorpay instance
+      const options = {
+        key: keyId,
+        amount: amount,
+        currency: currency || 'INR',
+        name: 'Vivahaa Matrimony',
+        description: `${planName || plan.name} (Test Mode Sandbox)`,
+        order_id: orderId,
+        prefill: {
+          name: currentUser?.name || '',
+          email: currentUser?.email || '',
+          contact: currentUser?.phone || '',
+        },
+        theme: {
+          color: '#0B5D52',
+        },
+        modal: {
+          ondismiss: function () {
+            setProcessingPlan(null);
+            setCheckoutNotice({
+              type: 'info',
+              message: 'Payment checkout was cancelled. No charges were made.',
+            });
+          },
+        },
+        handler: async function (paymentResponse) {
+          // IMPORTANT: Never activate subscription on client callback alone.
+          // ALWAYS send credentials to backend verification API.
+          setProcessingPlan(plan.code);
+          setCheckoutNotice({
+            type: 'loading',
+            message: 'Payment received by provider. Verifying signature on server and activating subscription...',
+          });
+
+          try {
+            const verifyRes = await verifySubscriptionPaymentApi({
+              razorpay_order_id: paymentResponse.razorpay_order_id,
+              razorpay_payment_id: paymentResponse.razorpay_payment_id,
+              razorpay_signature: paymentResponse.razorpay_signature,
+            });
+
+            if (verifyRes.success) {
+              setCheckoutNotice({
+                type: 'success',
+                message: 'Payment verified successfully! Your subscription and 50 monthly contact view credits are now active.',
+              });
+              // Refresh subscription and credits state
+              await loadMembershipDetails();
+            } else {
+              setCheckoutNotice({
+                type: 'error',
+                message: verifyRes.message || 'Payment verification failed on the server. Subscription was not activated.',
+              });
+            }
+          } catch (verifyErr) {
+            setCheckoutNotice({
+              type: 'error',
+              message: 'Network error occurred while verifying payment. Please refresh your membership dashboard.',
+            });
+          } finally {
+            setProcessingPlan(null);
+          }
+        },
+      };
+
+      const rzpInstance = new window.Razorpay(options);
+
+      rzpInstance.on('payment.failed', function (failureData) {
+        setProcessingPlan(null);
+        const desc = failureData.error?.description || failureData.error?.reason || 'Payment could not be completed.';
+        setCheckoutNotice({
+          type: 'error',
+          message: `Payment failed: ${desc}`,
+        });
+      });
+
+      rzpInstance.open();
+    } catch (err) {
+      setProcessingPlan(null);
+      setCheckoutNotice({
+        type: 'error',
+        message: 'An unexpected error occurred while launching payment checkout.',
+      });
+    }
+  };
 
   return (
     <div
@@ -219,6 +394,78 @@ export default function MembershipPage() {
             >
               <RefreshCw size={14} /> Retry
             </button>
+          </div>
+        )}
+
+        {/* Interactive Payment Checkout Notice Banner */}
+        {checkoutNotice && (
+          <div
+            style={{
+              backgroundColor:
+                checkoutNotice.type === 'success'
+                  ? '#ecfdf5'
+                  : checkoutNotice.type === 'error'
+                  ? '#fef2f2'
+                  : checkoutNotice.type === 'loading'
+                  ? '#f0fdfa'
+                  : '#fffbeb',
+              border:
+                checkoutNotice.type === 'success'
+                  ? '1.5px solid #6ee7b7'
+                  : checkoutNotice.type === 'error'
+                  ? '1.5px solid #fca5a5'
+                  : checkoutNotice.type === 'loading'
+                  ? '1.5px solid #5eead4'
+                  : '1.5px solid #fcd34d',
+              borderRadius: '10px',
+              padding: '1rem 1.25rem',
+              marginBottom: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              color:
+                checkoutNotice.type === 'success'
+                  ? '#065f46'
+                  : checkoutNotice.type === 'error'
+                  ? '#991b1b'
+                  : checkoutNotice.type === 'loading'
+                  ? '#0f766e'
+                  : '#92400e',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              {checkoutNotice.type === 'success' ? (
+                <CheckCircle2 size={20} color="#059669" />
+              ) : checkoutNotice.type === 'error' ? (
+                <AlertCircle size={20} color="#dc2626" />
+              ) : checkoutNotice.type === 'loading' ? (
+                <RefreshCw size={18} className="animate-spin" color="#0d9488" />
+              ) : (
+                <AlertCircle size={20} color="#d97706" />
+              )}
+              <span style={{ fontSize: '0.92rem', fontWeight: 600 }}>
+                {checkoutNotice.message}
+              </span>
+            </div>
+            {checkoutNotice.type !== 'loading' && (
+              <button
+                type="button"
+                onClick={() => setCheckoutNotice(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'inherit',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                Dismiss
+              </button>
+            )}
           </div>
         )}
 
@@ -662,7 +909,7 @@ export default function MembershipPage() {
                 <strong>{formatDate(subscription?.gracePeriodEndDate || subscription?.endDate)}</strong>. Member directory privileges and contact view credits are currently disabled.
               </p>
               <p style={{ fontSize: '0.85rem', color: '#0B5D52', fontWeight: 600 }}>
-                Review our quarterly and half-yearly plan options below. Online checkout will open as soon as payment tariffs are finalized.
+                Choose a plan below to renew your membership via secure test sandbox checkout.
               </p>
             </div>
           ) : (
@@ -711,13 +958,13 @@ export default function MembershipPage() {
                   lineHeight: 1.6,
                 }}
               >
-                Your account is registered. To access verified candidate profiles and receive 50 monthly contact credits, explore our Gold and Platinum plans below.
+                Your account is registered. To access verified candidate profiles and receive 50 monthly contact credits, select our Gold or Platinum plan below using secure sandbox checkout.
               </p>
             </div>
           )}
         </div>
 
-        {/* SECTION 2: Disabled Checkout Notice (Mandatory Requirement) */}
+        {/* SECTION 2: Test Mode Sandbox Notice */}
         <div
           style={{
             backgroundColor: '#fdfbf7',
@@ -743,7 +990,7 @@ export default function MembershipPage() {
               color: '#C5A15B',
             }}
           >
-            <Lock size={20} />
+            <CreditCard size={20} />
           </div>
           <div>
             <h3
@@ -754,10 +1001,10 @@ export default function MembershipPage() {
                 marginBottom: '0.2rem',
               }}
             >
-              Online Subscription Checkout Notice
+              Razorpay Test Mode Sandbox Environment
             </h3>
             <p style={{ fontSize: '0.86rem', color: '#5e5952', lineHeight: 1.5 }}>
-              Online payment gateway checkout is currently unavailable while official pricing tariffs and payment gateway setup are finalized. Registration, profile creation, and horoscope entry remain 100% free.
+              Online checkout is configured with Razorpay Test Mode credentials for sandbox verification. Nominal amounts (₹1.00 and ₹2.00) are temporary test values and not official membership tariffs. Production payment checkout remains disabled until public tariffs are officially released.
             </p>
           </div>
         </div>
@@ -791,6 +1038,9 @@ export default function MembershipPage() {
           >
             {MEMBERSHIP_PLANS.map((plan) => {
               const PlanIcon = plan.icon;
+              const isCurrentActive = hasSubscription && subscriptionStatus === 'active';
+              const isProcessing = processingPlan === plan.code;
+
               return (
                 <div
                   key={plan.code}
@@ -873,7 +1123,7 @@ export default function MembershipPage() {
                       </div>
                     </div>
 
-                    {/* Price Box */}
+                    {/* Price Box with Sandbox Badge */}
                     <div
                       style={{
                         backgroundColor: '#f8fafc',
@@ -895,6 +1145,27 @@ export default function MembershipPage() {
                       <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.15rem' }}>
                         {plan.priceSub}
                       </div>
+                      {plan.sandboxPriceText && (
+                        <div
+                          style={{
+                            marginTop: '0.5rem',
+                            padding: '0.35rem 0.6rem',
+                            backgroundColor: '#fef3c7',
+                            border: '1px dashed #d97706',
+                            borderRadius: '6px',
+                            fontSize: '0.74rem',
+                            color: '#92400e',
+                            fontWeight: 600,
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          Sandbox Test Price: {plan.sandboxPriceText}
+                          <br />
+                          <span style={{ fontWeight: 400, fontSize: '0.7rem', color: '#78350f' }}>
+                            ({plan.sandboxNote})
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Features List */}
@@ -931,38 +1202,89 @@ export default function MembershipPage() {
                     </ul>
                   </div>
 
-                  {/* Action / Checkout Button (Disabled) */}
+                  {/* Action / Checkout Button */}
                   <div>
-                    <button
-                      type="button"
-                      disabled
-                      style={{
-                        width: '100%',
-                        backgroundColor: '#f1f5f9',
-                        color: '#64748b',
-                        border: '1px solid #cbd5e1',
-                        padding: '0.75rem 1rem',
-                        borderRadius: '6px',
-                        fontSize: '0.88rem',
-                        fontWeight: 600,
-                        cursor: 'not-allowed',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.4rem',
-                      }}
-                    >
-                      <Lock size={15} /> Checkout Unavailable
-                    </button>
+                    {isCurrentActive ? (
+                      <button
+                        type="button"
+                        disabled
+                        style={{
+                          width: '100%',
+                          backgroundColor: '#f1f5f9',
+                          color: '#64748b',
+                          border: '1px solid #cbd5e1',
+                          padding: '0.75rem 1rem',
+                          borderRadius: '6px',
+                          fontSize: '0.88rem',
+                          fontWeight: 600,
+                          cursor: 'not-allowed',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.4rem',
+                        }}
+                      >
+                        <Check size={16} /> Plan Already Active
+                      </button>
+                    ) : isProcessing ? (
+                      <button
+                        type="button"
+                        disabled
+                        style={{
+                          width: '100%',
+                          backgroundColor: '#0B5D52',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '0.75rem 1rem',
+                          borderRadius: '6px',
+                          fontSize: '0.88rem',
+                          fontWeight: 600,
+                          cursor: 'wait',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.4rem',
+                        }}
+                      >
+                        <RefreshCw size={15} className="animate-spin" /> Processing Payment...
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleInitiateCheckout(plan)}
+                        disabled={Boolean(processingPlan)}
+                        data-plan-btn={plan.code}
+                        style={{
+                          width: '100%',
+                          backgroundColor: plan.featured ? '#0B5D52' : '#ffffff',
+                          color: plan.featured ? '#ffffff' : '#07463F',
+                          border: plan.featured ? 'none' : '1.5px solid #0B5D52',
+                          padding: '0.75rem 1rem',
+                          borderRadius: '6px',
+                          fontSize: '0.88rem',
+                          fontWeight: 600,
+                          cursor: processingPlan ? 'not-allowed' : 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.4rem',
+                          boxShadow: plan.featured ? '0 2px 8px rgba(11, 93, 82, 0.2)' : 'none',
+                        }}
+                      >
+                        <Sparkles size={15} /> Select Plan (Test Checkout)
+                      </button>
+                    )}
                     <p
                       style={{
                         fontSize: '0.74rem',
                         color: '#94a3b8',
                         textAlign: 'center',
-                        marginTop: '0.4rem',
+                        marginTop: '0.45rem',
                       }}
                     >
-                      Tariffs published upon payment gateway launch
+                      {isCurrentActive
+                        ? 'Renewal rules will open upon term expiry'
+                        : 'Simulated Razorpay sandbox payment'}
                     </p>
                   </div>
                 </div>
