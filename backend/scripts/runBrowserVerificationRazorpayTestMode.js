@@ -50,17 +50,16 @@ function fetchJson(url) {
   });
 }
 
-function checkPort(port, reqPath = '/') {
-  return new Promise((resolve) => {
-    const req = http.get(`http://localhost:${port}${reqPath}`, (res) => {
-      resolve(true);
-    });
-    req.on('error', () => resolve(false));
-    req.setTimeout(5000, () => {
-      req.destroy();
-      resolve(false);
-    });
-  });
+async function checkPort(port, reqPath = '/') {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(`http://127.0.0.1:${port}${reqPath}`, { signal: controller.signal });
+    clearTimeout(timer);
+    return res.status > 0;
+  } catch (_) {
+    return false;
+  }
 }
 
 class CDPClient {

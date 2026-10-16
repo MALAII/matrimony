@@ -101,6 +101,8 @@ export default function MembershipPage() {
   const router = useRouter();
   const { currentUser, authLoading } = useAuth();
 
+  const isCheckoutEnabled = process.env.NEXT_PUBLIC_ENABLE_CHECKOUT === 'true';
+
   const [loading, setLoading] = useState(true);
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [creditData, setCreditData] = useState(null);
@@ -161,6 +163,15 @@ export default function MembershipPage() {
 
   const handleInitiateCheckout = async (plan) => {
     setCheckoutNotice(null);
+
+    // 0. Environment guard: disallow checkout when flag is not enabled
+    if (!isCheckoutEnabled) {
+      setCheckoutNotice({
+        type: 'error',
+        message: 'Online subscription checkout is currently unavailable while official tariffs are finalized.',
+      });
+      return;
+    }
 
     // 1. Authentication check
     if (!currentUser) {
@@ -964,50 +975,96 @@ export default function MembershipPage() {
           )}
         </div>
 
-        {/* SECTION 2: Test Mode Sandbox Notice */}
-        <div
-          style={{
-            backgroundColor: '#fdfbf7',
-            border: '1.5px solid #dfcc9f',
-            borderRadius: '10px',
-            padding: '1.25rem 1.5rem',
-            marginBottom: '3rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-          }}
-        >
+        {/* SECTION 2: Checkout Notice */}
+        {isCheckoutEnabled ? (
           <div
             style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '50%',
-              backgroundColor: '#fbf6ec',
+              backgroundColor: '#fdfbf7',
+              border: '1.5px solid #dfcc9f',
+              borderRadius: '10px',
+              padding: '1.25rem 1.5rem',
+              marginBottom: '3rem',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              color: '#C5A15B',
+              gap: '1rem',
             }}
           >
-            <CreditCard size={20} />
-          </div>
-          <div>
-            <h3
+            <div
               style={{
-                fontSize: '0.96rem',
-                fontWeight: 700,
-                color: '#07463F',
-                marginBottom: '0.2rem',
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
+                backgroundColor: '#fbf6ec',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                color: '#C5A15B',
               }}
             >
-              Razorpay Test Mode Sandbox Environment
-            </h3>
-            <p style={{ fontSize: '0.86rem', color: '#5e5952', lineHeight: 1.5 }}>
-              Online checkout is configured with Razorpay Test Mode credentials for sandbox verification. Nominal amounts (₹1.00 and ₹2.00) are temporary test values and not official membership tariffs. Production payment checkout remains disabled until public tariffs are officially released.
-            </p>
+              <CreditCard size={20} />
+            </div>
+            <div>
+              <h3
+                style={{
+                  fontSize: '0.96rem',
+                  fontWeight: 700,
+                  color: '#07463F',
+                  marginBottom: '0.2rem',
+                }}
+              >
+                Razorpay Test Mode Sandbox Environment
+              </h3>
+              <p style={{ fontSize: '0.86rem', color: '#5e5952', lineHeight: 1.5 }}>
+                Online checkout is configured with Razorpay Test Mode credentials for sandbox verification. Nominal amounts (₹1.00 and ₹2.00) are temporary test values and not official membership tariffs. Production payment checkout remains disabled until public tariffs are officially released.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div
+            style={{
+              backgroundColor: '#fdfbf7',
+              border: '1.5px solid #dfcc9f',
+              borderRadius: '10px',
+              padding: '1.25rem 1.5rem',
+              marginBottom: '3rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+            }}
+          >
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
+                backgroundColor: '#fbf6ec',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                color: '#C5A15B',
+              }}
+            >
+              <Lock size={20} />
+            </div>
+            <div>
+              <h3
+                style={{
+                  fontSize: '0.96rem',
+                  fontWeight: 700,
+                  color: '#07463F',
+                  marginBottom: '0.2rem',
+                }}
+              >
+                Online Subscription Checkout Notice
+              </h3>
+              <p style={{ fontSize: '0.86rem', color: '#5e5952', lineHeight: 1.5 }}>
+                Online payment gateway checkout is currently unavailable while official pricing tariffs and payment gateway setup are finalized. Registration, profile creation, and horoscope entry remain 100% free.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* SECTION 3: Membership Plan Comparison Cards */}
         <div style={{ marginBottom: '3.5rem' }}>
@@ -1145,7 +1202,7 @@ export default function MembershipPage() {
                       <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.15rem' }}>
                         {plan.priceSub}
                       </div>
-                      {plan.sandboxPriceText && (
+                      {isCheckoutEnabled && plan.sandboxPriceText && (
                         <div
                           style={{
                             marginTop: '0.5rem',
@@ -1226,6 +1283,28 @@ export default function MembershipPage() {
                       >
                         <Check size={16} /> Plan Already Active
                       </button>
+                    ) : !isCheckoutEnabled ? (
+                      <button
+                        type="button"
+                        disabled
+                        style={{
+                          width: '100%',
+                          backgroundColor: '#f1f5f9',
+                          color: '#64748b',
+                          border: '1px solid #cbd5e1',
+                          padding: '0.75rem 1rem',
+                          borderRadius: '6px',
+                          fontSize: '0.88rem',
+                          fontWeight: 600,
+                          cursor: 'not-allowed',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.4rem',
+                        }}
+                      >
+                        <Lock size={15} /> Checkout Unavailable
+                      </button>
                     ) : isProcessing ? (
                       <button
                         type="button"
@@ -1284,6 +1363,8 @@ export default function MembershipPage() {
                     >
                       {isCurrentActive
                         ? 'Renewal rules will open upon term expiry'
+                        : !isCheckoutEnabled
+                        ? 'Tariffs published upon payment gateway launch'
                         : 'Simulated Razorpay sandbox payment'}
                     </p>
                   </div>
