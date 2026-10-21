@@ -475,6 +475,13 @@ const uploadAdminBrokerPhoto = async (req, res, next) => {
         url: newUrl,
         publicId: newPublicId,
       };
+      if (profile.photos && profile.photos.length > 0) {
+        const primIndex = profile.photos.findIndex((p) => p.isPrimary);
+        const targetIdx = primIndex >= 0 ? primIndex : 0;
+        profile.photos[targetIdx].url = newUrl;
+        profile.photos[targetIdx].publicId = newPublicId;
+        profile.photos[targetIdx].isPrimary = true;
+      }
       await profile.save();
     } catch (dbError) {
       // If database update fails, clean up newly uploaded image from Cloudinary

@@ -485,6 +485,244 @@ export async function uploadAdminBrokerPhotoApi(profileId, file) {
 }
 
 /**
+ * Fetch candidate photo gallery (up to 3 photos)
+ * @param {string} profileId
+ * @returns {Promise<{ success: boolean, status: number, data?: object, message?: string }>}
+ */
+export async function getAdminCandidatePhotosApi(profileId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    const result = await res.json().catch(() => ({}));
+
+    return {
+      success: res.ok,
+      status: res.status,
+      data: result.data,
+      message: result.message || (res.ok ? 'Photos loaded' : 'Failed to fetch photos'),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: 0,
+      message: 'Unable to connect to the server. Please check your network connection.',
+    };
+  }
+}
+
+/**
+ * Upload an additional candidate photo (enforces max 3)
+ * @param {string} profileId
+ * @param {File} file
+ * @returns {Promise<{ success: boolean, status: number, data?: object, message?: string }>}
+ */
+export async function addAdminCandidatePhotoApi(profileId, file) {
+  try {
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+
+    const result = await res.json().catch(() => ({}));
+
+    return {
+      success: res.ok,
+      status: res.status,
+      data: result.data,
+      message: result.message || (res.ok ? 'Photo uploaded successfully' : 'Photo upload failed'),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: 0,
+      message: 'Unable to connect to the server. Please check your network connection.',
+    };
+  }
+}
+
+/**
+ * Replace an existing candidate photo
+ * @param {string} profileId
+ * @param {string} photoId
+ * @param {File} file
+ * @returns {Promise<{ success: boolean, status: number, data?: object, message?: string }>}
+ */
+export async function replaceAdminCandidatePhotoApi(profileId, photoId, file) {
+  try {
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos/${photoId}`, {
+      method: 'PUT',
+      credentials: 'include',
+      body: formData,
+    });
+
+    const result = await res.json().catch(() => ({}));
+
+    return {
+      success: res.ok,
+      status: res.status,
+      data: result.data,
+      message: result.message || (res.ok ? 'Photo replaced successfully' : 'Photo replacement failed'),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: 0,
+      message: 'Unable to connect to the server. Please check your network connection.',
+    };
+  }
+}
+
+/**
+ * Delete a candidate photo
+ * @param {string} profileId
+ * @param {string} photoId
+ * @returns {Promise<{ success: boolean, status: number, data?: object, message?: string }>}
+ */
+export async function deleteAdminCandidatePhotoApi(profileId, photoId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos/${photoId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    const result = await res.json().catch(() => ({}));
+
+    return {
+      success: res.ok,
+      status: res.status,
+      data: result.data,
+      message: result.message || (res.ok ? 'Photo deleted successfully' : 'Photo deletion failed'),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: 0,
+      message: 'Unable to connect to the server. Please check your network connection.',
+    };
+  }
+}
+
+/**
+ * Designate a specific candidate photo as the primary photo
+ * @param {string} profileId
+ * @param {string} photoId
+ * @returns {Promise<{ success: boolean, status: number, data?: object, message?: string }>}
+ */
+export async function setAdminCandidatePrimaryPhotoApi(profileId, photoId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos/${photoId}/primary`, {
+      method: 'PATCH',
+      credentials: 'include',
+    });
+
+    const result = await res.json().catch(() => ({}));
+
+    return {
+      success: res.ok,
+      status: res.status,
+      data: result.data,
+      message: result.message || (res.ok ? 'Primary photo set' : 'Failed to update primary photo'),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: 0,
+      message: 'Unable to connect to the server. Please check your network connection.',
+    };
+  }
+}
+
+/**
+ * Validate an uploaded candidate Excel file for bulk import (Dry-Run)
+ * @param {File} file
+ * @returns {Promise<{ success: boolean, status: number, data?: object, message?: string }>}
+ */
+export async function validateCandidateImportApi(file) {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`${API_BASE_URL}/admin/imports/candidates/validate`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+
+    const result = await res.json().catch(() => ({}));
+
+    return {
+      success: res.ok,
+      status: res.status,
+      data: result.data,
+      message: result.message || (res.ok ? 'Validation complete' : 'Validation failed'),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: 0,
+      message: 'Unable to connect to the server. Please check your network connection.',
+    };
+  }
+}
+
+/**
+ * Execute chunked database commit of pre-validated candidates
+ * @param {string} batchId
+ * @returns {Promise<{ success: boolean, status: number, data?: object, message?: string }>}
+ */
+export async function commitCandidateImportApi(batchId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/imports/candidates/commit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ batchId }),
+    });
+
+    const result = await res.json().catch(() => ({}));
+
+    return {
+      success: res.ok,
+      status: res.status,
+      data: result.data,
+      message: result.message || (res.ok ? 'Import completed' : 'Import failed'),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: 0,
+      message: 'Unable to connect to the server. Please check your network connection.',
+    };
+  }
+}
+
+/**
+ * Returns URL for downloading starter Excel template
+ */
+export function getCandidateImportTemplateUrl() {
+  return `${API_BASE_URL}/admin/imports/candidates/template`;
+}
+
+/**
+ * Returns URL for downloading batch CSV error report
+ */
+export function getCandidateImportErrorsCsvUrl(batchId) {
+  return `${API_BASE_URL}/admin/imports/candidates/${batchId}/errors/csv`;
+}
+
+/**
  * Send login invitation email to an approved broker candidate (Admin only)
  * @param {string} profileId
  * @param {string} [email]

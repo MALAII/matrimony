@@ -10,6 +10,8 @@ import {
   reinviteBrokerCandidateApi,
 } from '@/lib/api';
 import { AdminNav } from '@/components/admin/AdminNav';
+import { AdminPhotoManagerModal } from '@/components/admin/AdminPhotoManagerModal';
+import { AdminBulkImportModal } from '@/components/admin/AdminBulkImportModal';
 
 // Calculate age from Date of Birth
 function calculateAge(dobString) {
@@ -44,6 +46,13 @@ export default function AdminProfilesPage() {
   const [actionFeedback, setActionFeedback] = useState({ type: '', text: '' });
   const [processingId, setProcessingId] = useState(null);
   const isFetchingRef = useRef(false);
+
+  // Photo Management Modal State
+  const [selectedPhotoProfile, setSelectedPhotoProfile] = useState(null);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+
+  // Bulk Excel Import Modal State
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // Fetch Profiles with in-flight request guard
   const fetchProfiles = useCallback(async (targetPage, targetLimit, targetSearch) => {
@@ -85,6 +94,35 @@ export default function AdminProfilesPage() {
       isFetchingRef.current = false;
     }
   }, [router]);
+
+  // Sync photo updates from modal to parent table row
+  const handlePhotosUpdated = useCallback((profileId, newPrimaryUrl, newCount) => {
+    setProfiles((prevProfiles) =>
+      prevProfiles.map((p) => {
+        if (p._id === profileId) {
+          return {
+            ...p,
+            profilePhoto: {
+              ...(p.profilePhoto || {}),
+              url: newPrimaryUrl,
+            },
+            photos: Array.from({ length: newCount || 0 }),
+          };
+        }
+        return p;
+      })
+    );
+  }, []);
+
+  // Handle successful import completion
+  const handleImportCompleted = useCallback((importedCount) => {
+    setActionFeedback({
+      type: 'success',
+      text: `Successfully imported ${importedCount} broker candidate profiles! All imported profiles are pending approval.`,
+    });
+    setPage(1);
+    fetchProfiles(1, limit, activeSearch);
+  }, [fetchProfiles, limit, activeSearch]);
 
   // Load when page, limit, or activeSearch changes
   useEffect(() => {
@@ -269,6 +307,24 @@ export default function AdminProfilesPage() {
             <p>Inspect registered candidate profiles, personal backgrounds, profession, and preferences.</p>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => setIsImportModalOpen(true)}
+              className="btn-primary"
+              style={{
+                fontSize: '0.85rem',
+                padding: '0.5rem 1.15rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                backgroundColor: '#0284c7',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+              title="Bulk import candidates from Excel spreadsheet"
+            >
+              <span>📥</span> Bulk Import Excel
+            </button>
             <Link
               href="/admin/profiles/new"
               className="btn-primary"
@@ -423,6 +479,7 @@ export default function AdminProfilesPage() {
                     <th>Candidate</th>
                     <th>Origin &amp; Account</th>
                     <th>Status</th>
+                    <th>Photos</th>
                     <th>Personal Details</th>
                     <th>Education &amp; Profession</th>
                     <th>Actions</th>
@@ -446,12 +503,27 @@ export default function AdminProfilesPage() {
                         })
                       : 'N/A';
 
+                    const photoCount =
+                      Array.isArray(p.photos) && p.photos.length > 0
+                        ? p.photos.length
+                        : p.profilePhoto?.url
+                        ? 1
+                        : 0;
+
                     return (
                       <tr key={p._id}>
                         {/* Candidate Avatar & Basic Info */}
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <div className="profile-thumb-avatar">
+                            <div
+                              className="profile-thumb-avatar"
+                              onClick={() => {
+                                setSelectedPhotoProfile(p);
+                                setIsPhotoModalOpen(true);
+                              }}
+                              style={{ cursor: 'pointer' }}
+                              title="Click to manage photos"
+                            >
                               {photoUrl ? (
                                 /* eslint-disable-next-line @next/next/no-img-element */
                                 <img
@@ -548,6 +620,50 @@ export default function AdminProfilesPage() {
 
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                               Added: {formattedCreated}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Photos Gallery Action & Count */}
+                        <td>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-start' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedPhotoProfile(p);
+                                setIsPhotoModalOpen(true);
+                              }}
+                              className="btn-secondary"
+                              style={{
+                                padding: '0.35rem 0.65rem',
+                                fontSize: '0.78rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                                backgroundColor: 'var(--bg-primary, #FFF8F2)',
+                                border: '1px solid var(--border-color, #EBDADF)',
+                                borderRadius: '6px',
+                                color: 'var(--text-main, #49343B)',
+                                cursor: 'pointer',
+                              }}
+                              title="Manage candidate photos (up to 3)"
+                            >
+                              <span>📸</span>
+                              <span>
+                                {photoCount} / 3 Photos
+                              </span>
+                            </button>
+                            <span
+                              style={{
+                                fontSize: '0.68rem',
+                                color: photoCount === 3 ? '#166534' : 'var(--text-muted)',
+                                paddingLeft: '0.2rem',
+                              }}
+                            >
+                              {photoCount === 0 && 'No photo'}
+                              {photoCount === 1 && '1 photo (Primary)'}
+                              {photoCount === 2 && '2 photos'}
+                              {photoCount === 3 && 'Full gallery'}
                             </span>
                           </div>
                         </td>
@@ -753,6 +869,24 @@ export default function AdminProfilesPage() {
           </>
         )}
       </div>
+
+      {/* Admin Candidate Photo Management Modal */}
+      <AdminPhotoManagerModal
+        profile={selectedPhotoProfile}
+        isOpen={isPhotoModalOpen}
+        onClose={() => {
+          setIsPhotoModalOpen(false);
+          setSelectedPhotoProfile(null);
+        }}
+        onPhotosUpdated={handlePhotosUpdated}
+      />
+
+      {/* Admin Bulk Excel Candidate Import Modal */}
+      <AdminBulkImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportCompleted={handleImportCompleted}
+      />
     </main>
   );
 }

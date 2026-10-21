@@ -114,7 +114,87 @@ const uploadPhotoMiddleware = (req, res, next) => {
   });
 };
 
+/**
+ * Validates Excel magic bytes (.xlsx PK zip header or .xls OLE header)
+ */
+const validateExcelMagicBytes = (buffer) => {
+  if (!buffer || buffer.length < 4) return false;
+  // .xlsx is a zip archive: 50 4B 03 04
+  if (buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04) {
+    return 'xlsx';
+  }
+  // .xls legacy compound document: D0 CF 11 E0
+  if (buffer[0] === 0xd0 && buffer[1] === 0xcf && buffer[2] === 0x11 && buffer[3] === 0xe0) {
+    return 'xls';
+  }
+  return false;
+};
+
+const maxExcelSizeBytes = 25 * 1024 * 1024; // 25 MB
+
+const excelUpload = multer({
+  storage,
+  limits: {
+    fileSize: maxExcelSizeBytes,
+    files: 1,
+  },
+  fileFilter: (req, file, cb) => {
+    const originalLower = file.originalname.toLowerCase();
+    if (originalLower.endsWith('.xlsx') || originalLower.endsWith('.xls')) {
+      cb(null, true);
+    } else {
+      cb(new Error("Invalid file extension. Only Excel files ('.xlsx' or '.xls') are supported."), false);
+    }
+  },
+});
+
+/**
+ * Express middleware wrapper handling Excel file uploads for bulk candidate import
+ */
+const uploadExcelMiddleware = (req, res, next) => {
+  const uploadSingle = excelUpload.single('file');
+
+  uploadSingle(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          success: false,
+          message: 'Excel file exceeds the maximum allowed size of 25 MB',
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: err.message,
+      });
+    } else if (err) {
+      return res.status(400).json({
+        success: false,
+        message: err.message,
+      });
+    }
+
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({
+        success: false,
+        message: "No Excel file uploaded. Please upload a file with field name 'file'",
+      });
+    }
+
+    const detectedType = validateExcelMagicBytes(req.file.buffer);
+    if (!detectedType) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid file content. The file does not appear to be a valid .xlsx or .xls spreadsheet.',
+      });
+    }
+
+    next();
+  });
+};
+
 module.exports = {
   uploadPhotoMiddleware,
+  uploadExcelMiddleware,
   validateImageMagicBytes,
+  validateExcelMagicBytes,
 };

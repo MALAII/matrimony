@@ -28,7 +28,7 @@ const matrimonialProfileSchema = new mongoose.Schema(
         values: ['pending_approval', 'approved', 'rejected'],
         message: '{VALUE} is not a valid approval status',
       },
-      default: 'approved', // Direct user profiles are pre-approved
+      default: 'pending_approval',
       required: true,
       index: true,
     },
@@ -62,6 +62,13 @@ const matrimonialProfileSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       default: null,
+    },
+
+    // Batch import tracking
+    importBatchId: {
+      type: String,
+      default: null,
+      index: true,
     },
 
     // Candidate contact details for broker profiles or direct profiles
@@ -231,6 +238,7 @@ const matrimonialProfileSchema = new mongoose.Schema(
     },
 
     // 5. Profile Photograph (prepared for future Cloudinary integration)
+    // Primary photograph retained for backward compatibility with directory cards and projections
     profilePhoto: {
       url: {
         type: String,
@@ -240,6 +248,39 @@ const matrimonialProfileSchema = new mongoose.Schema(
         type: String,
         default: null,
       },
+    },
+
+    // Multi-photo gallery (maximum 3 photos per candidate)
+    photos: {
+      type: [
+        {
+          url: {
+            type: String,
+            required: [true, 'Photo URL is required'],
+            trim: true,
+          },
+          publicId: {
+            type: String,
+            required: [true, 'Photo publicId is required'],
+            trim: true,
+          },
+          isPrimary: {
+            type: Boolean,
+            default: false,
+          },
+          uploadedAt: {
+            type: Date,
+            default: Date.now,
+          },
+        },
+      ],
+      validate: [
+        function (val) {
+          return !val || val.length <= 3;
+        },
+        'Candidate profile cannot exceed a maximum of 3 photos',
+      ],
+      default: [],
     },
   },
   {
@@ -278,6 +319,40 @@ matrimonialProfileSchema.pre('validate', function (next) {
         'Minimum preferred age cannot be greater than maximum preferred age'
       );
     }
+  }
+  next();
+});
+
+// Synchronizes the primary photo between `photos` array and root `profilePhoto`
+matrimonialProfileSchema.methods.syncPrimaryPhoto = function () {
+  if (!this.photos || this.photos.length === 0) {
+    this.profilePhoto = { url: null, publicId: null };
+    return;
+  }
+
+  // Find marked primary photo or default to first photo
+  let primary = this.photos.find((p) => p.isPrimary);
+  if (!primary) {
+    this.photos[0].isPrimary = true;
+    primary = this.photos[0];
+  }
+
+  // Ensure strict single primary flag across the array
+  const primaryIdStr = primary._id ? primary._id.toString() : null;
+  this.photos.forEach((p) => {
+    p.isPrimary = primaryIdStr && p._id ? p._id.toString() === primaryIdStr : p === primary;
+  });
+
+  this.profilePhoto = {
+    url: primary.url,
+    publicId: primary.publicId,
+  };
+};
+
+// Ensure primary photo synchronization on document saves if photos array was modified
+matrimonialProfileSchema.pre('save', function (next) {
+  if (this.isModified('photos')) {
+    this.syncPrimaryPhoto();
   }
   next();
 });
