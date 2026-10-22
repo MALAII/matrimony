@@ -9,6 +9,10 @@ const app = require('./app');
 // Initialize MongoDB Connection
 connectDB();
 
+// Initialize In-Process Subscription Expiry Scheduler if enabled
+const { startSubscriptionExpiryScheduler } = require('./services/expiryScheduler');
+startSubscriptionExpiryScheduler();
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
