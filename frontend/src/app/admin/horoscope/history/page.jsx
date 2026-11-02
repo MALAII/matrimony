@@ -17,11 +17,158 @@ import {
   History,
   ArrowLeft,
   Compass,
+  ChevronDown,
 } from 'lucide-react';
 import {
   getAdminGeneratedHoroscopesApi,
   getAdminHoroscopePdfUrl,
 } from '@/lib/api';
+
+/**
+ * Clean, professional dropdown menu for PDF actions per candidate
+ */
+function HoroscopeActionMenu({ recordId }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <div ref={menuRef} style={{ position: 'relative', display: 'inline-block' }}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="adm-act-btn primary"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.4rem',
+          padding: '0.4rem 0.85rem',
+          fontSize: '0.8rem',
+          fontWeight: 600,
+          cursor: 'pointer',
+          borderRadius: '8px',
+        }}
+      >
+        <FileText size={13} />
+        PDF Report
+        <ChevronDown size={13} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+      </button>
+
+      {isOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: 'calc(100% + 4px)',
+            background: '#FFFFFF',
+            border: '1px solid var(--a-line)',
+            borderRadius: '10px',
+            boxShadow: '0 8px 24px rgba(43, 26, 33, 0.16)',
+            width: '215px',
+            zIndex: 999,
+            padding: '0.45rem',
+            textAlign: 'left',
+          }}
+        >
+          {/* Section 1: Template 1 */}
+          <div style={{ padding: '0.35rem 0.55rem', fontSize: '0.7rem', fontWeight: 700, color: 'var(--a-gold)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Template 1: With Logo
+          </div>
+          <a
+            href={getAdminHoroscopePdfUrl(recordId, false, 'classic')}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setIsOpen(false)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.38rem 0.55rem',
+              fontSize: '0.8rem',
+              color: 'var(--a-ink)',
+              textDecoration: 'none',
+              borderRadius: '6px',
+            }}
+            className="adm-dropdown-item"
+          >
+            <Eye size={13} color="var(--a-brand)" /> View in new tab
+          </a>
+          <a
+            href={getAdminHoroscopePdfUrl(recordId, true, 'classic')}
+            onClick={() => setIsOpen(false)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.38rem 0.55rem',
+              fontSize: '0.8rem',
+              color: 'var(--a-ink)',
+              textDecoration: 'none',
+              borderRadius: '6px',
+            }}
+            className="adm-dropdown-item"
+          >
+            <Download size={13} color="var(--a-brand)" /> Download PDF
+          </a>
+
+          <div style={{ height: '1px', background: 'var(--a-line)', margin: '0.35rem 0' }} />
+
+          {/* Section 2: Template 2 */}
+          <div style={{ padding: '0.35rem 0.55rem', fontSize: '0.7rem', fontWeight: 700, color: 'var(--a-gold)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Template 2: With Watermark
+          </div>
+          <a
+            href={getAdminHoroscopePdfUrl(recordId, false, 'watermark')}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setIsOpen(false)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.38rem 0.55rem',
+              fontSize: '0.8rem',
+              color: 'var(--a-ink)',
+              textDecoration: 'none',
+              borderRadius: '6px',
+            }}
+            className="adm-dropdown-item"
+          >
+            <Eye size={13} color="var(--a-brand)" /> View in new tab
+          </a>
+          <a
+            href={getAdminHoroscopePdfUrl(recordId, true, 'watermark')}
+            onClick={() => setIsOpen(false)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.38rem 0.55rem',
+              fontSize: '0.8rem',
+              color: 'var(--a-ink)',
+              textDecoration: 'none',
+              borderRadius: '6px',
+            }}
+            className="adm-dropdown-item"
+          >
+            <Download size={13} color="var(--a-brand)" /> Download PDF
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminHoroscopeHistoryPage() {
   const [horoscopes, setHoroscopes] = useState([]);
@@ -137,7 +284,7 @@ export default function AdminHoroscopeHistoryPage() {
                 Astrological Records ({horoscopes.length})
               </h2>
               <small style={{ color: 'var(--a-muted)' }}>
-                Showing {filteredHoroscopes.length} matching {filteredHoroscopes.length === 1 ? 'record' : 'records'} • Select any template directly per candidate
+                Showing {filteredHoroscopes.length} matching {filteredHoroscopes.length === 1 ? 'record' : 'records'}
               </small>
             </div>
 
@@ -300,59 +447,9 @@ export default function AdminHoroscopeHistoryPage() {
                           </span>
                         </td>
 
-                        {/* Actions: Direct per-candidate choice for both templates */}
-                        <td>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'flex-end' }}>
-                            {/* Style 1: Royal Logo */}
-                            <div style={{ display: 'inline-flex', gap: '0.3rem', alignItems: 'center' }}>
-                              <a
-                                href={getAdminHoroscopePdfUrl(item._id, false, 'classic')}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="adm-act-btn primary"
-                                style={{ padding: '0.28rem 0.65rem', fontSize: '0.74rem' }}
-                                title="Open Style 1: Royal Logo & Header PDF"
-                              >
-                                <Eye size={11} /> 👑 Logo
-                              </a>
-                              <a
-                                href={getAdminHoroscopePdfUrl(item._id, true, 'classic')}
-                                className="adm-act-btn"
-                                style={{ padding: '0.28rem 0.45rem', fontSize: '0.74rem' }}
-                                title="Download Style 1: Royal Logo & Header PDF"
-                              >
-                                <Download size={11} />
-                              </a>
-                            </div>
-
-                            {/* Style 2: Watermark */}
-                            <div style={{ display: 'inline-flex', gap: '0.3rem', alignItems: 'center' }}>
-                              <a
-                                href={getAdminHoroscopePdfUrl(item._id, false, 'watermark')}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="adm-act-btn"
-                                style={{
-                                  padding: '0.28rem 0.65rem',
-                                  fontSize: '0.74rem',
-                                  borderColor: 'var(--a-brand)',
-                                  color: 'var(--a-brand)',
-                                  background: 'rgba(184, 92, 120, 0.05)',
-                                }}
-                                title="Open Style 2: Centered Varahi Watermark PDF"
-                              >
-                                <Eye size={11} /> 🛡️ Watermark
-                              </a>
-                              <a
-                                href={getAdminHoroscopePdfUrl(item._id, true, 'watermark')}
-                                className="adm-act-btn"
-                                style={{ padding: '0.28rem 0.45rem', fontSize: '0.74rem' }}
-                                title="Download Style 2: Centered Varahi Watermark PDF"
-                              >
-                                <Download size={11} />
-                              </a>
-                            </div>
-                          </div>
+                        {/* Actions */}
+                        <td style={{ textAlign: 'right' }}>
+                          <HoroscopeActionMenu recordId={item._id} />
                         </td>
                       </tr>
                     );

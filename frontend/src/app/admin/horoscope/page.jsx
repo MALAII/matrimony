@@ -556,7 +556,7 @@ export default function AdminHoroscopePage() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                  {/* Style 1: Royal Logo & Header */}
+                  {/* Template 1: Header Logo */}
                   <div style={{ display: 'inline-flex', gap: '0.25rem', alignItems: 'center' }}>
                     <a
                       href={getAdminHoroscopePdfUrl(justGeneratedData._id, false, 'classic')}
@@ -566,19 +566,19 @@ export default function AdminHoroscopePage() {
                       style={{ textDecoration: 'none', padding: '0.5rem 0.95rem', fontSize: '0.84rem' }}
                       title="View PDF with Royal Logo & Header"
                     >
-                      <Eye size={13} /> 👑 Style 1 (Logo)
+                      <Eye size={13} /> Template 1 (With Logo)
                     </a>
                     <a
                       href={getAdminHoroscopePdfUrl(justGeneratedData._id, true, 'classic')}
                       className="adm-act-btn"
                       style={{ textDecoration: 'none', padding: '0.5rem 0.6rem', fontSize: '0.84rem' }}
-                      title="Download Style 1 (Logo)"
+                      title="Download Template 1 (With Logo)"
                     >
                       <Download size={13} />
                     </a>
                   </div>
 
-                  {/* Style 2: Watermark */}
+                  {/* Template 2: Watermark */}
                   <div style={{ display: 'inline-flex', gap: '0.25rem', alignItems: 'center' }}>
                     <a
                       href={getAdminHoroscopePdfUrl(justGeneratedData._id, false, 'watermark')}
@@ -596,13 +596,13 @@ export default function AdminHoroscopePage() {
                       }}
                       title="View PDF with Centered Varahi Watermark"
                     >
-                      <Eye size={13} /> 🛡️ Style 2 (Watermark)
+                      <Eye size={13} /> Template 2 (With Watermark)
                     </a>
                     <a
                       href={getAdminHoroscopePdfUrl(justGeneratedData._id, true, 'watermark')}
                       className="adm-act-btn"
                       style={{ textDecoration: 'none', padding: '0.5rem 0.6rem', fontSize: '0.84rem' }}
-                      title="Download Style 2 (Watermark)"
+                      title="Download Template 2 (With Watermark)"
                     >
                       <Download size={13} />
                     </a>
