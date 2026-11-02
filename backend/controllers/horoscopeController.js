@@ -862,7 +862,8 @@ const getAdminCandidateHoroscopePdf = async (req, res, next) => {
       }
     }
 
-    const pdfBuffer = await generateHoroscopePdfBuffer(record);
+    const template = (req.query.template || 'classic').toLowerCase() === 'watermark' ? 'watermark' : 'classic';
+    const pdfBuffer = await generateHoroscopePdfBuffer(record, { template });
 
     const safeName = (record.personName || record.candidateName || 'Candidate').replace(/[^a-zA-Z0-9_-]/g, '_');
     const filename = `${safeName}_Horoscope.pdf`;

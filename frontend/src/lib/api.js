@@ -1864,11 +1864,13 @@ export const getAdminBrokerHoroscopeCandidatesApi = getAdminGeneratedHoroscopesA
 
 /**
  * Returns the URL for viewing or downloading the Horoscope PDF
+ * Supports template styles: 'classic' (Header & Logo) or 'watermark' (Background Watermark)
  */
-export function getAdminHoroscopePdfUrl(id, download = false) {
+export function getAdminHoroscopePdfUrl(id, download = false, template = 'classic') {
   const token = getStoredToken();
   const params = new URLSearchParams();
   if (download) params.append('download', '1');
+  if (template) params.append('template', template);
   if (token) params.append('token', token);
   const qs = params.toString();
   return `${API_BASE_URL}/admin/horoscopes/${id}/pdf${qs ? `?${qs}` : ''}`;

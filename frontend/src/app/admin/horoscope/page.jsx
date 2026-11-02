@@ -555,23 +555,58 @@ export default function AdminHoroscopePage() {
                   </h3>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
-                  <a
-                    href={getAdminHoroscopePdfUrl(justGeneratedData._id, false)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="adm-act-btn primary"
-                    style={{ textDecoration: 'none', padding: '0.5rem 1.15rem', fontSize: '0.85rem' }}
-                  >
-                    <Eye size={14} /> View PDF Report
-                  </a>
-                  <a
-                    href={getAdminHoroscopePdfUrl(justGeneratedData._id, true)}
-                    className="adm-act-btn"
-                    style={{ textDecoration: 'none', padding: '0.5rem 1.15rem', fontSize: '0.85rem' }}
-                  >
-                    <Download size={14} /> Download PDF
-                  </a>
+                <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {/* Style 1: Royal Logo & Header */}
+                  <div style={{ display: 'inline-flex', gap: '0.25rem', alignItems: 'center' }}>
+                    <a
+                      href={getAdminHoroscopePdfUrl(justGeneratedData._id, false, 'classic')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="adm-act-btn primary"
+                      style={{ textDecoration: 'none', padding: '0.5rem 0.95rem', fontSize: '0.84rem' }}
+                      title="View PDF with Royal Logo & Header"
+                    >
+                      <Eye size={13} /> 👑 Style 1 (Logo)
+                    </a>
+                    <a
+                      href={getAdminHoroscopePdfUrl(justGeneratedData._id, true, 'classic')}
+                      className="adm-act-btn"
+                      style={{ textDecoration: 'none', padding: '0.5rem 0.6rem', fontSize: '0.84rem' }}
+                      title="Download Style 1 (Logo)"
+                    >
+                      <Download size={13} />
+                    </a>
+                  </div>
+
+                  {/* Style 2: Watermark */}
+                  <div style={{ display: 'inline-flex', gap: '0.25rem', alignItems: 'center' }}>
+                    <a
+                      href={getAdminHoroscopePdfUrl(justGeneratedData._id, false, 'watermark')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="adm-act-btn"
+                      style={{
+                        textDecoration: 'none',
+                        padding: '0.5rem 0.95rem',
+                        fontSize: '0.84rem',
+                        borderColor: 'var(--a-brand)',
+                        color: 'var(--a-brand)',
+                        background: 'rgba(184, 92, 120, 0.05)',
+                        fontWeight: 600,
+                      }}
+                      title="View PDF with Centered Varahi Watermark"
+                    >
+                      <Eye size={13} /> 🛡️ Style 2 (Watermark)
+                    </a>
+                    <a
+                      href={getAdminHoroscopePdfUrl(justGeneratedData._id, true, 'watermark')}
+                      className="adm-act-btn"
+                      style={{ textDecoration: 'none', padding: '0.5rem 0.6rem', fontSize: '0.84rem' }}
+                      title="Download Style 2 (Watermark)"
+                    >
+                      <Download size={13} />
+                    </a>
+                  </div>
                 </div>
               </div>
 

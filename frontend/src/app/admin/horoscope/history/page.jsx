@@ -137,7 +137,7 @@ export default function AdminHoroscopeHistoryPage() {
                 Astrological Records ({horoscopes.length})
               </h2>
               <small style={{ color: 'var(--a-muted)' }}>
-                Showing {filteredHoroscopes.length} matching {filteredHoroscopes.length === 1 ? 'record' : 'records'}
+                Showing {filteredHoroscopes.length} matching {filteredHoroscopes.length === 1 ? 'record' : 'records'} • Select any template directly per candidate
               </small>
             </div>
 
@@ -145,7 +145,7 @@ export default function AdminHoroscopeHistoryPage() {
               <Search size={15} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--a-muted)' }} />
               <input
                 type="text"
-                placeholder="Search candidate name, city, rasi, star..."
+                placeholder="Search candidate, rasi, star..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -301,26 +301,58 @@ export default function AdminHoroscopeHistoryPage() {
                           </span>
                         </td>
 
-                        {/* Actions */}
+                        {/* Actions: Direct per-candidate choice for both templates */}
                         <td>
-                          <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                            <a
-                              href={getAdminHoroscopePdfUrl(item._id, false)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="adm-act-btn primary"
-                              title="View PDF report in new tab"
-                            >
-                              <Eye size={12} /> PDF
-                            </a>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'flex-end' }}>
+                            {/* Style 1: Royal Logo */}
+                            <div style={{ display: 'inline-flex', gap: '0.3rem', alignItems: 'center' }}>
+                              <a
+                                href={getAdminHoroscopePdfUrl(item._id, false, 'classic')}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="adm-act-btn primary"
+                                style={{ padding: '0.28rem 0.65rem', fontSize: '0.74rem' }}
+                                title="Open Style 1: Royal Logo & Header PDF"
+                              >
+                                <Eye size={11} /> 👑 Logo
+                              </a>
+                              <a
+                                href={getAdminHoroscopePdfUrl(item._id, true, 'classic')}
+                                className="adm-act-btn"
+                                style={{ padding: '0.28rem 0.45rem', fontSize: '0.74rem' }}
+                                title="Download Style 1: Royal Logo & Header PDF"
+                              >
+                                <Download size={11} />
+                              </a>
+                            </div>
 
-                            <a
-                              href={getAdminHoroscopePdfUrl(item._id, true)}
-                              className="adm-act-btn"
-                              title="Download PDF report"
-                            >
-                              <Download size={12} />
-                            </a>
+                            {/* Style 2: Watermark */}
+                            <div style={{ display: 'inline-flex', gap: '0.3rem', alignItems: 'center' }}>
+                              <a
+                                href={getAdminHoroscopePdfUrl(item._id, false, 'watermark')}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="adm-act-btn"
+                                style={{
+                                  padding: '0.28rem 0.65rem',
+                                  fontSize: '0.74rem',
+                                  borderColor: 'var(--a-brand)',
+                                  color: 'var(--a-brand)',
+                                  background: 'rgba(184, 92, 120, 0.05)',
+                                }}
+                                title="Open Style 2: Centered Varahi Watermark PDF"
+                              >
+                                <Eye size={11} /> 🛡️ Watermark
+                              </a>
+                              <a
+                                href={getAdminHoroscopePdfUrl(item._id, true, 'watermark')}
+                                className="adm-act-btn"
+                                style={{ padding: '0.28rem 0.45rem', fontSize: '0.74rem' }}
+                                title="Download Style 2: Centered Varahi Watermark PDF"
+                              >
+                                <Download size={11} />
+                              </a>
+                            </div>
                           </div>
                         </td>
                       </tr>
