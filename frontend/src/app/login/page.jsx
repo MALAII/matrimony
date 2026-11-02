@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -36,6 +36,13 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
   const [logoutMessage, setLogoutMessage] = useState('');
+
+  // Automatically redirect authenticated admins directly into the Admin Dashboard
+  useEffect(() => {
+    if (!authLoading && currentUser && currentUser.role === 'admin') {
+      window.location.href = '/admin';
+    }
+  }, [currentUser, authLoading]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -100,15 +107,18 @@ export default function LoginPage() {
       }));
 
       if (response.success && response.status === 200) {
-        const meResponse = await getCurrentUserApi();
-        const authenticatedUser = (meResponse.success && meResponse.data) ? meResponse.data : response.data;
+        const authenticatedUser = response.data;
         setCurrentUser(authenticatedUser);
         setFormData({ email: '', password: '' });
         setErrors({});
         setServerError('');
         setLogoutMessage('');
         if (authenticatedUser && authenticatedUser.role === 'admin') {
-          router.replace('/admin');
+          window.location.href = '/admin';
+          return;
+        } else {
+          window.location.href = '/profile';
+          return;
         }
       } else {
         setServerError(response.message || 'Invalid email or password');
@@ -191,10 +201,10 @@ export default function LoginPage() {
 
         {/* Right Side: Form / Authenticated State */}
         <main className={styles.formSide}>
-          {authLoading ? (
+          {authLoading || (currentUser && currentUser.role === 'admin') ? (
             <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--muted)' }}>
               <RefreshCw size={28} className="animate-spin" style={{ color: 'var(--rose-deep)', margin: '0 auto 1rem' }} />
-              <p>Verifying secure session...</p>
+              <p>{currentUser?.role === 'admin' ? 'Redirecting to Admin Dashboard...' : 'Verifying secure session...'}</p>
             </div>
           ) : currentUser ? (
             /* Authenticated Overview Card */
