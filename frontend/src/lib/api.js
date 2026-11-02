@@ -1,12 +1,49 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002/api';
 
 /**
+ * Token management helpers for resilient cross-origin authentication
+ */
+export function getStoredToken() {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('matrimony_token') || '';
+  }
+  return '';
+}
+
+export function setStoredToken(token) {
+  if (typeof window !== 'undefined') {
+    if (token) {
+      localStorage.setItem('matrimony_token', token);
+    } else {
+      localStorage.removeItem('matrimony_token');
+    }
+  }
+}
+
+/**
+ * Robust fetch wrapper that guarantees Authorization: Bearer token is attached
+ * to all cross-origin requests even when third-party cookies are blocked by browsers.
+ */
+const authFetch = (url, options = {}) => {
+  const token = getStoredToken();
+  const headers = new Headers(options.headers || {});
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  return fetch(url, {
+    ...options,
+    credentials: options.credentials || 'include',
+    headers,
+  });
+};
+
+/**
  * Fetch health status from backend API
  * @returns {Promise<{success: boolean, message: string, environment?: string, database?: string, timestamp?: string}>}
  */
 export async function getBackendHealth() {
   try {
-    const res = await fetch(`${API_BASE_URL}/health`, {
+    const res = await authFetch(`${API_BASE_URL}/health`, {
       cache: 'no-store',
     });
 
@@ -30,16 +67,18 @@ export async function getBackendHealth() {
  */
 export async function registerUserApi(userData) {
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/register`, {
+    const res = await authFetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include',
       body: JSON.stringify(userData),
     });
 
     const result = await res.json().catch(() => ({}));
+    if (result && result.data && result.data.token) {
+      setStoredToken(result.data.token);
+    }
 
     return {
       success: res.ok,
@@ -57,22 +96,24 @@ export async function registerUserApi(userData) {
 }
 
 /**
- * Authenticate user credentials and receive HttpOnly cookie
+ * Authenticate user credentials and receive HttpOnly cookie + fallback bearer token
  * @param {{ email: string, password: string }} credentials
  * @returns {Promise<{ success: boolean, status: number, message: string, data?: object }>}
  */
 export async function loginUserApi(credentials) {
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+    const res = await authFetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include',
       body: JSON.stringify(credentials),
     });
 
     const result = await res.json().catch(() => ({}));
+    if (result && result.data && result.data.token) {
+      setStoredToken(result.data.token);
+    }
 
     return {
       success: res.ok,
@@ -90,14 +131,13 @@ export async function loginUserApi(credentials) {
 }
 
 /**
- * Fetch current authenticated user profile using HttpOnly cookie
+ * Fetch current authenticated user profile using HttpOnly cookie or Bearer token
  * @returns {Promise<{ success: boolean, status: number, data?: object, message?: string }>}
  */
 export async function getCurrentUserApi() {
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+    const res = await authFetch(`${API_BASE_URL}/auth/me`, {
       method: 'GET',
-      credentials: 'include',
       cache: 'no-store',
     });
 
@@ -119,14 +159,14 @@ export async function getCurrentUserApi() {
 }
 
 /**
- * Logout current user and clear HttpOnly cookie
+ * Logout current user and clear HttpOnly cookie and Bearer token
  * @returns {Promise<{ success: boolean, status: number, message: string }>}
  */
 export async function logoutUserApi() {
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/logout`, {
+    setStoredToken(null);
+    const res = await authFetch(`${API_BASE_URL}/auth/logout`, {
       method: 'POST',
-      credentials: 'include',
     });
 
     const result = await res.json().catch(() => ({}));
@@ -137,7 +177,14 @@ export async function logoutUserApi() {
       message: result.message || 'Logged out successfully',
     };
   } catch (error) {
+    setStoredToken(null);
     return {
+      success: false,
+      status: 0,
+      message: 'Unable to connect to the server.',
+    };
+  }
+}
       success: false,
       status: 0,
       message: 'Unable to connect to the server.',
@@ -151,7 +198,7 @@ export async function logoutUserApi() {
  */
 export async function getMyProfileApi() {
   try {
-    const res = await fetch(`${API_BASE_URL}/profiles/me`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/me`, {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store',
@@ -181,7 +228,7 @@ export async function getMyProfileApi() {
  */
 export async function createProfileApi(profileData) {
   try {
-    const res = await fetch(`${API_BASE_URL}/profiles/me`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/me`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -214,7 +261,7 @@ export async function createProfileApi(profileData) {
  */
 export async function updateProfileApi(profileData) {
   try {
-    const res = await fetch(`${API_BASE_URL}/profiles/me`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/me`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -250,7 +297,7 @@ export async function uploadProfilePhotoApi(file) {
     const formData = new FormData();
     formData.append('photo', file);
 
-    const res = await fetch(`${API_BASE_URL}/profiles/me/photo`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/me/photo`, {
       method: 'POST',
       credentials: 'include',
       // Note: Do NOT set Content-Type header so fetch creates the multipart boundary
@@ -280,7 +327,7 @@ export async function uploadProfilePhotoApi(file) {
  */
 export async function getMyPhotosApi() {
   try {
-    const res = await fetch(`${API_BASE_URL}/profiles/me/photos`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/me/photos`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -312,7 +359,7 @@ export async function addMyPhotoApi(file) {
     const formData = new FormData();
     formData.append('photo', file);
 
-    const res = await fetch(`${API_BASE_URL}/profiles/me/photos`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/me/photos`, {
       method: 'POST',
       credentials: 'include',
       body: formData,
@@ -346,7 +393,7 @@ export async function replaceMyPhotoApi(photoId, file) {
     const formData = new FormData();
     formData.append('photo', file);
 
-    const res = await fetch(`${API_BASE_URL}/profiles/me/photos/${photoId}`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/me/photos/${photoId}`, {
       method: 'PUT',
       credentials: 'include',
       body: formData,
@@ -376,7 +423,7 @@ export async function replaceMyPhotoApi(photoId, file) {
  */
 export async function deleteMyPhotoApi(photoId) {
   try {
-    const res = await fetch(`${API_BASE_URL}/profiles/me/photos/${photoId}`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/me/photos/${photoId}`, {
       method: 'DELETE',
       credentials: 'include',
     });
@@ -405,7 +452,7 @@ export async function deleteMyPhotoApi(photoId) {
  */
 export async function setMyPrimaryPhotoApi(photoId) {
   try {
-    const res = await fetch(`${API_BASE_URL}/profiles/me/photos/${photoId}/primary`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/me/photos/${photoId}/primary`, {
       method: 'PATCH',
       credentials: 'include',
     });
@@ -433,7 +480,7 @@ export async function setMyPrimaryPhotoApi(photoId) {
  */
 export async function getAdminMeApi() {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/me`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/me`, {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store',
@@ -487,7 +534,7 @@ export async function getAdminUsersApi({
       params.append('registrationSource', registrationSource.trim());
     }
 
-    const res = await fetch(`${API_BASE_URL}/admin/users?${params.toString()}`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/users?${params.toString()}`, {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store',
@@ -592,7 +639,7 @@ export async function getAdminProfilesApi({ page = 1, limit = 10, search = '', a
     if (source) params.append('source', source);
     if (gender) params.append('gender', gender);
 
-    const res = await fetch(`${API_BASE_URL}/admin/profiles?${params.toString()}`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles?${params.toString()}`, {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store',
@@ -624,7 +671,7 @@ export async function getAdminProfilesApi({ page = 1, limit = 10, search = '', a
  */
 export async function createBrokerProfileApi(brokerProfileData) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/broker`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/broker`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -658,7 +705,7 @@ export async function createBrokerProfileApi(brokerProfileData) {
  */
 export async function updateProfileApprovalApi(profileId, approvalStatus) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/approval`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/${profileId}/approval`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -695,7 +742,7 @@ export async function uploadAdminBrokerPhotoApi(profileId, file) {
     const formData = new FormData();
     formData.append('photo', file);
 
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/photo`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/${profileId}/photo`, {
       method: 'POST',
       credentials: 'include',
       body: formData,
@@ -725,7 +772,7 @@ export async function uploadAdminBrokerPhotoApi(profileId, file) {
  */
 export async function getAdminCandidatePhotosApi(profileId) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -758,7 +805,7 @@ export async function addAdminCandidatePhotoApi(profileId, file) {
     const formData = new FormData();
     formData.append('photo', file);
 
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos`, {
       method: 'POST',
       credentials: 'include',
       body: formData,
@@ -793,7 +840,7 @@ export async function replaceAdminCandidatePhotoApi(profileId, photoId, file) {
     const formData = new FormData();
     formData.append('photo', file);
 
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos/${photoId}`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos/${photoId}`, {
       method: 'PUT',
       credentials: 'include',
       body: formData,
@@ -824,7 +871,7 @@ export async function replaceAdminCandidatePhotoApi(profileId, photoId, file) {
  */
 export async function deleteAdminCandidatePhotoApi(profileId, photoId) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos/${photoId}`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos/${photoId}`, {
       method: 'DELETE',
       credentials: 'include',
     });
@@ -854,7 +901,7 @@ export async function deleteAdminCandidatePhotoApi(profileId, photoId) {
  */
 export async function setAdminCandidatePrimaryPhotoApi(profileId, photoId) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos/${photoId}/primary`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/${profileId}/photos/${photoId}/primary`, {
       method: 'PATCH',
       credentials: 'include',
     });
@@ -886,7 +933,7 @@ export async function validateCandidateImportApi(file) {
     const formData = new FormData();
     formData.append('file', file);
 
-    const res = await fetch(`${API_BASE_URL}/admin/imports/candidates/validate`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/imports/candidates/validate`, {
       method: 'POST',
       credentials: 'include',
       body: formData,
@@ -916,7 +963,7 @@ export async function validateCandidateImportApi(file) {
  */
 export async function commitCandidateImportApi(batchId) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/imports/candidates/commit`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/imports/candidates/commit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -964,7 +1011,7 @@ export function getCandidateImportErrorsCsvUrl(batchId) {
  */
 export async function inviteBrokerCandidateApi(profileId, email) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/invite`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/${profileId}/invite`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1000,7 +1047,7 @@ export async function inviteBrokerCandidateApi(profileId, email) {
  */
 export async function reinviteBrokerCandidateApi(profileId, email) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/reinvite`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/${profileId}/reinvite`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1034,7 +1081,7 @@ export async function reinviteBrokerCandidateApi(profileId, email) {
  */
 export async function verifySetupTokenApi(token) {
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/setup-password/verify?token=${encodeURIComponent(token)}`, {
+    const res = await authFetch(`${API_BASE_URL}/auth/setup-password/verify?token=${encodeURIComponent(token)}`, {
       method: 'GET',
       cache: 'no-store',
     });
@@ -1063,7 +1110,7 @@ export async function verifySetupTokenApi(token) {
  */
 export async function setupPasswordApi(payload) {
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/setup-password`, {
+    const res = await authFetch(`${API_BASE_URL}/auth/setup-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1095,7 +1142,7 @@ export async function setupPasswordApi(payload) {
  */
 export async function forgotPasswordApi(email) {
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+    const res = await authFetch(`${API_BASE_URL}/auth/forgot-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1126,7 +1173,7 @@ export async function forgotPasswordApi(email) {
  */
 export async function verifyResetTokenApi(token) {
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/reset-password/verify?token=${encodeURIComponent(token)}`, {
+    const res = await authFetch(`${API_BASE_URL}/auth/reset-password/verify?token=${encodeURIComponent(token)}`, {
       method: 'GET',
       cache: 'no-store',
     });
@@ -1155,7 +1202,7 @@ export async function verifyResetTokenApi(token) {
  */
 export async function resetPasswordApi(payload) {
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+    const res = await authFetch(`${API_BASE_URL}/auth/reset-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1274,7 +1321,7 @@ export async function getMemberDirectoryApi({
       params.append('dosham', dosham.trim());
     }
 
-    const res = await fetch(`${API_BASE_URL}/members?${params.toString()}`, {
+    const res = await authFetch(`${API_BASE_URL}/members?${params.toString()}`, {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store',
@@ -1309,7 +1356,7 @@ export async function getMemberDirectoryApi({
  */
 export async function getMemberCreditsApi() {
   try {
-    const res = await fetch(`${API_BASE_URL}/members/credits`, {
+    const res = await authFetch(`${API_BASE_URL}/members/credits`, {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store',
@@ -1402,7 +1449,7 @@ export async function unlockMemberContactApi(profileId) {
  */
 export async function getMemberCandidateDetailsApi(profileId) {
   try {
-    const res = await fetch(`${API_BASE_URL}/members/${encodeURIComponent(profileId)}`, {
+    const res = await authFetch(`${API_BASE_URL}/members/${encodeURIComponent(profileId)}`, {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store',
@@ -1452,7 +1499,7 @@ export async function getMemberCandidateDetailsApi(profileId) {
  */
 export async function createSubscriptionOrderApi(planCode) {
   try {
-    const res = await fetch(`${API_BASE_URL}/subscriptions/create-order`, {
+    const res = await authFetch(`${API_BASE_URL}/subscriptions/create-order`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1504,7 +1551,7 @@ export async function createSubscriptionOrderApi(planCode) {
  */
 export async function verifySubscriptionPaymentApi(paymentData) {
   try {
-    const res = await fetch(`${API_BASE_URL}/subscriptions/verify-payment`, {
+    const res = await authFetch(`${API_BASE_URL}/subscriptions/verify-payment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1556,7 +1603,7 @@ export async function verifySubscriptionPaymentApi(paymentData) {
  */
 export async function getMySubscriptionApi() {
   try {
-    const res = await fetch(`${API_BASE_URL}/subscriptions/me`, {
+    const res = await authFetch(`${API_BASE_URL}/subscriptions/me`, {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store',
@@ -1593,7 +1640,7 @@ export async function getMySubscriptionApi() {
  */
 export async function getSouthIndianCitiesApi() {
   try {
-    const res = await fetch(`${API_BASE_URL}/profiles/cities`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/cities`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -1647,7 +1694,7 @@ export async function generateMyHoroscopeApi({
   language = 'en',
 }) {
   try {
-    const res = await fetch(`${API_BASE_URL}/profiles/me/horoscope/generate`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/me/horoscope/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1681,7 +1728,7 @@ export async function generateMyHoroscopeApi({
  */
 export async function updateMyHoroscopeApi(horoscopePayload) {
   try {
-    const res = await fetch(`${API_BASE_URL}/profiles/me/horoscope`, {
+    const res = await authFetch(`${API_BASE_URL}/profiles/me/horoscope`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1709,7 +1756,7 @@ export async function updateMyHoroscopeApi(horoscopePayload) {
  */
 export async function generateStandaloneHoroscopeApi(payload) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/horoscopes/generate`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/horoscopes/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1737,7 +1784,7 @@ export async function generateStandaloneHoroscopeApi(payload) {
  */
 export async function generateAdminCandidateHoroscopeApi(profileId, payload) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/${profileId}/horoscope/generate`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/${profileId}/horoscope/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1765,7 +1812,7 @@ export async function generateAdminCandidateHoroscopeApi(profileId, payload) {
  */
 export async function previewAdminHoroscopeApi(payload) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/horoscope/preview`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/horoscope/preview`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1793,7 +1840,7 @@ export async function previewAdminHoroscopeApi(payload) {
  */
 export async function getAdminGeneratedHoroscopesApi() {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/horoscopes`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/horoscopes`, {
       credentials: 'include',
       cache: 'no-store',
     });
@@ -1826,7 +1873,7 @@ export function getAdminHoroscopePdfUrl(id, download = false) {
 
 async function adminProfileRequest(path, method, body) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/profiles/${path}`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/profiles/${path}`, {
       method,
       headers: body ? { 'Content-Type': 'application/json' } : undefined,
       credentials: 'include',
@@ -1850,7 +1897,7 @@ async function adminGet(path, params = {}) {
     Object.entries(params).forEach(([k, v]) => {
       if (v !== '' && v !== undefined && v !== null) qs.append(k, String(v));
     });
-    const res = await fetch(`${API_BASE_URL}/admin/${path}${qs.toString() ? `?${qs}` : ''}`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/${path}${qs.toString() ? `?${qs}` : ''}`, {
       credentials: 'include',
       cache: 'no-store',
     });
@@ -1868,7 +1915,7 @@ export const getAdminProfileDetailApi = (id) => adminGet(`profiles/${id}`);
 
 export async function updateAdminSubscriptionApi(id, payload) {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/subscriptions/${id}`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/subscriptions/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

@@ -15,7 +15,7 @@ const parseConfiguredOrigins = (rawString) => {
   if (!rawString || typeof rawString !== 'string') return [];
   return rawString
     .split(',')
-    .map((o) => o.trim())
+    .map((o) => o.trim().replace(/\/+$/, ''))
     .filter(Boolean);
 };
 
@@ -83,7 +83,16 @@ const createCorsOptions = (envArg = process.env, customEnvVars = {}) => {
       }
 
       const allowed = getAllowedOrigins(env);
-      if (allowed.includes(origin)) {
+      const normalizedOrigin = String(origin).replace(/\/+$/, '');
+      const isAllowed = allowed.some((allowedOrigin) => {
+        if (allowedOrigin === normalizedOrigin) return true;
+        if (allowedOrigin === '*' || allowedOrigin === 'https://*.vercel.app') {
+          return normalizedOrigin.endsWith('.vercel.app');
+        }
+        return false;
+      });
+
+      if (isAllowed) {
         return callback(null, true);
       }
 

@@ -21,12 +21,19 @@ const generateToken = (id) => {
 /**
  * Get environment-appropriate cookie options
  */
-const getCookieOptions = () => ({
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
-});
+const getCookieOptions = () => {
+  const isCrossSiteOrProd =
+    process.env.NODE_ENV === 'production' ||
+    Boolean(process.env.RENDER) ||
+    Boolean(process.env.CLIENT_URL && !process.env.CLIENT_URL.includes('localhost'));
+
+  return {
+    httpOnly: true,
+    secure: isCrossSiteOrProd,
+    sameSite: isCrossSiteOrProd ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+  };
+};
 
 /**
  * @route   POST /api/auth/register
@@ -118,6 +125,7 @@ const registerUser = async (req, res, next) => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
+        token,
         createdAt: newUser.createdAt,
       },
     });
@@ -204,6 +212,7 @@ const loginUser = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        token,
       },
     });
   } catch (error) {
