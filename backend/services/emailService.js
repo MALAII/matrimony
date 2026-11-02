@@ -233,32 +233,41 @@ let cachedTransporter = null;
 let cachedTransporterKey = '';
 
 const createTransporter = () => {
-  const host = process.env.SMTP_HOST;
-  const port = parseInt(process.env.SMTP_PORT, 10) || 587;
-  const secure = process.env.SMTP_SECURE === 'true' || port === 465;
+  const host = process.env.SMTP_HOST || '';
+  const isGmail = Boolean(host.toLowerCase().includes('gmail') || (process.env.SMTP_USER && process.env.SMTP_USER.includes('@gmail.com')));
+  const port = parseInt(process.env.SMTP_PORT, 10) || (isGmail ? 465 : 587);
+  const secure = process.env.SMTP_SECURE === 'true' || port === 465 || isGmail;
   const user = process.env.SMTP_USER;
   // Strip whitespace if user copied Google App Password as "xxxx xxxx xxxx xxxx"
   const pass = (process.env.SMTP_PASS || '').replace(/\s+/g, '');
 
-  // Reuse one pooled connection instead of opening a new SMTP session per message.
-  // Providers (Gmail especially) throttle and flag senders that reconnect constantly.
-  const key = [host, port, secure, user, pass].join('|');
+  const key = [host, port, secure, user, pass, isGmail].join('|');
   if (cachedTransporter && cachedTransporterKey === key) {
     return cachedTransporter;
   }
 
-  cachedTransporter = nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    pool: true,
-    maxConnections: 3,
-    maxMessages: 100,
-    auth: {
-      user,
-      pass,
-    },
-  });
+  const transportConfig = isGmail
+    ? {
+        service: 'gmail',
+        auth: { user, pass },
+        connectionTimeout: 15000,
+        greetingTimeout: 15000,
+        socketTimeout: 20000,
+      }
+    : {
+        host,
+        port,
+        secure,
+        pool: true,
+        maxConnections: 3,
+        maxMessages: 100,
+        auth: { user, pass },
+        connectionTimeout: 15000,
+        greetingTimeout: 15000,
+        socketTimeout: 20000,
+      };
+
+  cachedTransporter = nodemailer.createTransport(transportConfig);
   cachedTransporterKey = key;
   return cachedTransporter;
 };
