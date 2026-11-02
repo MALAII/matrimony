@@ -233,10 +233,9 @@ export default function AdminHoroscopeHistoryPage() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                               {item.gender && item.gender !== 'Not Specified' && (
                                 <span className={`adm-tag-gender ${item.gender === 'Female' ? 'female' : item.gender === 'Male' ? 'male' : ''}`}>
-                                  {item.gender}
+                                   {item.gender}
                                 </span>
                               )}
-                              <span className="adm-tag-id">#{item._id.slice(-6).toUpperCase()}</span>
                             </div>
                             {(item.contactPhone || item.contactEmail) && (
                               <div style={{ fontSize: '0.74rem', color: 'var(--a-muted)', marginTop: '0.15rem' }}>

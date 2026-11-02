@@ -333,66 +333,78 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
       // -------------------------------------------------------------
       if (template === 'classic') {
         // STYLE 1: Royal Plum/Wine Banner with Gold Varahi Logo Crest
-        const bannerHeight = 52;
+        const bannerHeight = 54;
         doc.rect(margin, curY, contentWidth, bannerHeight).fill('#7A1E3A');
 
         // Draw Left Logo
-        drawVarahiLogo(doc, margin + 12, curY + 7, 38);
+        drawVarahiLogo(doc, margin + 10, curY + 7, 40);
 
         // Header Texts
         const textX = margin + 58;
-        const textW = contentWidth - 70;
+        const textW = contentWidth - 68;
 
+        // Line 1: Main Tamil Brand
         doc.fillColor('#FFFFFF')
           .font(boldFont)
-          .fontSize(13.5)
-          .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம் • SRI VARAHI MATRIMONY', textX, curY + 9, {
+          .fontSize(13)
+          .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', textX, curY + 8, {
             width: textW,
             align: 'left',
-            characterSpacing: 0.5,
+            lineBreak: false,
           });
 
+        // Line 2: English Brand & Dossier Subtitle
         doc.fillColor('#E5D3B3')
-          .font(regFont)
+          .font(boldFont)
           .fontSize(9)
-          .text('வரன் ஜாதகக் குறிப்பு அறிக்கை (CANDIDATE JATHAGAM / ASTROLOGICAL DOSSIER)', textX, curY + 29, {
-            width: textW,
-            align: 'left',
-            characterSpacing: 0.3,
+          .text('SRI VARAHI MATRIMONY  •  ', textX, curY + 26, {
+            continued: true,
+            characterSpacing: 0.8,
+          })
+          .font(regFont)
+          .fillColor('#FFFFFF')
+          .text('வரன் ஜாதகக் குறிப்பு அறிக்கை (ASTROLOGICAL DOSSIER)', {
+            characterSpacing: 0.2,
           });
 
-        curY += bannerHeight + 9;
+        curY += bannerHeight + 8;
       } else {
         // STYLE 2: Watermark Certificate Header with Gold Double Border
-        const headerHeight = 48;
+        const headerHeight = 50;
         doc.rect(margin, curY, contentWidth, headerHeight).fillAndStroke('#FFFDF9', '#C4A87C');
         doc.rect(margin + 2, curY + 2, contentWidth - 4, headerHeight - 4).strokeColor('#EAD9BF').lineWidth(0.75).stroke();
 
         // Mini crest emblem on left
-        drawVarahiLogo(doc, margin + 10, curY + 8, 32);
+        drawVarahiLogo(doc, margin + 10, curY + 8, 34);
 
-        const textX = margin + 50;
+        const textX = margin + 52;
         const textW = contentWidth - 60;
 
+        // Line 1: Main Tamil Brand
         doc.fillColor('#7A1E3A')
           .font(boldFont)
           .fontSize(13)
-          .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம் • SRI VARAHI MATRIMONY', textX, curY + 8, {
+          .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', textX, curY + 8, {
             width: textW,
             align: 'left',
-            characterSpacing: 0.6,
+            lineBreak: false,
           });
 
-        doc.fillColor('#735A62')
+        // Line 2: English Brand & Dossier Subtitle
+        doc.fillColor('#A78345')
+          .font(boldFont)
+          .fontSize(9)
+          .text('SRI VARAHI MATRIMONY  •  ', textX, curY + 26, {
+            continued: true,
+            characterSpacing: 0.8,
+          })
           .font(regFont)
-          .fontSize(8.5)
-          .text('அதிகாரப்பூர்வ வரன் ஜாதகக் குறிப்பு • OFFICIAL ASTROLOGICAL DOSSIER', textX, curY + 27, {
-            width: textW,
-            align: 'left',
-            characterSpacing: 0.3,
+          .fillColor('#5C1D2E')
+          .text('வரன் ஜாதகக் குறிப்பு (OFFICIAL ASTROLOGICAL DOSSIER)', {
+            characterSpacing: 0.2,
           });
 
-        curY += headerHeight + 9;
+        curY += headerHeight + 8;
       }
 
       // -------------------------------------------------------------
