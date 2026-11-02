@@ -18,6 +18,10 @@ const protect = async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(' ')[1];
   }
+  // 3. Fallback to query parameter token (for direct PDF viewers and file downloads in new tabs)
+  else if (req.query && req.query.token) {
+    token = req.query.token;
+  }
 
   // 3. Reject if no token is provided
   if (!token) {

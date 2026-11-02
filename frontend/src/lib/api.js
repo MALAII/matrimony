@@ -559,7 +559,9 @@ export async function getAdminUsersApi({
  * @returns {string}
  */
 export function getAdminUsersExportUrl({ search = '', status = '', role = '', registrationSource = '' } = {}) {
+  const token = getStoredToken();
   const params = new URLSearchParams();
+  if (token) params.append('token', token);
   if (search && search.trim()) params.append('search', search.trim());
   if (status && status.trim()) params.append('status', status.trim());
   if (role && role.trim()) params.append('role', role.trim());
@@ -987,14 +989,16 @@ export async function commitCandidateImportApi(batchId) {
  * Returns URL for downloading starter Excel template
  */
 export function getCandidateImportTemplateUrl() {
-  return `${API_BASE_URL}/admin/imports/candidates/template`;
+  const token = getStoredToken();
+  return `${API_BASE_URL}/admin/imports/candidates/template${token ? `?token=${encodeURIComponent(token)}` : ''}`;
 }
 
 /**
  * Returns URL for downloading batch CSV error report
  */
 export function getCandidateImportErrorsCsvUrl(batchId) {
-  return `${API_BASE_URL}/admin/imports/candidates/${batchId}/errors/csv`;
+  const token = getStoredToken();
+  return `${API_BASE_URL}/admin/imports/candidates/${batchId}/errors/csv${token ? `?token=${encodeURIComponent(token)}` : ''}`;
 }
 
 /**
@@ -1862,7 +1866,12 @@ export const getAdminBrokerHoroscopeCandidatesApi = getAdminGeneratedHoroscopesA
  * Returns the URL for viewing or downloading the Horoscope PDF
  */
 export function getAdminHoroscopePdfUrl(id, download = false) {
-  return `${API_BASE_URL}/admin/horoscopes/${id}/pdf${download ? '?download=1' : ''}`;
+  const token = getStoredToken();
+  const params = new URLSearchParams();
+  if (download) params.append('download', '1');
+  if (token) params.append('token', token);
+  const qs = params.toString();
+  return `${API_BASE_URL}/admin/horoscopes/${id}/pdf${qs ? `?${qs}` : ''}`;
 }
 
 async function adminProfileRequest(path, method, body) {
