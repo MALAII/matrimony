@@ -591,7 +591,7 @@ export default function AdminHoroscopePage() {
                 </div>
                 <div style={{ background: 'var(--a-gold-soft)', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid rgba(224,189,119,0.4)' }}>
                   <small style={{ color: 'var(--a-gold)', fontWeight: 700, fontSize: '0.7rem', display: 'block', textTransform: 'uppercase' }}>லக்னம் (Lagna)</small>
-                  <strong style={{ fontSize: '1.1rem', color: 'var(--a-ink)', display: 'block', marginTop: '0.15rem' }}>{justGeneratedData.lagnam || 'N/A'}</strong>
+                  <strong style={{ fontSize: '1.1rem', color: 'var(--a-ink)', display: 'block', marginTop: '0.15rem' }}>{justGeneratedData.lagnam || justGeneratedData.lagna || justGeneratedData.ascendant || 'N/A'}</strong>
                 </div>
                 <div style={{ background: 'var(--a-gold-soft)', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid rgba(224,189,119,0.4)' }}>
                   <small style={{ color: 'var(--a-gold)', fontWeight: 700, fontSize: '0.7rem', display: 'block', textTransform: 'uppercase' }}>செவ்வாய் தோஷம்</small>

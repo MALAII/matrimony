@@ -284,7 +284,7 @@ export default function AdminHoroscopeHistoryPage() {
                               )}
                             </div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--a-muted)' }}>
-                              Lagna: <strong>{item.lagnam || '—'}</strong>
+                              Lagna: <strong>{item.lagnam || item.lagna || item.ascendant || '—'}</strong>
                             </div>
                             {item.dosham?.doshamSummary && (
                               <div style={{ fontSize: '0.72rem', color: '#b45309', fontWeight: 600 }}>

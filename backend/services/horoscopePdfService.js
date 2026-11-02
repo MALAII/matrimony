@@ -151,7 +151,7 @@ const generateHoroscopePdfBuffer = (profile) => {
       const rasi = horoscope.rasi || 'Not Specified';
       const nakshatram = horoscope.nakshatram || 'Not Specified';
       const padam = horoscope.padam !== null && horoscope.padam !== undefined ? String(horoscope.padam) : '-';
-      const lagnam = horoscope.lagnam || 'Not Specified';
+      const lagnam = horoscope.lagnam || horoscope.lagna || horoscope.ascendant || 'Not Specified';
 
       const dosham = horoscope.dosham || {};
       const doshamSummary = dosham.doshamSummary || 'None';

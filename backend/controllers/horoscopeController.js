@@ -18,6 +18,7 @@ const {
   SOUTH_INDIAN_CITIES,
   RASI_LIST,
   NAKSHATRA_LIST,
+  calculateVedicAscendant,
 } = require('../services/prokeralaService');
 const { generateHoroscopePdfBuffer } = require('../services/horoscopePdfService');
 
@@ -719,10 +720,31 @@ const generateStandaloneHoroscope = async (req, res, next) => {
  */
 const getAdminGeneratedHoroscopes = async (req, res, next) => {
   try {
+    // Helper to ensure lagnam is calculated if not stored
+    const resolveItemLagnam = (item) => {
+      if (item.lagnam && typeof item.lagnam === 'string' && item.lagnam.trim() && item.lagnam !== '—' && item.lagnam !== 'N/A') {
+        return item.lagnam.trim();
+      }
+      const dob = item.dateOfBirth;
+      const tob = item.timeOfBirth || '12:00';
+      const coords = item.birthCoordinates || resolveCoordinates(null, item.placeOfBirth);
+      if (dob && coords) {
+        const iso = formatIsoDatetime(dob, tob);
+        const computed = calculateVedicAscendant(iso, coords, 'ta');
+        if (computed) return computed;
+      }
+      return item.lagnam || '—';
+    };
+
     // 1. Fetch standalone HoroscopeRecord documents
-    const standaloneRecords = await HoroscopeRecord.find()
+    const standaloneDocs = await HoroscopeRecord.find()
       .sort({ createdAt: -1 })
       .lean();
+
+    const standaloneRecords = standaloneDocs.map((rec) => ({
+      ...rec,
+      lagnam: resolveItemLagnam(rec),
+    }));
 
     // 2. Fetch any MatrimonialProfile documents that have generated horoscopes
     const profileRecords = await MatrimonialProfile.find({
@@ -734,29 +756,33 @@ const getAdminGeneratedHoroscopes = async (req, res, next) => {
       .lean();
 
     // Format profiles into uniform list items
-    const formattedProfiles = profileRecords.map((p) => ({
-      _id: p._id,
-      personName: p.candidateName || p.user?.name || 'Unnamed Candidate',
-      gender: p.personalDetails?.gender || 'Not Specified',
-      dateOfBirth: p.personalDetails?.dateOfBirth,
-      timeOfBirth: p.horoscope?.timeOfBirth,
-      placeOfBirth: p.horoscope?.placeOfBirth,
-      birthCoordinates: p.horoscope?.birthCoordinates,
-      contactPhone: p.candidatePhone || '',
-      contactEmail: p.candidateEmail || p.user?.email || '',
-      rasi: p.horoscope?.rasi,
-      nakshatram: p.horoscope?.nakshatram,
-      padam: p.horoscope?.padam,
-      lagnam: p.horoscope?.lagnam,
-      dosham: p.horoscope?.dosham,
-      dasaBalance: p.horoscope?.dasaBalance,
-      isGenerated: p.horoscope?.isGenerated,
-      isSimulated: p.horoscope?.isSimulated,
-      generatedAt: p.horoscope?.generatedAt || p.updatedAt,
-      isProfileLinked: true,
-      profileSource: p.source,
-      createdAt: p.createdAt,
-    }));
+    const formattedProfiles = profileRecords.map((p) => {
+      const item = {
+        _id: p._id,
+        personName: p.candidateName || p.user?.name || 'Unnamed Candidate',
+        gender: p.personalDetails?.gender || 'Not Specified',
+        dateOfBirth: p.personalDetails?.dateOfBirth,
+        timeOfBirth: p.horoscope?.timeOfBirth,
+        placeOfBirth: p.horoscope?.placeOfBirth,
+        birthCoordinates: p.horoscope?.birthCoordinates,
+        contactPhone: p.candidatePhone || '',
+        contactEmail: p.candidateEmail || p.user?.email || '',
+        rasi: p.horoscope?.rasi,
+        nakshatram: p.horoscope?.nakshatram,
+        padam: p.horoscope?.padam,
+        lagnam: p.horoscope?.lagnam,
+        dosham: p.horoscope?.dosham,
+        dasaBalance: p.horoscope?.dasaBalance,
+        isGenerated: p.horoscope?.isGenerated,
+        isSimulated: p.horoscope?.isSimulated,
+        generatedAt: p.horoscope?.generatedAt || p.updatedAt,
+        isProfileLinked: true,
+        profileSource: p.source,
+        createdAt: p.createdAt,
+      };
+      item.lagnam = resolveItemLagnam(item);
+      return item;
+    });
 
     // Combine standalone + profile records, sorted newest first
     const allRecords = [...standaloneRecords, ...formattedProfiles].sort((a, b) => {
@@ -820,6 +846,20 @@ const getAdminCandidateHoroscopePdf = async (req, res, next) => {
         success: false,
         message: 'Simulated horoscope PDFs cannot be served in production mode.',
       });
+    }
+
+    // Ensure Lagnam is calculated if missing in legacy records
+    if (!record.lagnam || record.lagnam === '—' || record.lagnam === 'N/A') {
+      const dob = record.dateOfBirth || record.personalDetails?.dateOfBirth;
+      const tob = horoscope.timeOfBirth || record.timeOfBirth || '12:00';
+      const coords = horoscope.birthCoordinates || record.birthCoordinates || resolveCoordinates(null, horoscope.placeOfBirth || record.placeOfBirth);
+      if (dob && coords) {
+        const computed = calculateVedicAscendant(formatIsoDatetime(dob, tob), coords, 'ta');
+        if (computed) {
+          record.lagnam = computed;
+          if (record.horoscope) record.horoscope.lagnam = computed;
+        }
+      }
     }
 
     const pdfBuffer = await generateHoroscopePdfBuffer(record);

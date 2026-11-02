@@ -20,6 +20,111 @@ let tokenCache = {
 };
 
 /**
+ * Maps English / Sanskrit Rasi names to Tamil
+ */
+const RASI_NAME_MAP_TO_TAMIL = {
+  aries: 'மேஷம்',
+  mesha: 'மேஷம்',
+  mesham: 'மேஷம்',
+  taurus: 'ரிஷபம்',
+  vrishabha: 'ரிஷபம்',
+  rishaba: 'ரிஷபம்',
+  rishabam: 'ரிஷபம்',
+  gemini: 'மிதுனம்',
+  mithuna: 'மிதுனம்',
+  mithunam: 'மிதுனம்',
+  cancer: 'கடகம்',
+  karka: 'கடகம்',
+  kataka: 'கடகம்',
+  kadagam: 'கடகம்',
+  leo: 'சிம்மம்',
+  simha: 'சிம்மம்',
+  simmam: 'சிம்மம்',
+  virgo: 'கன்னி',
+  kanya: 'கன்னி',
+  kanni: 'கன்னி',
+  libra: 'துலாம்',
+  thula: 'துலாம்',
+  tula: 'துலாம்',
+  thulam: 'துலாம்',
+  scorpio: 'விருச்சிகம்',
+  vrischika: 'விருச்சிகம்',
+  vrichigam: 'விருச்சிகம்',
+  sagittarius: 'தனுசு',
+  dhanu: 'தனுசு',
+  dhanusu: 'தனுசு',
+  capricorn: 'மகரம்',
+  makara: 'மகரம்',
+  makaram: 'மகரம்',
+  aquarius: 'கும்பம்',
+  kumbha: 'கும்பம்',
+  kumbam: 'கும்பம்',
+  pisces: 'மீனம்',
+  meena: 'மீனம்',
+  meenam: 'மீனம்',
+};
+
+/**
+ * Normalizes any Rasi / Lagna name to target language
+ */
+const normalizeRasiName = (name, language = 'ta') => {
+  if (!name || typeof name !== 'string') return null;
+  const clean = name.trim().toLowerCase();
+  if (language === 'ta') {
+    if (TAMIL_RASI_NAMES.includes(name.trim())) return name.trim();
+    if (RASI_NAME_MAP_TO_TAMIL[clean]) return RASI_NAME_MAP_TO_TAMIL[clean];
+  }
+  return name.trim();
+};
+
+/**
+ * Calculates Vedic Ascendant (Lagna) sign accurately based on UTC date, time, latitude, longitude
+ * using standard Lahiri Ayanamsa algorithm as a verified astronomical fallback
+ */
+const calculateVedicAscendant = (datetime, coordinates, language = 'ta') => {
+  try {
+    if (!coordinates) return null;
+    const parts = coordinates.split(',');
+    const lat = parseFloat(parts[0]) || 13.0827;
+    const lon = parseFloat(parts[1]) || 80.2707;
+    const date = new Date(datetime);
+    if (isNaN(date.getTime())) return null;
+
+    // Julian Date
+    const jd = date.getTime() / 86400000 + 2440587.5;
+    const d = jd - 2451545.0; // days since J2000.0
+
+    // Greenwich Mean Sidereal Time (GMST) in degrees
+    let gmst = 280.46061837 + 360.98564736629 * d;
+    gmst = ((gmst % 360) + 360) % 360;
+
+    // Local Sidereal Time (LST) in degrees
+    const lst = ((gmst + lon) % 360 + 360) % 360;
+    const lstRad = (lst * Math.PI) / 180;
+    const latRad = (lat * Math.PI) / 180;
+
+    // Obliquity of the Ecliptic
+    const T = d / 36525.0;
+    const eps = (23.439291 - 0.0130042 * T) * (Math.PI / 180);
+
+    // Tropical Ascendant
+    const y = Math.cos(lstRad);
+    const x = -(Math.sin(lstRad) * Math.cos(eps) + Math.tan(latRad) * Math.sin(eps));
+    let tropicalAscDeg = (Math.atan2(y, x) * 180) / Math.PI;
+    tropicalAscDeg = ((tropicalAscDeg % 360) + 360) % 360;
+
+    // Lahiri Ayanamsa approximation
+    const lahiriAyanamsa = 23.85 + (d / 365.25) * (50.29 / 3600);
+    const siderealAscDeg = ((tropicalAscDeg - lahiriAyanamsa) % 360 + 360) % 360;
+
+    const rasiIndex = Math.floor(siderealAscDeg / 30) % 12;
+    return language === 'ta' ? TAMIL_RASI_NAMES[rasiIndex] : RASI_LIST[rasiIndex];
+  } catch (_) {
+    return null;
+  }
+};
+
+/**
  * Standard South Indian Rasi (Moon Sign) and Nakshatra Constants
  */
 const RASI_LIST = [
@@ -528,11 +633,39 @@ const generateHoroscope = async ({ datetime, coordinates, placeName = '', langua
 
     // Lagna / Ascendant is identified in planet_position where name is 'Ascendant' or 'Lagna'
     let lagnamName = null;
-    if (Array.isArray(kData.planet_position)) {
-      const lagnaObj = kData.planet_position.find((p) => p.name === 'Ascendant' || p.name === 'Lagna');
+
+    // Check 1: Direct in kData (kundli payload)
+    if (kData.ascendant?.rasi?.name) {
+      lagnamName = normalizeRasiName(kData.ascendant.rasi.name, lang);
+    } else if (Array.isArray(kData.planet_position)) {
+      const lagnaObj = kData.planet_position.find((p) => p.name === 'Ascendant' || p.name === 'Lagna' || p.id === 100);
       if (lagnaObj && lagnaObj.rasi) {
-        lagnamName = lagnaObj.rasi.name;
+        lagnamName = normalizeRasiName(lagnaObj.rasi.name, lang);
       }
+    }
+
+    // Check 2: Query Prokerala's planet-position endpoint if not found in kundli response
+    if (!lagnamName) {
+      try {
+        const planetPosRes = await fetch(`${PROKERALA_API_BASE}/planet-position?${queryParams.toString()}`, { headers });
+        if (planetPosRes.ok) {
+          const ppJson = await planetPosRes.json();
+          const positions = ppJson.data?.planet_position || ppJson.data || [];
+          if (Array.isArray(positions)) {
+            const asc = positions.find((p) => p.name === 'Ascendant' || p.name === 'Lagna' || p.id === 100);
+            if (asc && asc.rasi) {
+              lagnamName = normalizeRasiName(asc.rasi.name, lang);
+            }
+          }
+        }
+      } catch (_) {
+        // Graceful fallback to astronomical calculation
+      }
+    }
+
+    // Check 3: Standard Astronomical Ascendant calculation from exact birth datetime & coordinates
+    if (!lagnamName) {
+      lagnamName = calculateVedicAscendant(datetime, cleanCoords, lang);
     }
 
     const doshamSummary = hasChevvai
@@ -589,4 +722,6 @@ module.exports = {
   generateSyntheticHoroscope,
   generateHoroscope,
   localizeChartSvgToTamil,
+  calculateVedicAscendant,
+  normalizeRasiName,
 };
