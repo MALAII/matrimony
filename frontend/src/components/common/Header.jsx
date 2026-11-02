@@ -129,7 +129,32 @@ export const Header = () => {
               <div className="nav-auth-placeholder" aria-hidden="true" />
             ) : currentUser ? (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.65rem' }}>
-                <NotificationBell feed="user" />
+                {currentUser.role === 'admin' ? (
+                  <Link
+                    href="/admin"
+                    className="nav-link nav-link-btn"
+                    onClick={closeMobileMenu}
+                    style={{
+                      background: 'linear-gradient(135deg, #2b1a21 0%, #3a1c28 100%)',
+                      border: '1px solid #b08d4c',
+                      color: '#e0bd77',
+                      padding: '0.45rem 1rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      borderRadius: '9999px',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <ShieldCheck size={15} color="#e0bd77" />
+                    <span>Admin Console</span>
+                  </Link>
+                ) : (
+                  <NotificationBell feed="user" />
+                )}
+
                 <div className="user-menu-container">
                   <button
                     type="button"
@@ -154,41 +179,53 @@ export const Header = () => {
                 {userMenuOpen && (
                   <div className="user-nav-dropdown" role="menu">
                     <div className="user-nav-dropdown-header">
-                      <strong style={{ display: 'block', fontSize: '0.88rem', color: 'var(--text-main, #142D28)' }}>
-                        {currentUser.name}
-                      </strong>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                        <strong style={{ fontSize: '0.88rem', color: 'var(--text-main, #142D28)' }}>
+                          {currentUser.name}
+                        </strong>
+                        {currentUser.role === 'admin' && (
+                          <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.5px', background: '#fef7ee', color: '#8c6a28', border: '1px solid #e0bd77', padding: '1px 6px', borderRadius: '999px', fontWeight: 700 }}>
+                            Admin
+                          </span>
+                        )}
+                      </div>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', fontFamily: 'monospace' }}>
                         {currentUser.email}
                       </span>
                     </div>
 
-                    <Link
-                      href="/profile"
-                      className="user-nav-dropdown-item"
-                      role="menuitem"
-                      onClick={closeMobileMenu}
-                    >
-                      <User size={15} /> My Profile
-                    </Link>
-
-                    <Link
-                      href="/membership"
-                      className="user-nav-dropdown-item"
-                      role="menuitem"
-                      onClick={closeMobileMenu}
-                    >
-                      <CreditCard size={15} /> Membership Plans
-                    </Link>
-
-                    {currentUser.role === 'admin' && (
+                    {currentUser.role === 'admin' ? (
+                      /* Admin-only menu items */
                       <Link
                         href="/admin"
                         className="user-nav-dropdown-item"
                         role="menuitem"
                         onClick={closeMobileMenu}
+                        style={{ fontWeight: 600, color: 'var(--primary, #7d3147)' }}
                       >
                         <ShieldCheck size={15} color="#b08d4c" /> Admin Console
                       </Link>
+                    ) : (
+                      /* Candidate user menu items */
+                      <>
+                        <Link
+                          href="/profile"
+                          className="user-nav-dropdown-item"
+                          role="menuitem"
+                          onClick={closeMobileMenu}
+                        >
+                          <User size={15} /> My Profile
+                        </Link>
+
+                        <Link
+                          href="/membership"
+                          className="user-nav-dropdown-item"
+                          role="menuitem"
+                          onClick={closeMobileMenu}
+                        >
+                          <CreditCard size={15} /> Membership Plans
+                        </Link>
+                      </>
                     )}
 
                     <div className="user-nav-dropdown-divider" />

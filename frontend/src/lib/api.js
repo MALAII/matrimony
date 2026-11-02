@@ -185,12 +185,6 @@ export async function logoutUserApi() {
     };
   }
 }
-      success: false,
-      status: 0,
-      message: 'Unable to connect to the server.',
-    };
-  }
-}
 
 /**
  * Fetch the authenticated user's matrimonial profile
