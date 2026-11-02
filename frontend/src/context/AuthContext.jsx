@@ -111,6 +111,7 @@ export function AuthProvider({ children }) {
         checkAuth,
         logout,
         setCurrentUser: setAuthenticatedUser,
+        setAuthenticatedUser,
       }}
     >
       {children}

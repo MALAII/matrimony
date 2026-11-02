@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const MatrimonialProfile = require('../models/MatrimonialProfile');
+const Subscription = require('../models/Subscription');
 const { cloudinary, isCloudinaryConfigured } = require('../config/cloudinary');
 const { uploadToCloudinary } = require('./profileController');
 
@@ -10,10 +11,13 @@ const ALLOWED_BROKER_PROFILE_FIELDS = [
   'candidateEmail',
   'candidatePhone',
   'personalDetails',
+  'communityDetails',
   'educationAndProfession',
   'familyDetails',
   'partnerPreferences',
   'profilePhoto',
+  'photos',
+  'horoscope',
 ];
 
 /**
@@ -79,14 +83,171 @@ const parsePaginationParams = (query) => {
   };
 };
 
+const ALLOWED_ACCOUNT_STATUSES = ['active', 'invited', 'suspended', 'inactive'];
+const ALLOWED_ROLES = ['user', 'admin'];
+const ALLOWED_REGISTRATION_SOURCES = ['direct', 'broker'];
+
+/**
+ * Escapes a cell for CSV export to protect against spreadsheet formula injection
+ * (e.g., values starting with =, +, -, @, \t, \r) and wraps cells containing commas,
+ * double quotes, or newlines according to RFC 4180.
+ * @param {*} val
+ * @returns {string}
+ */
+const escapeCsvCell = (val) => {
+  if (val === null || val === undefined) return '';
+  let str = String(val);
+  // Neutralize formula injection risk if cell starts with dangerous spreadsheet formula triggers: =, +, -, @, \t, \r
+  if (/^[\=\+\-\@\t\r]/.test(str)) {
+    str = `'${str}`;
+  }
+  // Wrap in quotes if comma, newline, quote, or carriage return present, and escape existing double quotes
+  if (/[",\n\r]/.test(str)) {
+    str = `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+};
+
+/**
+ * Parses and validates user filter parameters including status, role, registrationSource, and pagination
+ * @param {object} query
+ * @returns {{ page?: number, limit?: number, search?: string, status?: string|null, role?: string|null, registrationSource?: string|null, error?: string }}
+ */
+const parseUserFilterParams = (query = {}) => {
+  const paginationResult = parsePaginationParams(query);
+  if (paginationResult.error) {
+    return paginationResult;
+  }
+
+  const rawStatus = typeof query.status === 'string'
+    ? query.status.trim()
+    : typeof query.accountStatus === 'string'
+      ? query.accountStatus.trim()
+      : '';
+
+  const rawRole = typeof query.role === 'string' ? query.role.trim() : '';
+
+  const rawSource = typeof query.registrationSource === 'string'
+    ? query.registrationSource.trim()
+    : typeof query.source === 'string'
+      ? query.source.trim()
+      : '';
+
+  let status = null;
+  if (rawStatus) {
+    if (!ALLOWED_ACCOUNT_STATUSES.includes(rawStatus)) {
+      return {
+        error: `Invalid status parameter: "${rawStatus}". Allowed values: ${ALLOWED_ACCOUNT_STATUSES.join(', ')}`,
+      };
+    }
+    status = rawStatus;
+  }
+
+  let role = null;
+  if (rawRole) {
+    if (!ALLOWED_ROLES.includes(rawRole)) {
+      return {
+        error: `Invalid role parameter: "${rawRole}". Allowed values: ${ALLOWED_ROLES.join(', ')}`,
+      };
+    }
+    role = rawRole;
+  }
+
+  let registrationSource = null;
+  if (rawSource) {
+    if (!ALLOWED_REGISTRATION_SOURCES.includes(rawSource)) {
+      return {
+        error: `Invalid registrationSource parameter: "${rawSource}". Allowed values: ${ALLOWED_REGISTRATION_SOURCES.join(', ')}`,
+      };
+    }
+    registrationSource = rawSource;
+  }
+
+  return {
+    ...paginationResult,
+    status,
+    role,
+    registrationSource,
+  };
+};
+
+/**
+ * Builds MongoDB filter object for user queries
+ * @param {{ search?: string, status?: string|null, role?: string|null, registrationSource?: string|null }} params
+ * @returns {object}
+ */
+const buildUserFilter = ({ search, status, role, registrationSource }) => {
+  const filter = {};
+  if (status) {
+    filter.accountStatus = status;
+  }
+  if (role) {
+    filter.role = role;
+  }
+  if (registrationSource) {
+    filter.registrationSource = registrationSource;
+  }
+  if (search) {
+    const searchRegex = new RegExp(escapeRegex(search), 'i');
+    filter.$or = [{ name: searchRegex }, { email: searchRegex }];
+  }
+  return filter;
+};
+
+/**
+ * @route   GET /api/admin/users/stats
+ * @desc    Aggregate user account metrics (total, active, invited, suspended/inactive, verified emails, subscribed users)
+ * @access  Private (Admin only)
+ */
+const getAdminUserStats = async (req, res, next) => {
+  try {
+    const [
+      totalAccounts,
+      activeAccounts,
+      invitedAccounts,
+      suspendedAccounts,
+      inactiveAccounts,
+      verifiedEmails,
+      activeSubscribedUsers,
+    ] = await Promise.all([
+      User.countDocuments({}),
+      User.countDocuments({ accountStatus: 'active' }),
+      User.countDocuments({ accountStatus: 'invited' }),
+      User.countDocuments({ accountStatus: 'suspended' }),
+      User.countDocuments({ accountStatus: 'inactive' }),
+      User.countDocuments({ emailVerifiedAt: { $ne: null } }),
+      Subscription.distinct('user', { status: 'active' }),
+    ]);
+
+    const suspendedOrInactive = suspendedAccounts + inactiveAccounts;
+    const subscribedUsers = activeSubscribedUsers.length;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        totalAccounts,
+        active: activeAccounts,
+        invited: invitedAccounts,
+        suspended: suspendedAccounts,
+        inactive: inactiveAccounts,
+        suspendedOrInactive,
+        verifiedEmails,
+        subscribedUsers,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 /**
  * @route   GET /api/admin/users
- * @desc    Get paginated listing of user records (name, email, role, timestamps)
+ * @desc    Get paginated listing of user records with filter support and linked profile/subscription badges
  * @access  Private (Admin only)
  */
 const getAdminUsers = async (req, res, next) => {
   try {
-    const { page, limit, search, error } = parsePaginationParams(req.query);
+    const { page, limit, search, status, role, registrationSource, error } = parseUserFilterParams(req.query);
 
     if (error) {
       return res.status(400).json({
@@ -96,11 +257,7 @@ const getAdminUsers = async (req, res, next) => {
     }
 
     // Build filter query
-    const filter = {};
-    if (search) {
-      const searchRegex = new RegExp(escapeRegex(search), 'i');
-      filter.$or = [{ name: searchRegex }, { email: searchRegex }];
-    }
+    const filter = buildUserFilter({ search, status, role, registrationSource });
 
     // Database count and query
     const totalRecords = await User.countDocuments(filter);
@@ -108,14 +265,66 @@ const getAdminUsers = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     const users = await User.find(filter)
-      .select('-passwordHash')
+      .select('-passwordHash -invitationTokenHash -passwordResetTokenHash -__v')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
+    // Fetch linked profiles and subscriptions in parallel for current page users
+    const userIds = users.map((u) => u._id);
+    const [profiles, subscriptions] = await Promise.all([
+      MatrimonialProfile.find({ user: { $in: userIds } })
+        .select('user candidateName approvalStatus profileStatus deactivationReason createdAt')
+        .lean(),
+      Subscription.find({ user: { $in: userIds } })
+        .sort({ createdAt: -1 })
+        .select('user planCode status startDate endDate gracePeriodEndDate')
+        .lean(),
+    ]);
+
+    const profileMap = new Map();
+    profiles.forEach((p) => {
+      if (p.user) {
+        profileMap.set(p.user.toString(), {
+          _id: p._id,
+          id: p._id,
+          candidateName: p.candidateName,
+          approvalStatus: p.approvalStatus,
+          profileStatus: p.profileStatus,
+          deactivationReason: p.deactivationReason,
+          createdAt: p.createdAt,
+        });
+      }
+    });
+
+    const subMap = new Map();
+    subscriptions.forEach((s) => {
+      if (s.user && !subMap.has(s.user.toString())) {
+        subMap.set(s.user.toString(), {
+          planCode: s.planCode,
+          status: s.status,
+          startDate: s.startDate,
+          endDate: s.endDate,
+          gracePeriodEndDate: s.gracePeriodEndDate,
+        });
+      }
+    });
+
+    const enrichedUsers = users.map((u) => {
+      const uObj = typeof u.toObject === 'function' ? u.toObject() : { ...u };
+      delete uObj.passwordHash;
+      delete uObj.invitationTokenHash;
+      delete uObj.passwordResetTokenHash;
+      delete uObj.__v;
+      const uidStr = (uObj._id || uObj.id).toString();
+      uObj.profile = profileMap.get(uidStr) || null;
+      uObj.subscription = subMap.get(uidStr) || null;
+      return uObj;
+    });
+
     return res.status(200).json({
       success: true,
-      data: users,
+      data: enrichedUsers,
       pagination: {
         page,
         limit,
@@ -125,6 +334,136 @@ const getAdminUsers = async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+};
+
+/**
+ * @route   GET /api/admin/users/export
+ * @desc    Export filtered user accounts as streaming CSV with formula injection protection
+ * @access  Private (Admin only)
+ */
+const exportAdminUsersCsv = async (req, res, next) => {
+  try {
+    const { search, status, role, registrationSource, error } = parseUserFilterParams(req.query);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error,
+      });
+    }
+
+    const filter = buildUserFilter({ search, status, role, registrationSource });
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="users-export-${timestamp}.csv"`);
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+    // Emit UTF-8 BOM so spreadsheet editors like Excel render special characters correctly
+    res.write('\uFEFF');
+
+    const csvHeaders = [
+      'User ID',
+      'Name',
+      'Email',
+      'Role',
+      'Account Status',
+      'Registration Source',
+      'Email Verified',
+      'Email Verified At',
+      'Registration Date',
+      'Linked Profile ID',
+      'Candidate Name',
+      'Profile Status',
+      'Profile Approval Status',
+      'Subscription Plan',
+      'Subscription Status',
+      'Subscription End Date',
+    ];
+
+    res.write(csvHeaders.map(escapeCsvCell).join(',') + '\r\n');
+
+    // Stream cursor in bounded chunks of 100 users
+    const cursor = User.find(filter)
+      .select('name email role accountStatus registrationSource emailVerifiedAt createdAt')
+      .sort({ createdAt: -1 })
+      .cursor();
+
+    const BATCH_SIZE = 100;
+    let batch = [];
+
+    const processBatch = async (usersBatch) => {
+      const userIds = usersBatch.map((u) => u._id);
+      const [profiles, subscriptions] = await Promise.all([
+        MatrimonialProfile.find({ user: { $in: userIds } })
+          .select('user candidateName approvalStatus profileStatus')
+          .lean(),
+        Subscription.find({ user: { $in: userIds } })
+          .sort({ createdAt: -1 })
+          .select('user planCode status endDate')
+          .lean(),
+      ]);
+
+      const profileMap = new Map();
+      profiles.forEach((p) => {
+        if (p.user) profileMap.set(p.user.toString(), p);
+      });
+
+      const subMap = new Map();
+      subscriptions.forEach((s) => {
+        if (s.user && !subMap.has(s.user.toString())) {
+          subMap.set(s.user.toString(), s);
+        }
+      });
+
+      for (const user of usersBatch) {
+        const uidStr = user._id.toString();
+        const profile = profileMap.get(uidStr);
+        const sub = subMap.get(uidStr);
+
+        const row = [
+          uidStr,
+          user.name || '',
+          user.email || '',
+          user.role || '',
+          user.accountStatus || '',
+          user.registrationSource || '',
+          user.emailVerifiedAt ? 'Yes' : 'No',
+          user.emailVerifiedAt ? user.emailVerifiedAt.toISOString() : '',
+          user.createdAt ? user.createdAt.toISOString() : '',
+          profile ? profile._id.toString() : 'None',
+          profile ? profile.candidateName || '' : '',
+          profile ? profile.profileStatus || '' : 'N/A',
+          profile ? profile.approvalStatus || '' : 'N/A',
+          sub ? sub.planCode || '' : 'None',
+          sub ? sub.status || '' : 'None',
+          sub && sub.endDate ? sub.endDate.toISOString() : 'N/A',
+        ];
+
+        res.write(row.map(escapeCsvCell).join(',') + '\r\n');
+      }
+    };
+
+    for await (const doc of cursor) {
+      batch.push(doc);
+      if (batch.length >= BATCH_SIZE) {
+        await processBatch(batch);
+        batch = [];
+      }
+    }
+
+    if (batch.length > 0) {
+      await processBatch(batch);
+    }
+
+    res.end();
+  } catch (err) {
+    if (!res.headersSent) {
+      next(err);
+    } else {
+      res.end();
+    }
   }
 };
 
@@ -146,6 +485,12 @@ const getAdminProfiles = async (req, res, next) => {
 
     // Build filter query across profile fields, candidate details, and linked users
     const filter = {};
+    const { approvalStatus: qApproval, profileStatus: qStatus, source: qSource, gender: qGender } = req.query;
+    if (['pending_approval', 'approved', 'rejected'].includes(qApproval)) filter.approvalStatus = qApproval;
+    if (['active', 'inactive'].includes(qStatus)) filter.profileStatus = qStatus;
+    if (['direct', 'broker'].includes(qSource)) filter.source = qSource;
+    if (['Male', 'Female', 'Other'].includes(qGender)) filter['personalDetails.gender'] = qGender;
+
     if (search) {
       const searchRegex = new RegExp(escapeRegex(search), 'i');
 
@@ -159,8 +504,16 @@ const getAdminProfiles = async (req, res, next) => {
       filter.$or = [
         { candidateName: searchRegex },
         { candidateEmail: searchRegex },
+        { candidatePhone: searchRegex },
         { 'personalDetails.location': searchRegex },
+        { 'personalDetails.nativity': searchRegex },
         { 'personalDetails.motherTongue': searchRegex },
+        { 'communityDetails.caste': searchRegex },
+        { 'communityDetails.subcaste': searchRegex },
+        { 'communityDetails.gothram': searchRegex },
+        { 'communityDetails.religion': searchRegex },
+        { 'horoscope.rasi': searchRegex },
+        { 'horoscope.nakshatram': searchRegex },
         { 'educationAndProfession.occupation': searchRegex },
         { 'educationAndProfession.educationalQualification': searchRegex },
         { 'educationAndProfession.company': searchRegex },
@@ -265,7 +618,27 @@ const createBrokerProfile = async (req, res, next) => {
       }
     }
 
-    // 6. Assemble profile data with strict server-enforced business invariants:
+    // 6. Normalize horoscope dosham & dasaBalance if passed as strings
+    const horoscopeData = { ...(sanitizedBody.horoscope || {}) };
+    if (typeof horoscopeData.dosham === 'string') {
+      const dStr = horoscopeData.dosham.trim();
+      const lower = dStr.toLowerCase();
+      horoscopeData.dosham = {
+        hasChevvaiDosham: lower.includes('chevvai') || lower.includes('sevvai') || lower.includes('manglik'),
+        hasNagaDosham: lower.includes('naga') || lower.includes('rahu') || lower.includes('kethu') || lower.includes('ketu'),
+        doshamSummary: dStr || 'None',
+        description: dStr || null,
+      };
+    }
+    if (typeof horoscopeData.dasaBalance === 'string') {
+      const dbStr = horoscopeData.dasaBalance.trim();
+      horoscopeData.dasaBalance = {
+        planet: dbStr.split(' ')[0] || null,
+        text: dbStr,
+      };
+    }
+
+    // 7. Assemble profile data with strict server-enforced business invariants:
     // - source is forced to 'broker'
     // - user is forced to null (no user account created)
     // - approvalStatus is forced to 'pending_approval'
@@ -282,10 +655,13 @@ const createBrokerProfile = async (req, res, next) => {
       candidateEmail: normalizedCandidateEmail,
       candidatePhone: candidatePhone || null,
       personalDetails: sanitizedBody.personalDetails || {},
+      communityDetails: sanitizedBody.communityDetails || {},
       educationAndProfession: sanitizedBody.educationAndProfession || {},
       familyDetails: sanitizedBody.familyDetails || {},
       partnerPreferences: sanitizedBody.partnerPreferences || {},
       profilePhoto: sanitizedBody.profilePhoto || {},
+      photos: Array.isArray(sanitizedBody.photos) ? sanitizedBody.photos : [],
+      horoscope: horoscopeData,
     };
 
     const newProfile = await MatrimonialProfile.create(profileData);
@@ -306,6 +682,7 @@ const createBrokerProfile = async (req, res, next) => {
         familyDetails: newProfile.familyDetails,
         partnerPreferences: newProfile.partnerPreferences,
         profilePhoto: newProfile.profilePhoto,
+        horoscope: newProfile.horoscope,
         createdAt: newProfile.createdAt,
         updatedAt: newProfile.updatedAt,
       },
@@ -560,11 +937,11 @@ const inviteBrokerCandidate = async (req, res, next) => {
       });
     }
 
-    // 3. Precondition: Must be broker-sourced
-    if (profile.source !== 'broker') {
+    // 3. Precondition: Must be an unlinked candidate profile (broker-imported or admin-created)
+    if (profile.source !== 'broker' && profile.user !== null) {
       return res.status(400).json({
         success: false,
-        message: 'Invitations are restricted to broker-sourced profiles only.',
+        message: 'Invitations are restricted to unlinked candidate profiles only.',
       });
     }
 
@@ -648,7 +1025,7 @@ const inviteBrokerCandidate = async (req, res, next) => {
     // Link User to Profile atomically
     const linkedProfile = await MatrimonialProfile.findOneAndUpdate(
       { _id: profile._id, user: null },
-      { $set: { user: newUser._id } },
+      { $set: { user: newUser._id, candidateEmail: candidateEmailToUse } },
       { new: true }
     );
 
@@ -748,10 +1125,10 @@ const reinviteBrokerCandidate = async (req, res, next) => {
     }
 
     // 3. Preconditions
-    if (profile.source !== 'broker') {
+    if (profile.source !== 'broker' && profile.user?.registrationSource !== 'broker' && profile.user?.accountStatus !== 'invited') {
       return res.status(400).json({
         success: false,
-        message: 'Invitation resend is restricted to broker-sourced profiles only.',
+        message: 'Invitation resend is restricted to invited candidate profiles only.',
       });
     }
 
@@ -772,7 +1149,39 @@ const reinviteBrokerCandidate = async (req, res, next) => {
       });
     }
 
-    // 4. Rotate token: Issue new raw token, store new SHA-256 hash, refresh 24h expiry
+    // 4. Handle optional email correction
+    let targetEmail = linkedUser.email;
+    const oldEmail = linkedUser.email;
+    let emailChanged = false;
+    const { email } = req.body || {};
+
+    if (email && typeof email === 'string' && email.trim()) {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!EMAIL_REGEX.test(normalizedEmail)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide a valid email address for invitation resend.',
+        });
+      }
+
+      if (normalizedEmail !== linkedUser.email.toLowerCase()) {
+        // Collision check: reject if another user owns this email
+        const existingUser = await User.findOne({
+          email: normalizedEmail,
+          _id: { $ne: linkedUser._id },
+        });
+        if (existingUser) {
+          return res.status(409).json({
+            success: false,
+            message: `An account with email '${normalizedEmail}' already exists.`,
+          });
+        }
+        targetEmail = normalizedEmail;
+        emailChanged = true;
+      }
+    }
+
+    // 5. Rotate token: Issue new raw token, store new SHA-256 hash, refresh 24h expiry
     const { rawToken, tokenHash } = generateInvitationTokenPair();
     const expiresAt = new Date(Date.now() + INVITATION_EXPIRY_MS);
     const candidateName = profile.candidateName || linkedUser.name || 'Candidate';
@@ -780,13 +1189,29 @@ const reinviteBrokerCandidate = async (req, res, next) => {
     linkedUser.invitationTokenHash = tokenHash;
     linkedUser.invitationExpiresAt = expiresAt;
     linkedUser.invitationDeliveryStatus = 'pending';
+    if (emailChanged) {
+      linkedUser.email = targetEmail;
+    }
     await linkedUser.save();
 
-    // 5. Attempt email dispatch
+    // Synchronize candidateEmail on profile with rollback on failure
+    if (emailChanged) {
+      try {
+        profile.candidateEmail = targetEmail;
+        await profile.save();
+      } catch (profileSaveErr) {
+        // Rollback user email to maintain consistency
+        linkedUser.email = oldEmail;
+        await linkedUser.save();
+        throw profileSaveErr;
+      }
+    }
+
+    // 6. Attempt email dispatch
     let emailResult = { success: false };
     try {
       emailResult = await emailService.sendInvitationEmail({
-        to: linkedUser.email,
+        to: targetEmail,
         name: candidateName,
         rawToken,
       });
@@ -802,11 +1227,11 @@ const reinviteBrokerCandidate = async (req, res, next) => {
 
       return res.status(200).json({
         success: true,
-        message: `Invitation email resent successfully to ${linkedUser.email}.`,
+        message: `Invitation email sent successfully to ${targetEmail}.`,
         data: {
           profileId: profile._id,
           userId: linkedUser._id,
-          email: linkedUser.email,
+          email: targetEmail,
           accountStatus: linkedUser.accountStatus,
           invitationDeliveryStatus: 'sent',
           expiresAt,
@@ -819,11 +1244,11 @@ const reinviteBrokerCandidate = async (req, res, next) => {
       return res.status(200).json({
         success: true,
         warning: true,
-        message: `Invitation token rotated, but email delivery failed (${emailResult.error || 'SMTP delivery failure'}). You may try resending again later.`,
+        message: `Invitation token rotated for ${targetEmail}, but email delivery failed (${emailResult.error || 'SMTP delivery failure'}). You may try resending again.`,
         data: {
           profileId: profile._id,
           userId: linkedUser._id,
-          email: linkedUser.email,
+          email: targetEmail,
           accountStatus: linkedUser.accountStatus,
           invitationDeliveryStatus: 'failed',
           expiresAt,
@@ -835,14 +1260,221 @@ const reinviteBrokerCandidate = async (req, res, next) => {
   }
 };
 
+const EDITABLE_GROUPS = ['personalDetails', 'educationAndProfession', 'familyDetails', 'communityDetails', 'horoscope', 'partnerPreferences'];
+const EDITABLE_TOP = ['candidateName', 'candidatePhone'];
+
+/**
+ * @route   PATCH /api/admin/profiles/:id
+ * @desc    Admin edit of candidate/contact details and profile sections
+ * @access  Private (Admin only)
+ */
+const updateAdminProfile = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid profile ID format' });
+    }
+    const body = req.body || {};
+    const profile = await MatrimonialProfile.findById(id);
+    if (!profile) {
+      return res.status(404).json({ success: false, message: 'Matrimonial profile not found' });
+    }
+
+    let changed = 0;
+
+    // Handle candidateEmail with synchronization to linked invited User
+    if (body.candidateEmail !== undefined) {
+      const emailVal = typeof body.candidateEmail === 'string' ? body.candidateEmail.trim() : '';
+      const normalizedEmail = emailVal.toLowerCase();
+      if (emailVal && !EMAIL_REGEX.test(normalizedEmail)) {
+        return res.status(400).json({ success: false, message: 'Please provide a valid candidate email address' });
+      }
+
+      if (profile.user) {
+        const linkedUser = await User.findById(profile.user);
+        if (linkedUser) {
+          if (linkedUser.accountStatus === 'active' && linkedUser.email !== normalizedEmail && normalizedEmail) {
+            return res.status(400).json({
+              success: false,
+              message: 'Cannot change email of an active candidate account. Account credentials must be managed separately.',
+            });
+          }
+          if (linkedUser.accountStatus === 'invited' && linkedUser.email !== normalizedEmail && normalizedEmail) {
+            const existingUser = await User.findOne({
+              email: normalizedEmail,
+              _id: { $ne: linkedUser._id },
+            });
+            if (existingUser) {
+              return res.status(409).json({
+                success: false,
+                message: `An account with email '${normalizedEmail}' already exists.`,
+              });
+            }
+            linkedUser.email = normalizedEmail;
+            // Invalidate outstanding invitation token because recipient email was modified
+            linkedUser.invitationTokenHash = null;
+            linkedUser.invitationExpiresAt = null;
+            linkedUser.invitationDeliveryStatus = 'pending';
+            await linkedUser.save();
+          }
+        }
+      }
+      profile.candidateEmail = normalizedEmail || null;
+      changed++;
+    }
+
+    for (const key of EDITABLE_TOP) {
+      if (typeof body[key] === 'string') {
+        profile.set(key, body[key].trim());
+        changed++;
+      }
+    }
+    for (const group of EDITABLE_GROUPS) {
+      const section = body[group];
+      if (section && typeof section === 'object' && !Array.isArray(section)) {
+        for (const [field, rawVal] of Object.entries(section)) {
+          if (field.startsWith('$') || field.includes('.')) continue;
+          let value = rawVal;
+          if (group === 'horoscope' && field === 'dosham') {
+            if (typeof value === 'string') {
+              const lower = value.toLowerCase();
+              value = {
+                hasChevvaiDosham: lower.includes('chevvai') || lower.includes('sevvai'),
+                hasNagaDosham: lower.includes('naga'),
+                doshamSummary: value,
+              };
+            }
+            profile.set(`${group}.${field}`, value);
+            changed++;
+            continue;
+          }
+          if (value !== null && typeof value === 'object' && !(group === 'partnerPreferences' && field === 'preferredAgeRange')) continue;
+          profile.set(`${group}.${field}`, value);
+          changed++;
+        }
+      }
+    }
+    if (changed === 0) {
+      return res.status(400).json({ success: false, message: 'No editable fields were provided' });
+    }
+
+    try {
+      await profile.save();
+    } catch (err) {
+      if (err.name === 'ValidationError') {
+        const first = Object.values(err.errors)[0];
+        return res.status(400).json({ success: false, message: first ? first.message : 'Validation failed' });
+      }
+      throw err;
+    }
+    const populated = await MatrimonialProfile.findById(id).populate('user', 'name email role accountStatus');
+    return res.status(200).json({ success: true, message: 'Profile updated', data: populated });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * @route   PATCH /api/admin/profiles/:id/status
+ * @desc    Activate or deactivate a profile (hidden from the member directory when inactive)
+ * @access  Private (Admin only)
+ */
+const updateAdminProfileStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { profileStatus } = req.body || {};
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid profile ID format' });
+    }
+    if (!['active', 'inactive'].includes(profileStatus)) {
+      return res.status(400).json({ success: false, message: "profileStatus must be 'active' or 'inactive'" });
+    }
+    const profile = await MatrimonialProfile.findById(id);
+    if (!profile) {
+      return res.status(404).json({ success: false, message: 'Matrimonial profile not found' });
+    }
+    profile.profileStatus = profileStatus;
+    profile.deactivationReason = profileStatus === 'inactive' ? 'admin_action' : null;
+    profile.deactivatedAt = profileStatus === 'inactive' ? new Date() : null;
+    await profile.save();
+    return res.status(200).json({ success: true, message: `Profile ${profileStatus === 'active' ? 'activated' : 'deactivated'}`, data: profile });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * @route   DELETE /api/admin/profiles/:id
+ * @desc    Permanently delete a broker-sourced profile that has no linked login account
+ * @access  Private (Admin only)
+ */
+const deleteAdminProfile = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid profile ID format' });
+    }
+    const profile = await MatrimonialProfile.findById(id);
+    if (!profile) {
+      return res.status(404).json({ success: false, message: 'Matrimonial profile not found' });
+    }
+    if (profile.source !== 'broker' || profile.user) {
+      return res.status(409).json({
+        success: false,
+        message: 'Only broker profiles without a linked account can be deleted. Deactivate member profiles instead.',
+      });
+    }
+    await profile.deleteOne();
+    return res.status(200).json({ success: true, message: 'Profile deleted' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * @route   GET /api/admin/profiles/:id
+ * @desc    Get complete candidate profile dossier for administrative review
+ * @access  Private (Admin only)
+ */
+const getAdminProfileDetail = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid profile ID format' });
+    }
+    const profile = await MatrimonialProfile.findById(id).populate(
+      'user',
+      'name email role accountStatus registrationSource invitationSentAt createdAt'
+    );
+    if (!profile) {
+      return res.status(404).json({ success: false, message: 'Matrimonial profile not found' });
+    }
+    return res.status(200).json({
+      success: true,
+      data: profile,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getAdminUsers,
+  getAdminUserStats,
+  exportAdminUsersCsv,
   getAdminProfiles,
+  getAdminProfileDetail,
   createBrokerProfile,
   updateProfileApproval,
+  updateAdminProfile,
+  updateAdminProfileStatus,
+  deleteAdminProfile,
   uploadAdminBrokerPhoto,
   inviteBrokerCandidate,
   reinviteBrokerCandidate,
   parsePaginationParams,
+  parseUserFilterParams,
+  buildUserFilter,
+  escapeCsvCell,
   escapeRegex,
 };

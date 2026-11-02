@@ -412,6 +412,19 @@ const requireDirectoryAccess = async (req, res, next) => {
       });
     }
 
+    // Administrators always have full browsing access
+    if (req.user.role === 'admin') {
+      req.subscriptionAccess = {
+        allowed: true,
+        code: 'ADMIN_ACCESS',
+        accessMode: 'active',
+        inGracePeriod: false,
+        contactsHidden: false,
+        credits: { creditsRemaining: 999, creditsAllocated: 999, creditsUsed: 0 },
+      };
+      return next();
+    }
+
     const accessResult = await checkUserDirectoryAccess(req.user._id);
 
     if (!accessResult.allowed) {

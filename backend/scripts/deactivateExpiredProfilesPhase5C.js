@@ -247,6 +247,30 @@ const runSubscriptionExpiryDeactivation = async ({
         if (updatedProfile) {
           deactivatedCount += 1;
           deactivatedProfileIds.push(String(updatedProfile._id));
+
+          // In-app user notification for subscription expiration / profile deactivation
+          try {
+            const { notifyUser } = require('../services/notificationService');
+            const userTargetId = profile.user._id || profile.user;
+            const deactDateStr = currentTime.toISOString().slice(0, 10);
+            await notifyUser({
+              userId: userTargetId,
+              type: 'subscription_expired',
+              title: 'Subscription Expired',
+              message: 'Your subscription grace period has ended and your matrimonial profile is now inactive. Renew now to restore profile visibility and contact access.',
+              link: '/membership',
+              metadata: {
+                profileId: String(updatedProfile._id),
+                deactivatedAt: currentTime,
+              },
+              dedupKey: `sub_expired_${updatedProfile._id}_${deactDateStr}`,
+            });
+          } catch (notifErr) {
+            logStructured('warn', 'user_expired_notification_failed', {
+              profileId: String(updatedProfile._id),
+              error: notifErr.message,
+            });
+          }
         }
 
         // Also mark any stale 'active' or 'grace_period' subscriptions for this user as 'expired'

@@ -7,6 +7,9 @@ const {
   logoutUser,
   verifySetupToken,
   setupPassword,
+  forgotPassword,
+  verifyResetToken,
+  resetPassword,
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 const { createRateLimiter } = require('../middleware/rateLimiter');
@@ -23,6 +26,20 @@ const setupPasswordLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: 'Too many password setup attempts. Please try again later.',
+});
+
+// Rate limiter for forgot-password requests (max 5 requests per 15 minutes per IP)
+const forgotPasswordLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: 'Too many password reset requests. Please try again later.',
+});
+
+// Rate limiter for password reset submissions (max 10 requests per 15 minutes per IP)
+const resetPasswordLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: 'Too many password reset attempts. Please try again later.',
 });
 
 /**
@@ -66,5 +83,26 @@ router.get('/setup-password/verify', verifyLimiter, verifySetupToken);
  * @access  Public
  */
 router.post('/setup-password', setupPasswordLimiter, setupPassword);
+
+/**
+ * @route   POST /api/auth/forgot-password
+ * @desc    Request password reset email with secure expiring token
+ * @access  Public
+ */
+router.post('/forgot-password', forgotPasswordLimiter, forgotPassword);
+
+/**
+ * @route   GET /api/auth/reset-password/verify
+ * @desc    Verify reset token validity without consuming
+ * @access  Public
+ */
+router.get('/reset-password/verify', verifyLimiter, verifyResetToken);
+
+/**
+ * @route   POST /api/auth/reset-password
+ * @desc    Submit new password, consume reset token, and update password
+ * @access  Public
+ */
+router.post('/reset-password', resetPasswordLimiter, resetPassword);
 
 module.exports = router;

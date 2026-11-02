@@ -24,7 +24,58 @@ const MAX_SEARCH_LENGTH = 100;
  * internal Cloudinary publicId, and audit fields. User is never populated.
  */
 const DIRECTORY_DB_PROJECTION =
-  '_id user source approvalStatus profileStatus candidateName personalDetails educationAndProfession familyDetails partnerPreferences profilePhoto.url createdAt';
+  '_id user source approvalStatus profileStatus candidateName personalDetails communityDetails educationAndProfession familyDetails partnerPreferences profilePhoto.url photos.url photos.isPrimary horoscope createdAt';
+
+/**
+ * Vedic Rasi bilingual synonym dictionary covering Tamil, Sanskrit, and English representations.
+ */
+const RASI_SYNONYMS = {
+  mesham: ['mesham', 'mesha', 'aries', 'மேஷம்'],
+  rishabam: ['rishabam', 'vrishabha', 'vrishabh', 'rishaba', 'taurus', 'ரிஷபம்'],
+  mithunam: ['mithunam', 'mithuna', 'gemini', 'மிதுனம்'],
+  kadagam: ['kadagam', 'karkataka', 'karka', 'cancer', 'கடகம்'],
+  simmam: ['simmam', 'simha', 'leo', 'சிம்மம்'],
+  kanni: ['kanni', 'kanya', 'virgo', 'கன்னி'],
+  thulaam: ['thulaam', 'thulam', 'tula', 'libra', 'துலாம்'],
+  viruchigam: ['viruchigam', 'vrischika', 'vrischikam', 'scorpio', 'விருச்சிகம்'],
+  dhanusu: ['dhanusu', 'dhanu', 'sagittarius', 'தனுசு'],
+  magaram: ['magaram', 'makaram', 'makara', 'capricorn', 'மகரம்'],
+  kumbam: ['kumbam', 'kumbha', 'aquarius', 'கும்பம்'],
+  meenam: ['meenam', 'meena', 'pisces', 'மீனம்'],
+};
+
+/**
+ * Vedic Nakshatram (27 Birth Stars) bilingual synonym dictionary covering Tamil, Sanskrit, and English representations.
+ */
+const NAKSHATRAM_SYNONYMS = {
+  ashwini: ['ashwini', 'aswini', 'aswathi', 'அஸ்வினி', 'அசுவினி'],
+  bharani: ['bharani', 'பரணி'],
+  krittika: ['krittika', 'krithika', 'karthigai', 'கார்த்திகை'],
+  rohini: ['rohini', 'ரோஹிணி', 'ரோகிணி'],
+  mrigashirsha: ['mrigashirsha', 'mrigashira', 'mirugasiridam', 'மிருகசீரிஷம்', 'மிருகசீரிடம்'],
+  ardra: ['ardra', 'thiruvathirai', 'thiruvaathirai', 'திருவாதிரை'],
+  punarvasu: ['punarvasu', 'punarpusam', 'புனர்பூசம்'],
+  pushya: ['pushya', 'poosam', 'பூசம்'],
+  ashlesha: ['ashlesha', 'ayilyam', 'ஆயில்யம்'],
+  magha: ['magha', 'makam', 'மகம்'],
+  purva_phalguni: ['purva phalguni', 'pooram', 'பூரம்'],
+  uttara_phalguni: ['uttara phalguni', 'uthiram', 'உத்திரம்'],
+  hasta: ['hasta', 'hastham', 'ஹஸ்தம்', 'அஸ்தம்'],
+  chitra: ['chitra', 'chithirai', 'சித்திரை'],
+  swati: ['swati', 'swathi', 'சுவாதி'],
+  vishakha: ['vishakha', 'visakam', 'விசாகம்'],
+  anuradha: ['anuradha', 'anusham', 'அனுஷம்'],
+  jyeshtha: ['jyeshtha', 'kettai', 'கேட்டை'],
+  mula: ['mula', 'moolam', 'மூலம்'],
+  purva_ashadha: ['purva ashadha', 'pooradam', 'பூராடம்'],
+  uttara_ashadha: ['uttara ashadha', 'uthiradam', 'உத்திராடம்'],
+  shravana: ['shravana', 'thiruvonam', 'திருவோணம்'],
+  dhanishta: ['dhanishta', 'avittam', 'அவிட்டம்'],
+  shatabhisha: ['shatabhisha', 'sadayam', 'சதயம்'],
+  purva_bhadrapada: ['purva bhadrapada', 'poorattathi', 'பூரட்டாதி'],
+  uttara_bhadrapada: ['uttara bhadrapada', 'uthirattathi', 'உத்திரட்டாதி'],
+  revati: ['revati', 'revathi', 'ரேவதி'],
+};
 
 /**
  * Escapes regex special characters to prevent ReDoS or regex injection.
@@ -79,6 +130,16 @@ const parseMemberDirectoryParams = (query = {}) => {
   const rawLocation = query.location !== undefined ? query.location : '';
   const rawEducation = query.education !== undefined ? query.education : '';
   const rawOccupation = query.occupation !== undefined ? query.occupation : '';
+  const rawRasi = query.rasi !== undefined ? query.rasi : '';
+  const rawNakshatram = query.nakshatram !== undefined ? query.nakshatram : '';
+  const rawCaste = query.caste !== undefined ? query.caste : '';
+  const rawSubcaste = query.subcaste !== undefined ? query.subcaste : '';
+  const rawGothram = query.gothram !== undefined ? query.gothram : '';
+  const rawReligion = query.religion !== undefined ? query.religion : '';
+  const rawMinHeight = query.minHeight !== undefined ? query.minHeight : '';
+  const rawMaxHeight = query.maxHeight !== undefined ? query.maxHeight : '';
+  const rawDiet = query.diet !== undefined ? query.diet : '';
+  const rawDosham = query.dosham !== undefined ? query.dosham : '';
 
   // 1. Validate page
   const pageStr = typeof rawPage === 'number' ? String(rawPage) : rawPage;
@@ -215,6 +276,104 @@ const parseMemberDirectoryParams = (query = {}) => {
     }
   }
 
+  // 10. Validate rasi filter
+  let rasi = '';
+  if (rawRasi !== undefined && rawRasi !== null && String(rawRasi).trim().length > 0) {
+    rasi = String(rawRasi).trim();
+    if (rasi.length > MAX_SEARCH_LENGTH) {
+      return { error: `Rasi filter cannot exceed ${MAX_SEARCH_LENGTH} characters.` };
+    }
+  }
+
+  // 11. Validate nakshatram filter
+  let nakshatram = '';
+  if (rawNakshatram !== undefined && rawNakshatram !== null && String(rawNakshatram).trim().length > 0) {
+    nakshatram = String(rawNakshatram).trim();
+    if (nakshatram.length > MAX_SEARCH_LENGTH) {
+      return { error: `Nakshatram filter cannot exceed ${MAX_SEARCH_LENGTH} characters.` };
+    }
+  }
+
+  // 12. Validate community filters (caste, subcaste, gothram, religion)
+  let caste = '';
+  if (rawCaste !== undefined && rawCaste !== null && String(rawCaste).trim().length > 0) {
+    caste = String(rawCaste).trim();
+    if (caste.length > MAX_SEARCH_LENGTH) {
+      return { error: `Caste filter cannot exceed ${MAX_SEARCH_LENGTH} characters.` };
+    }
+  }
+
+  let subcaste = '';
+  if (rawSubcaste !== undefined && rawSubcaste !== null && String(rawSubcaste).trim().length > 0) {
+    subcaste = String(rawSubcaste).trim();
+    if (subcaste.length > MAX_SEARCH_LENGTH) {
+      return { error: `Subcaste filter cannot exceed ${MAX_SEARCH_LENGTH} characters.` };
+    }
+  }
+
+  let gothram = '';
+  if (rawGothram !== undefined && rawGothram !== null && String(rawGothram).trim().length > 0) {
+    gothram = String(rawGothram).trim();
+    if (gothram.length > MAX_SEARCH_LENGTH) {
+      return { error: `Gothram filter cannot exceed ${MAX_SEARCH_LENGTH} characters.` };
+    }
+  }
+
+  let religion = '';
+  if (rawReligion !== undefined && rawReligion !== null && String(rawReligion).trim().length > 0) {
+    religion = String(rawReligion).trim();
+    if (religion.length > MAX_SEARCH_LENGTH) {
+      return { error: `Religion filter cannot exceed ${MAX_SEARCH_LENGTH} characters.` };
+    }
+  }
+
+  // 13. Validate minHeight and maxHeight filters (in cm)
+  let minHeight = null;
+  if (rawMinHeight !== undefined && rawMinHeight !== null && String(rawMinHeight).trim().length > 0) {
+    const minHeightStr = String(rawMinHeight).trim();
+    if (!/^\d+$/.test(minHeightStr)) {
+      return { error: 'Invalid minHeight parameter: must be a positive integer.' };
+    }
+    minHeight = parseInt(minHeightStr, 10);
+    if (minHeight < 100 || minHeight > 250) {
+      return { error: 'Invalid minHeight parameter: must be between 100 and 250 cm.' };
+    }
+  }
+
+  let maxHeight = null;
+  if (rawMaxHeight !== undefined && rawMaxHeight !== null && String(rawMaxHeight).trim().length > 0) {
+    const maxHeightStr = String(rawMaxHeight).trim();
+    if (!/^\d+$/.test(maxHeightStr)) {
+      return { error: 'Invalid maxHeight parameter: must be a positive integer.' };
+    }
+    maxHeight = parseInt(maxHeightStr, 10);
+    if (maxHeight < 100 || maxHeight > 250) {
+      return { error: 'Invalid maxHeight parameter: must be between 100 and 250 cm.' };
+    }
+  }
+
+  if (minHeight !== null && maxHeight !== null && minHeight > maxHeight) {
+    return { error: 'Invalid height range: minHeight cannot exceed maxHeight.' };
+  }
+
+  // 14. Validate diet filter
+  let diet = '';
+  if (rawDiet !== undefined && rawDiet !== null && String(rawDiet).trim().length > 0) {
+    diet = String(rawDiet).trim();
+    if (diet.length > MAX_SEARCH_LENGTH) {
+      return { error: `Diet filter cannot exceed ${MAX_SEARCH_LENGTH} characters.` };
+    }
+  }
+
+  // 15. Validate dosham filter (e.g., 'no_dosham', 'chevvai', 'rahu_ketu')
+  let dosham = '';
+  if (rawDosham !== undefined && rawDosham !== null && String(rawDosham).trim().length > 0) {
+    dosham = String(rawDosham).trim().toLowerCase();
+    if (dosham.length > MAX_SEARCH_LENGTH) {
+      return { error: `Dosham filter cannot exceed ${MAX_SEARCH_LENGTH} characters.` };
+    }
+  }
+
   return {
     page,
     limit,
@@ -222,10 +381,20 @@ const parseMemberDirectoryParams = (query = {}) => {
     gender,
     minAge,
     maxAge,
+    minHeight,
+    maxHeight,
     maritalStatus,
     location,
     education,
     occupation,
+    rasi,
+    nakshatram,
+    caste,
+    subcaste,
+    gothram,
+    religion,
+    diet,
+    dosham,
   };
 };
 
@@ -301,10 +470,20 @@ const buildMemberDirectoryFilter = ({
   gender = '',
   minAge = null,
   maxAge = null,
+  minHeight = null,
+  maxHeight = null,
   maritalStatus = '',
   location = '',
   education = '',
   occupation = '',
+  rasi = '',
+  nakshatram = '',
+  caste = '',
+  subcaste = '',
+  gothram = '',
+  religion = '',
+  diet = '',
+  dosham = '',
   expiredOwnerIds = [],
 }) => {
   const userExclusion =
@@ -329,8 +508,14 @@ const buildMemberDirectoryFilter = ({
       $or: [
         { candidateName: searchRegex },
         { 'personalDetails.location': searchRegex },
+        { 'personalDetails.nativity': searchRegex },
+        { 'personalDetails.placeOfBirth': searchRegex },
         { 'personalDetails.motherTongue': searchRegex },
         { 'personalDetails.maritalStatus': searchRegex },
+        { 'communityDetails.religion': searchRegex },
+        { 'communityDetails.caste': searchRegex },
+        { 'communityDetails.subcaste': searchRegex },
+        { 'communityDetails.gothram': searchRegex },
         { 'educationAndProfession.educationalQualification': searchRegex },
         { 'educationAndProfession.occupation': searchRegex },
         { 'educationAndProfession.company': searchRegex },
@@ -349,8 +534,14 @@ const buildMemberDirectoryFilter = ({
   }
 
   if (location) {
+    const locRegex = new RegExp(escapeRegex(location), 'i');
     andClauses.push({
-      'personalDetails.location': new RegExp(escapeRegex(location), 'i'),
+      $or: [
+        { 'personalDetails.location': locRegex },
+        { 'personalDetails.nativity': locRegex },
+        { 'personalDetails.placeOfBirth': locRegex },
+        { 'familyDetails.familyLocation': locRegex },
+      ],
     });
   }
 
@@ -364,6 +555,117 @@ const buildMemberDirectoryFilter = ({
     andClauses.push({
       'educationAndProfession.occupation': new RegExp(escapeRegex(occupation), 'i'),
     });
+  }
+
+  if (rasi) {
+    const rasiLower = rasi.toLowerCase();
+    let matchedRasiGroup = null;
+    for (const synonyms of Object.values(RASI_SYNONYMS)) {
+      if (synonyms.some((s) => rasiLower.includes(s.toLowerCase()))) {
+        matchedRasiGroup = synonyms;
+        break;
+      }
+    }
+    if (matchedRasiGroup && matchedRasiGroup.length > 0) {
+      const pattern = matchedRasiGroup.map((s) => escapeRegex(s)).join('|');
+      andClauses.push({
+        'horoscope.rasi': new RegExp(pattern, 'i'),
+      });
+    } else {
+      const rasiBase = rasi.split('(')[0].trim();
+      andClauses.push({
+        'horoscope.rasi': new RegExp(escapeRegex(rasiBase), 'i'),
+      });
+    }
+  }
+
+  if (nakshatram) {
+    const nakLower = nakshatram.toLowerCase();
+    let matchedNakGroup = null;
+    for (const synonyms of Object.values(NAKSHATRAM_SYNONYMS)) {
+      if (synonyms.some((s) => nakLower.includes(s.toLowerCase()))) {
+        matchedNakGroup = synonyms;
+        break;
+      }
+    }
+    if (matchedNakGroup && matchedNakGroup.length > 0) {
+      const pattern = matchedNakGroup.map((s) => escapeRegex(s)).join('|');
+      andClauses.push({
+        'horoscope.nakshatram': new RegExp(pattern, 'i'),
+      });
+    } else {
+      const nakshatramBase = nakshatram.split('/')[0].trim().split(' ')[0];
+      andClauses.push({
+        'horoscope.nakshatram': new RegExp(escapeRegex(nakshatramBase), 'i'),
+      });
+    }
+  }
+
+  if (caste) {
+    andClauses.push({
+      'communityDetails.caste': new RegExp(escapeRegex(caste), 'i'),
+    });
+  }
+
+  if (subcaste) {
+    andClauses.push({
+      'communityDetails.subcaste': new RegExp(escapeRegex(subcaste), 'i'),
+    });
+  }
+
+  if (gothram) {
+    andClauses.push({
+      'communityDetails.gothram': new RegExp(escapeRegex(gothram), 'i'),
+    });
+  }
+
+  if (religion) {
+    andClauses.push({
+      'communityDetails.religion': new RegExp(escapeRegex(religion), 'i'),
+    });
+  }
+
+  if (diet) {
+    andClauses.push({
+      'personalDetails.diet': new RegExp(`^${escapeRegex(diet)}$`, 'i'),
+    });
+  }
+
+  if (dosham) {
+    if (dosham === 'no_dosham' || dosham === 'none' || dosham === 'no') {
+      andClauses.push({
+        $or: [
+          { 'horoscope.dosham.hasChevvaiDosham': { $in: [false, null] } },
+          { 'horoscope.dosham.doshamSummary': { $regex: /^(none|no|dosham free)$/i } },
+          { 'horoscope.dosham': null },
+        ],
+      });
+    } else if (dosham === 'chevvai' || dosham === 'chevvai_dosham') {
+      andClauses.push({
+        $or: [
+          { 'horoscope.dosham.hasChevvaiDosham': true },
+          { 'horoscope.dosham.doshamSummary': { $regex: /chevvai|sevvai|mars/i } },
+        ],
+      });
+    } else if (dosham === 'rahu_ketu' || dosham === 'naga') {
+      andClauses.push({
+        $or: [
+          { 'horoscope.dosham.hasNagaDosham': true },
+          { 'horoscope.dosham.doshamSummary': { $regex: /rahu|ketu|naga|sarpa/i } },
+        ],
+      });
+    }
+  }
+
+  if (minHeight !== null || maxHeight !== null) {
+    const heightQuery = {};
+    if (minHeight !== null) {
+      heightQuery.$gte = minHeight;
+    }
+    if (maxHeight !== null) {
+      heightQuery.$lte = maxHeight;
+    }
+    andClauses.push({ 'personalDetails.height': heightQuery });
   }
 
   if (minAge !== null || maxAge !== null) {
@@ -434,6 +736,7 @@ const toMemberDirectoryDTO = (profileDoc, { isContactUnlocked = false } = {}) =>
       : profileDoc || {};
 
   const personal = raw.personalDetails || {};
+  const community = raw.communityDetails || {};
   const edu = raw.educationAndProfession || {};
   const family = raw.familyDetails || {};
   const prefs = raw.partnerPreferences || {};
@@ -466,9 +769,23 @@ const toMemberDirectoryDTO = (profileDoc, { isContactUnlocked = false } = {}) =>
       dateOfBirth: personal.dateOfBirth || null,
       age: calculateAgeFromDob(personal.dateOfBirth),
       height: typeof personal.height === 'number' ? personal.height : null,
+      weight: typeof personal.weight === 'number' ? personal.weight : null,
+      bloodGroup: personal.bloodGroup || null,
+      complexion: personal.complexion || null,
+      diet: personal.diet || null,
+      physicalStatus: personal.physicalStatus || null,
       maritalStatus: personal.maritalStatus || null,
       motherTongue: personal.motherTongue || null,
+      nativity: personal.nativity || null,
+      placeOfBirth: personal.placeOfBirth || null,
+      timeOfBirth: personal.timeOfBirth || null,
       location: personal.location || null,
+    },
+    communityDetails: {
+      religion: community.religion || null,
+      caste: community.caste || null,
+      subcaste: community.subcaste || null,
+      gothram: community.gothram || null,
     },
     educationAndProfession: {
       educationalQualification: edu.educationalQualification || null,
@@ -478,6 +795,20 @@ const toMemberDirectoryDTO = (profileDoc, { isContactUnlocked = false } = {}) =>
       income: edu.income || null,
     },
     familyDetails: {
+      fatherName: family.fatherName || null,
+      fatherAlive: family.fatherAlive || null,
+      fatherOccupation: family.fatherOccupation || null,
+      motherName: family.motherName || null,
+      motherAlive: family.motherAlive || null,
+      motherOccupation: family.motherOccupation || null,
+      marriedElderBrothers: family.marriedElderBrothers ?? 0,
+      unmarriedElderBrothers: family.unmarriedElderBrothers ?? 0,
+      marriedYoungerBrothers: family.marriedYoungerBrothers ?? 0,
+      unmarriedYoungerBrothers: family.unmarriedYoungerBrothers ?? 0,
+      marriedElderSisters: family.marriedElderSisters ?? 0,
+      unmarriedElderSisters: family.unmarriedElderSisters ?? 0,
+      marriedYoungerSisters: family.marriedYoungerSisters ?? 0,
+      unmarriedYoungerSisters: family.unmarriedYoungerSisters ?? 0,
       familyInformation: family.familyInformation || null,
       parentInformation: family.parentInformation || null,
       siblingInformation: family.siblingInformation || null,
@@ -488,12 +819,49 @@ const toMemberDirectoryDTO = (profileDoc, { isContactUnlocked = false } = {}) =>
         min: typeof ageRange.min === 'number' ? ageRange.min : null,
         max: typeof ageRange.max === 'number' ? ageRange.max : null,
       },
-      preferredLocation: prefs.preferredLocation || null,
+      maritalStatusPreference: Array.isArray(prefs.maritalStatusPreference) ? prefs.maritalStatusPreference : [],
+      dietPreference: Array.isArray(prefs.dietPreference) ? prefs.dietPreference : [],
+      jobRequirement: prefs.jobRequirement || null,
+      horoscopeRequired: prefs.horoscopeRequired || null,
       educationPreference: prefs.educationPreference || null,
       occupationPreference: prefs.occupationPreference || null,
+      preferredLocation: prefs.preferredLocation || null,
+      castePreference: prefs.castePreference || null,
+      subcastePreference: prefs.subcastePreference || null,
+      incomePreference: prefs.incomePreference || null,
       otherPreferences: prefs.otherPreferences || null,
     },
     profilePhotoUrl: photoUrl,
+    photos: Array.isArray(raw.photos)
+      ? raw.photos
+          .filter((ph) => ph && typeof ph.url === 'string' && ph.url.trim().length > 0)
+          .map((ph) => ({
+            _id: ph._id ? String(ph._id) : undefined,
+            url: ph.url.trim(),
+            isPrimary: Boolean(ph.isPrimary),
+          }))
+      : (photoUrl ? [{ url: photoUrl, isPrimary: true }] : []),
+    horoscope: raw.horoscope ? {
+      isGenerated: Boolean(raw.horoscope.isGenerated),
+      isSimulated: Boolean(raw.horoscope.isSimulated),
+      timeOfBirth: raw.horoscope.timeOfBirth || null,
+      placeOfBirth: raw.horoscope.placeOfBirth || null,
+      rasi: raw.horoscope.rasi || null,
+      nakshatram: raw.horoscope.nakshatram || null,
+      padam: raw.horoscope.padam || null,
+      lagnam: raw.horoscope.lagnam || null,
+      dosham: typeof raw.horoscope.dosham === 'object'
+        ? raw.horoscope.dosham?.doshamSummary || 'None'
+        : (raw.horoscope.dosham || 'None'),
+      dasaBalance: typeof raw.horoscope.dasaBalance === 'object' && raw.horoscope.dasaBalance?.planet
+        ? `${raw.horoscope.dasaBalance.planet} Dasa (${raw.horoscope.dasaBalance.years || 0}y ${raw.horoscope.dasaBalance.months || 0}m ${raw.horoscope.dasaBalance.days || 0}d)`
+        : (typeof raw.horoscope.dasaBalance === 'string' ? raw.horoscope.dasaBalance : null),
+      rasiChartSvg: raw.horoscope.rasiChartSvg || null,
+      navamsaChartSvg: raw.horoscope.navamsaChartSvg || null,
+      rasiChartBoxes: Array.isArray(raw.horoscope.rasiChartBoxes) ? raw.horoscope.rasiChartBoxes : [],
+      navamsaChartBoxes: Array.isArray(raw.horoscope.navamsaChartBoxes) ? raw.horoscope.navamsaChartBoxes : [],
+      attribution: raw.horoscope.attribution || null,
+    } : null,
     contactLocked: true,
     isContactUnlocked: Boolean(isContactUnlocked),
     createdAt: raw.createdAt || null,
@@ -531,10 +899,20 @@ const getMemberDirectory = async (req, res, next) => {
       gender,
       minAge,
       maxAge,
+      minHeight,
+      maxHeight,
       maritalStatus,
       location,
       education,
       occupation,
+      rasi,
+      nakshatram,
+      caste,
+      subcaste,
+      gothram,
+      religion,
+      diet,
+      dosham,
     } = parsedParams;
 
     // 2. Enforce subscription access
@@ -600,10 +978,20 @@ const getMemberDirectory = async (req, res, next) => {
       gender,
       minAge,
       maxAge,
+      minHeight,
+      maxHeight,
       maritalStatus,
       location,
       education,
       occupation,
+      rasi,
+      nakshatram,
+      caste,
+      subcaste,
+      gothram,
+      religion,
+      diet,
+      dosham,
       expiredOwnerIds,
     });
 

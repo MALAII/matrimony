@@ -70,6 +70,17 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+
+    // Password Reset Security Fields (single-use, cryptographic SHA-256 token hash)
+    passwordResetTokenHash: {
+      type: String,
+      default: null,
+      select: false, // Never return reset token hash in queries by default
+    },
+    passwordResetExpiresAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -78,11 +89,12 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Exclude passwordHash, invitationTokenHash, and internal version key by default from JSON outputs
+// Exclude passwordHash, invitationTokenHash, passwordResetTokenHash, and internal version key by default from JSON outputs
 userSchema.methods.toJSON = function () {
   const userObj = this.toObject();
   delete userObj.passwordHash;
   delete userObj.invitationTokenHash;
+  delete userObj.passwordResetTokenHash;
   delete userObj.__v;
   return userObj;
 };

@@ -25,7 +25,7 @@ const connectDB = async () => {
 
     // Connect using Mongoose with serverSelectionTimeoutMS to prevent hanging on network/firewall issues
     const conn = await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 15000,
       autoIndex: false,
     });
 

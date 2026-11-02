@@ -5,10 +5,12 @@ const { cloudinary, isCloudinaryConfigured } = require('../config/cloudinary');
 const ALLOWED_PROFILE_FIELDS = [
   'candidatePhone',
   'personalDetails',
+  'communityDetails',
   'educationAndProfession',
   'familyDetails',
   'partnerPreferences',
   'profilePhoto',
+  'horoscope',
 ];
 
 const PHONE_FORMAT_REGEX = /^[+]?[\d\s()-]{7,25}$/;
@@ -115,22 +117,13 @@ const createProfile = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    // 1. Enforce one matrimonial profile per user account
-    const existingProfile = await MatrimonialProfile.findOne({ user: userId });
-    if (existingProfile) {
-      return res.status(409).json({
-        success: false,
-        message: 'A matrimonial profile already exists for this account',
-      });
-    }
-
-    // 2. Safely strip any client-supplied owner IDs (never trust user ID from client)
+    // 1. Safely strip any client-supplied owner IDs (never trust user ID from client)
     const sanitizedBody = { ...req.body };
     delete sanitizedBody.user;
     delete sanitizedBody.userId;
     delete sanitizedBody._id;
 
-    // 3. Validate that only approved top-level profile fields are provided
+    // 2. Validate that only approved top-level profile fields are provided
     for (const key of Object.keys(sanitizedBody)) {
       if (!ALLOWED_PROFILE_FIELDS.includes(key)) {
         return res.status(400).json({
@@ -140,7 +133,7 @@ const createProfile = async (req, res, next) => {
       }
     }
 
-    // 4. Validate candidatePhone if provided
+    // 3. Validate candidatePhone if provided
     const phoneCheck = validateCandidatePhoneInput(sanitizedBody.candidatePhone);
     if (phoneCheck.error) {
       return res.status(400).json({
@@ -149,26 +142,78 @@ const createProfile = async (req, res, next) => {
       });
     }
 
-    // 5. Construct profile strictly with server-derived authenticated user ID
-    const profileData = {
-      user: userId,
-      source: 'direct',
-      approvalStatus: 'approved',
-      profileStatus: 'active',
-      ...(phoneCheck.provided && { candidatePhone: phoneCheck.value }),
-      personalDetails: sanitizedBody.personalDetails || {},
-      educationAndProfession: sanitizedBody.educationAndProfession || {},
-      familyDetails: sanitizedBody.familyDetails || {},
-      partnerPreferences: sanitizedBody.partnerPreferences || {},
-      profilePhoto: sanitizedBody.profilePhoto || {},
-    };
+    // Normalize string dosham to schema object if needed
+    if (sanitizedBody.horoscope && typeof sanitizedBody.horoscope.dosham === 'string') {
+      const dStr = sanitizedBody.horoscope.dosham;
+      sanitizedBody.horoscope.dosham = {
+        hasChevvaiDosham: dStr.includes('Chevvai') || dStr.includes('Manglik'),
+        hasNagaDosham: dStr.includes('Naga') || dStr.includes('Rahu'),
+        doshamSummary: dStr,
+        description: dStr,
+      };
+    }
+    // Normalize string dasaBalance to schema object if needed
+    if (sanitizedBody.horoscope && typeof sanitizedBody.horoscope.dasaBalance === 'string') {
+      const dbStr = sanitizedBody.horoscope.dasaBalance;
+      sanitizedBody.horoscope.dasaBalance = {
+        planet: dbStr.split(' ')[0] || null,
+        text: dbStr,
+      };
+    }
 
-    const newProfile = await MatrimonialProfile.create(profileData);
+    // 4. Locate or instantiate matrimonial profile for user (idempotent upsert)
+    let profile = await MatrimonialProfile.findOne({ user: userId });
+    const isNew = !profile;
 
-    return res.status(201).json({
+    if (isNew) {
+      const profileData = {
+        user: userId,
+        source: 'direct',
+        approvalStatus: 'approved',
+        profileStatus: 'active',
+        ...(phoneCheck.provided && { candidatePhone: phoneCheck.value }),
+        personalDetails: sanitizedBody.personalDetails || {},
+        communityDetails: sanitizedBody.communityDetails || {},
+        educationAndProfession: sanitizedBody.educationAndProfession || {},
+        familyDetails: sanitizedBody.familyDetails || {},
+        partnerPreferences: sanitizedBody.partnerPreferences || {},
+        profilePhoto: sanitizedBody.profilePhoto || {},
+        horoscope: sanitizedBody.horoscope || {},
+      };
+      profile = await MatrimonialProfile.create(profileData);
+    } else {
+      // Update existing profile fields cleanly
+      if (phoneCheck.provided) {
+        profile.candidatePhone = phoneCheck.value;
+      }
+      if (sanitizedBody.personalDetails) {
+        profile.personalDetails = { ...profile.personalDetails?.toObject?.(), ...sanitizedBody.personalDetails };
+      }
+      if (sanitizedBody.communityDetails) {
+        profile.communityDetails = { ...profile.communityDetails?.toObject?.(), ...sanitizedBody.communityDetails };
+      }
+      if (sanitizedBody.educationAndProfession) {
+        profile.educationAndProfession = { ...profile.educationAndProfession?.toObject?.(), ...sanitizedBody.educationAndProfession };
+      }
+      if (sanitizedBody.familyDetails) {
+        profile.familyDetails = { ...profile.familyDetails?.toObject?.(), ...sanitizedBody.familyDetails };
+      }
+      if (sanitizedBody.partnerPreferences) {
+        profile.partnerPreferences = { ...profile.partnerPreferences?.toObject?.(), ...sanitizedBody.partnerPreferences };
+      }
+      if (sanitizedBody.horoscope) {
+        profile.horoscope = { ...profile.horoscope?.toObject?.(), ...sanitizedBody.horoscope };
+      }
+      if (sanitizedBody.profilePhoto && Object.keys(sanitizedBody.profilePhoto).length > 0) {
+        profile.profilePhoto = sanitizedBody.profilePhoto;
+      }
+      await profile.save();
+    }
+
+    return res.status(isNew ? 201 : 200).json({
       success: true,
-      message: 'Matrimonial profile created successfully',
-      data: sanitizeOwnProfileResponse(newProfile),
+      message: isNew ? 'Matrimonial profile created successfully' : 'Matrimonial profile updated successfully',
+      data: sanitizeOwnProfileResponse(profile),
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -230,12 +275,14 @@ const updateMyProfile = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    // 1. Locate authenticated user's profile
-    const profile = await MatrimonialProfile.findOne({ user: userId });
+    // 1. Locate authenticated user's profile (or auto-instantiate if not yet created)
+    let profile = await MatrimonialProfile.findOne({ user: userId });
     if (!profile) {
-      return res.status(404).json({
-        success: false,
-        message: 'Matrimonial profile not found for this account',
+      profile = new MatrimonialProfile({
+        user: userId,
+        source: 'direct',
+        approvalStatus: 'approved',
+        profileStatus: 'active',
       });
     }
 
@@ -293,6 +340,15 @@ const updateMyProfile = async (req, res, next) => {
       };
     }
 
+    if (sanitizedBody.communityDetails) {
+      profile.communityDetails = {
+        ...(typeof profile.communityDetails?.toObject === 'function'
+          ? profile.communityDetails.toObject()
+          : profile.communityDetails || {}),
+        ...sanitizedBody.communityDetails,
+      };
+    }
+
     if (sanitizedBody.educationAndProfession) {
       profile.educationAndProfession = {
         ...(typeof profile.educationAndProfession?.toObject === 'function'
@@ -337,6 +393,46 @@ const updateMyProfile = async (req, res, next) => {
       };
     }
 
+    if (sanitizedBody.horoscope) {
+      if (typeof sanitizedBody.horoscope.dosham === 'string') {
+        const dStr = sanitizedBody.horoscope.dosham;
+        sanitizedBody.horoscope.dosham = {
+          hasChevvaiDosham: dStr.includes('Chevvai') || dStr.includes('Manglik'),
+          hasNagaDosham: dStr.includes('Naga') || dStr.includes('Rahu'),
+          doshamSummary: dStr,
+          description: dStr,
+        };
+      }
+      if (typeof sanitizedBody.horoscope.dasaBalance === 'string') {
+        const dbStr = sanitizedBody.horoscope.dasaBalance;
+        sanitizedBody.horoscope.dasaBalance = {
+          planet: dbStr.split(' ')[0] || null,
+          text: dbStr,
+        };
+      }
+      const existingHoro =
+        typeof profile.horoscope?.toObject === 'function'
+          ? profile.horoscope.toObject()
+          : profile.horoscope || {};
+      const newHoro = sanitizedBody.horoscope;
+      profile.horoscope = {
+        ...existingHoro,
+        ...newHoro,
+        ...(newHoro.dasaBalance && {
+          dasaBalance: {
+            ...(existingHoro.dasaBalance || {}),
+            ...newHoro.dasaBalance,
+          },
+        }),
+        ...(newHoro.dosham && {
+          dosham: {
+            ...(existingHoro.dosham || {}),
+            ...newHoro.dosham,
+          },
+        }),
+      };
+    }
+
     // 7. Save and execute validations
     await profile.save();
 
@@ -367,12 +463,14 @@ const uploadProfilePhoto = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    // 1. Matrimonial profile must exist
-    const profile = await MatrimonialProfile.findOne({ user: userId });
+    // 1. Matrimonial profile must exist (or auto-create for authenticated user)
+    let profile = await MatrimonialProfile.findOne({ user: userId });
     if (!profile) {
-      return res.status(404).json({
-        success: false,
-        message: 'Matrimonial profile not found for this account. Please create a profile first.',
+      profile = await MatrimonialProfile.create({
+        user: userId,
+        source: 'direct',
+        approvalStatus: 'approved',
+        profileStatus: 'active',
       });
     }
 
@@ -436,6 +534,8 @@ const uploadProfilePhoto = async (req, res, next) => {
       success: true,
       message: 'Profile photo uploaded successfully',
       data: {
+        id: profile._id,
+        _id: profile._id,
         url: profile.profilePhoto.url,
         publicId: profile.profilePhoto.publicId,
       },

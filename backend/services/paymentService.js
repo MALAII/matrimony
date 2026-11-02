@@ -315,6 +315,28 @@ const processFailedPayment = async ({ orderId, paymentId, reason }) => {
   if (typeof payment.save === 'function') {
     await payment.save();
   }
+
+  // In-app admin notification for recorded payment failure
+  try {
+    const { notifyActiveAdmins } = require('./notificationService');
+    const safeReason = payment.failureReason || 'Payment declined';
+    await notifyActiveAdmins({
+      type: 'payment_failed',
+      title: 'Payment Failed',
+      message: `Payment of ₹${((payment.amount || 0) / 100).toFixed(2)} for ${payment.planCode || 'subscription'} failed: ${safeReason}`,
+      link: '/admin/payments',
+      metadata: {
+        orderId: payment.razorpayOrderId,
+        paymentId: payment.razorpayPaymentId || paymentId,
+        amount: payment.amount,
+        planCode: payment.planCode,
+      },
+      dedupKeyPrefix: `pay_fail_${payment.razorpayOrderId}`,
+    });
+  } catch (notifErr) {
+    console.warn('[Payment Service] Failed to dispatch admin payment failure notification:', notifErr.message);
+  }
+
   return payment;
 };
 

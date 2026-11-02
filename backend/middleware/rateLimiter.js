@@ -1,9 +1,26 @@
 /**
- * Simple in-memory token-bucket / sliding-window rate limiter middleware.
+ * Token-bucket / sliding-window rate limiter middleware.
  * Zero external dependencies: Uses Node.js native Map and setInterval.
  */
 
-const createRateLimiter = ({ windowMs = 15 * 60 * 1000, max = 5, message = 'Too many requests, please try again later.' } = {}) => {
+/**
+ * Resolves client IP according to Express trust proxy configuration.
+ * When trust proxy is disabled, Express sets req.ip to the direct remote socket IP,
+ * preventing attackers from forging X-Forwarded-For to bypass limits.
+ * When trust proxy is enabled, Express securely extracts client IP from trusted proxies.
+ */
+const getClientIp = (req) => {
+  if (req.ip) return req.ip;
+  if (req.socket && req.socket.remoteAddress) return req.socket.remoteAddress;
+  return 'unknown';
+};
+
+const createRateLimiter = ({
+  windowMs = 15 * 60 * 1000,
+  max = 5,
+  message = 'Too many requests, please try again later.',
+  keyGenerator = null,
+} = {}) => {
   const hits = new Map();
 
   // Periodic cleanup every minute to prevent memory leakage
@@ -21,11 +38,13 @@ const createRateLimiter = ({ windowMs = 15 * 60 * 1000, max = 5, message = 'Too 
     interval.unref();
   }
 
-  return (req, res, next) => {
-    // Generate key based on IP or authenticated user ID if present
-    const identifier = (req.user && req.user._id)
-      ? String(req.user._id)
-      : (req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown');
+  const limiterMiddleware = (req, res, next) => {
+    // Generate key based on custom key generator, authenticated user ID, or resolved client IP
+    const identifier = typeof keyGenerator === 'function'
+      ? keyGenerator(req)
+      : (req.user && req.user._id)
+        ? `user:${req.user._id}`
+        : `ip:${getClientIp(req)}`;
 
     const now = Date.now();
     let record = hits.get(identifier);
@@ -46,6 +65,7 @@ const createRateLimiter = ({ windowMs = 15 * 60 * 1000, max = 5, message = 'Too 
     res.setHeader('X-RateLimit-Reset', Math.ceil(record.resetTime / 1000));
 
     if (record.count > max) {
+      res.setHeader('Retry-After', Math.max(1, Math.ceil((record.resetTime - now) / 1000)));
       return res.status(429).json({
         success: false,
         message,
@@ -54,8 +74,21 @@ const createRateLimiter = ({ windowMs = 15 * 60 * 1000, max = 5, message = 'Too 
 
     next();
   };
+
+  // Helper method to reset hit count in tests
+  limiterMiddleware.reset = () => {
+    hits.clear();
+  };
+
+  limiterMiddleware.destroy = () => {
+    clearInterval(interval);
+    hits.clear();
+  };
+
+  return limiterMiddleware;
 };
 
 module.exports = {
   createRateLimiter,
+  getClientIp,
 };

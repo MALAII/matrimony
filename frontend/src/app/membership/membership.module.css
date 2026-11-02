@@ -1,0 +1,1235 @@
+/* ==========================================================================
+   MEMBERSHIP & CREDITS DASHBOARD — HOMEPAGE ELEGANCE ALIGNMENT
+   ========================================================================== */
+
+.page {
+  --ivory: #fffaf5;
+  --ivory-2: #f8ede3;
+  --plum: #2b1a21;
+  --plum-2: #3a252c;
+  --ink: #3f2b32;
+  --muted: #75606a;
+  --rose: #b85c78;
+  --rose-deep: #7d3147;
+  --gold: #b08d4c;
+  --gold-bright: #e0bd77;
+  --line: #eadbd0;
+  --serif: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --sans: var(--font-inter), -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --ease: cubic-bezier(0.22, 0.8, 0.28, 1);
+
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--ivory);
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page * {
+  box-sizing: border-box;
+}
+
+.page :where(h1, h2, h3, h4) {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--plum);
+}
+
+.page :where(p, ul, ol) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page button {
+  font-family: inherit;
+}
+
+.page :focus-visible {
+  outline: 3px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+.kicker {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.kickerLight {
+  color: var(--gold-bright);
+}
+
+/* ------------------------------ Buttons ------------------------------ */
+.btnPrimary,
+.btnOutline,
+.btnGold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.95rem 1.7rem;
+  border-radius: 999px;
+  font: 600 0.95rem var(--sans);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.25s, color 0.25s;
+}
+
+.btnPrimary {
+  color: #fff;
+  background: var(--rose-deep);
+  border: 0;
+  box-shadow: 0 12px 26px -12px rgba(125, 49, 71, 0.8);
+}
+
+.btnPrimary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: #692640;
+}
+
+.btnOutline {
+  color: var(--rose-deep);
+  background: #fff;
+  border: 1.5px solid var(--rose-deep);
+}
+
+.btnOutline:hover:not(:disabled) {
+  background: var(--rose-deep);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.btnGold {
+  color: var(--plum);
+  background: var(--gold-bright);
+  border: 0;
+}
+
+.btnGold:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -12px rgba(224, 189, 119, 0.8);
+}
+
+.btnPrimary:disabled,
+.btnOutline:disabled,
+.btnGold:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ------------------------------ Hero Header ------------------------------ */
+.hero {
+  background: radial-gradient(600px 300px at 100% 0%, rgba(184, 92, 120, 0.45), transparent 70%),
+              linear-gradient(160deg, var(--plum-2), var(--plum));
+  color: #fff;
+  padding: clamp(2.4rem, 4.5vw, 3.6rem) 1.5rem;
+  border-bottom: 1px solid rgba(224, 189, 119, 0.2);
+}
+
+.heroInner {
+  max-width: 1140px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.heroContent {
+  max-width: 640px;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 0.85rem;
+  width: 100%;
+}
+
+.crumbs a {
+  color: var(--gold-bright);
+  text-decoration: none;
+}
+
+.crumbs a:hover {
+  text-decoration: underline;
+}
+
+.kickerPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  margin-bottom: 0.75rem;
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 4.2vw, 3.2rem);
+  color: #ffffff;
+  line-height: 1.12;
+  margin-bottom: 0.8rem;
+}
+
+.heroDesc {
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 1.4rem;
+}
+
+.heroTrustStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.heroTrustPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.heroTrustPill svg {
+  color: var(--gold-bright);
+}
+
+/* Hero inline credit preview */
+.heroCreditsCard {
+  width: min(100%, 340px);
+  padding: 1.4rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(224, 189, 119, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+.heroCreditsTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.heroCreditsTop span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--gold-bright);
+}
+
+.heroCreditsTop em {
+  font-style: normal;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(224, 189, 119, 0.2);
+  color: var(--gold-bright);
+  font-weight: 600;
+}
+
+.heroCreditsNum {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0.8rem 0;
+}
+
+.heroCreditsNum strong {
+  font-family: var(--serif);
+  font-size: 2.85rem;
+  line-height: 1;
+  color: var(--gold-bright);
+}
+
+.heroCreditsNum span {
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.heroBar {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+
+.heroBar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gold-bright), #f3d89c);
+  transition: width 0.6s var(--ease);
+}
+
+.heroCreditsNote {
+  margin-top: 0.8rem;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ------------------------------ Layout Container ------------------------------ */
+.mainContainer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 6rem;
+}
+
+/* ------------------------------ Banners & Notices ------------------------------ */
+.noticeBanner {
+  border-radius: 16px;
+  padding: 1rem 1.4rem;
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 4px 14px rgba(43, 26, 33, 0.04);
+}
+
+.noticeContent {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.94rem;
+  font-weight: 500;
+}
+
+.noticeSuccess {
+  background-color: #f0fdf4;
+  border: 1.5px solid #86efac;
+  color: #14532d;
+}
+
+.noticeError {
+  background-color: #fef2f2;
+  border: 1.5px solid #fca5a5;
+  color: #991b1b;
+}
+
+.noticeLoading {
+  background: #faf5eb;
+  border: 1.5px solid var(--gold-bright);
+  color: var(--plum);
+}
+
+.noticeInfo {
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  color: #92400e;
+}
+
+.noticeDismiss {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0.2rem 0.4rem;
+}
+
+.noticeRetry {
+  background: #fff;
+  border: 1px solid currentColor;
+  color: inherit;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* --------------------------------------------------------------------------
+   1. ACTIVE MEMBERSHIP — HOMEPAGE-INSPIRED EXECUTIVE CTA PASS
+   -------------------------------------------------------------------------- */
+.statusWrapper {
+  margin-bottom: 4rem;
+}
+
+.loadingSkeleton {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+}
+
+.loadingSkeleton p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
+
+/* Guest Welcome Panel */
+.guestPanel {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  border-radius: 28px;
+  color: #fff;
+  background: radial-gradient(520px 340px at 0% 0%, rgba(184, 92, 120, 0.45), transparent 70%),
+              linear-gradient(160deg, var(--plum-2), var(--plum));
+  box-shadow: 0 40px 70px -40px rgba(43, 26, 33, 0.8);
+}
+
+.guestLeft {
+  padding: clamp(2.2rem, 4.5vw, 3.5rem);
+}
+
+.guestTag {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  margin-bottom: 0.75rem;
+}
+
+.guestLeft h2 {
+  font-size: clamp(1.8rem, 3.2vw, 2.5rem);
+  line-height: 1.15;
+  color: #fff;
+  margin-bottom: 0.8rem;
+}
+
+.guestLeft p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.76);
+  margin-bottom: 1.8rem;
+  max-width: 480px;
+}
+
+.guestActions {
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.guestPerksStrip {
+  padding: clamp(2rem, 3.5vw, 3rem);
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  align-content: center;
+}
+
+.guestPerkItem {
+  padding: 1.1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.guestPerkIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(224, 189, 119, 0.18);
+  color: var(--gold-bright);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.2rem;
+}
+
+.guestPerkItem strong {
+  font-size: 0.88rem;
+  color: #fff;
+}
+
+.guestPerkItem span {
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   ACTIVE MEMBERSHIP — HOMEPAGE ELEGANT PASS (Plum & Gold Hero Pass)
+   ========================================================================== */
+.activeDashboard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  color: #fff;
+  background: radial-gradient(520px 340px at 100% 0%, rgba(184, 92, 120, 0.5), transparent 70%),
+              linear-gradient(160deg, var(--plum-2), var(--plum));
+  box-shadow: 0 0 0 1px var(--gold-bright), 0 40px 70px -34px rgba(43, 26, 33, 0.85);
+  padding: clamp(2.2rem, 4vw, 3.2rem);
+}
+
+/* Subtle decorative gold circle watermark like Homepage whyIntro */
+.activeDashboard::after {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  right: -100px;
+  bottom: -100px;
+  border-radius: 50%;
+  border: 1px solid rgba(224, 189, 119, 0.3);
+  box-shadow: 0 0 0 32px rgba(224, 189, 119, 0.05);
+  pointer-events: none;
+}
+
+.activeDashHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+  z-index: 1;
+}
+
+.activeHeaderLeft {
+  max-width: 600px;
+}
+
+.liveIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(224, 189, 119, 0.18);
+  border: 1px solid var(--gold-bright);
+  color: var(--gold-bright);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold-bright);
+  box-shadow: 0 0 8px var(--gold-bright);
+}
+
+.activeDashHeader h2 {
+  font-size: clamp(2rem, 3.5vw, 2.6rem);
+  color: #fff;
+  line-height: 1.15;
+}
+
+.activeDashSub {
+  font-size: 0.94rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.activeMetricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.metricCard {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 1.6rem 1.5rem;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.25s var(--ease), background 0.25s;
+}
+
+.metricCard:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.metricHead {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.metricIconWrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(224, 189, 119, 0.18);
+  color: var(--gold-bright);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metricBody {
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+}
+
+.metricRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.45rem 0;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.15);
+}
+
+.metricRow:last-child {
+  border-bottom: none;
+}
+
+.metricRow label {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.84rem;
+}
+
+.metricRow strong {
+  font-weight: 600;
+  color: #fff;
+}
+
+.graceNoticePill {
+  margin-top: 0.85rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.metricCreditsBig {
+  font-family: var(--serif);
+  font-size: 2.85rem;
+  font-weight: 700;
+  color: var(--gold-bright);
+  line-height: 1;
+  margin-bottom: 0.35rem;
+}
+
+.metricCreditsSub {
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--sans);
+  font-weight: 500;
+}
+
+.creditProgressBar {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+  margin: 0.85rem 0 0.65rem;
+}
+
+.creditProgressBar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gold-bright), #f3d89c);
+  transition: width 0.6s var(--ease);
+}
+
+.metricList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.metricList li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.metricCheckIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--gold-bright);
+  color: var(--plum);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Grace Period, Expired & Registered Panels */
+.gracePanel,
+.expiredPanel,
+.registeredPanel {
+  background: #fff;
+  border-radius: 24px;
+  padding: clamp(2rem, 3.8vw, 2.75rem);
+  border: 1px solid var(--line);
+  box-shadow: 0 20px 40px -32px rgba(43, 26, 33, 0.4);
+}
+
+.gracePanel {
+  border-left: 4px solid var(--gold-bright);
+}
+
+.expiredPanel {
+  border-left: 4px solid var(--rose);
+}
+
+.registeredPanel {
+  border-left: 4px solid var(--gold);
+}
+
+.gracePanel h2,
+.expiredPanel h2,
+.registeredPanel h2 {
+  font-size: 1.6rem;
+  margin-bottom: 0.55rem;
+}
+
+.gracePanel p,
+.expiredPanel p,
+.registeredPanel p {
+  color: var(--muted);
+  font-size: 0.96rem;
+  line-height: 1.65;
+  margin-bottom: 1.4rem;
+  max-width: 680px;
+}
+
+/* ==========================================================================
+   2. SUBSCRIPTION PLAN OPTIONS — EXACT HOMEPAGE STYLE
+   ========================================================================== */
+.plansSection {
+  margin-bottom: 5.5rem;
+}
+
+.sectionHeading {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.sectionHeading h2 {
+  margin-top: 0.8rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.sectionHeading p {
+  margin-top: 0.5rem;
+  font-size: 1.03rem;
+  color: var(--muted);
+}
+
+/* Exact Homepage Plans Grid */
+.plansGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.8rem;
+  max-width: 880px;
+  margin: 0 auto;
+  align-items: stretch;
+}
+
+.planCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 2.2rem 2rem 2rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px -32px rgba(43, 26, 33, 0.4);
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+
+.planCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 34px 56px -34px rgba(43, 26, 33, 0.55);
+}
+
+/* Exact Homepage Featured Plan */
+.planFeatured {
+  color: #fff;
+  border-color: transparent;
+  background: radial-gradient(360px 260px at 100% 0%, rgba(184, 92, 120, 0.45), transparent 70%),
+              linear-gradient(165deg, var(--plum-2), var(--plum));
+  box-shadow: 0 0 0 1px var(--gold-bright), 0 40px 64px -34px rgba(43, 26, 33, 0.8);
+}
+
+.planFeatured:hover {
+  box-shadow: 0 0 0 1px var(--gold-bright), 0 44px 74px -34px rgba(43, 26, 33, 0.9);
+}
+
+/* Exact Homepage Tag */
+.planTag {
+  position: absolute;
+  top: -13px;
+  right: 1.8rem;
+  padding: 0.35rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--plum);
+  background: var(--gold-bright);
+}
+
+.planHead {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.planFeatured .planHead {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.planIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  color: var(--gold);
+  background: #f6ecd8;
+}
+
+.planFeatured .planIcon {
+  color: var(--gold-bright);
+  background: rgba(224, 189, 119, 0.16);
+}
+
+.planHead h3 {
+  font-size: 1.6rem;
+  color: inherit;
+}
+
+.planFeatured .planHead h3 {
+  color: #fff;
+}
+
+.planHead p {
+  margin-top: 0.15rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.planFeatured .planHead p {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+/* Exact Homepage Plan 2-Box Body */
+.planBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.planBody > div {
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  background: var(--ivory);
+  border: 1px solid var(--line);
+}
+
+.planFeatured .planBody > div {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.planBody strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  line-height: 1.1;
+  color: var(--rose-deep);
+}
+
+.planFeatured .planBody strong {
+  color: var(--gold-bright);
+}
+
+.planBody span {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.planFeatured .planBody span {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.planFeaturesList {
+  display: grid;
+  gap: 0.8rem;
+  margin-bottom: 1.8rem;
+  flex: 1;
+}
+
+.planFeaturesList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  font-size: 0.93rem;
+  line-height: 1.45;
+}
+
+.featureBullet {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--rose-deep);
+}
+
+.planFeatured .featureBullet {
+  background: var(--gold-bright);
+  color: var(--plum);
+}
+
+.planFoot {
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--line);
+}
+
+.planFeatured .planFoot {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.priceLabel {
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.planFeatured .priceLabel {
+  color: var(--gold-bright);
+}
+
+.planFoot button {
+  width: 100%;
+}
+
+.planFootNote {
+  font-size: 0.76rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 0.65rem;
+}
+
+.planFeatured .planFootNote {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.note {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+/* ------------------------------ Interactive FAQ Section ------------------------------ */
+.faqSection {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: clamp(2.4rem, 4.8vw, 3.5rem);
+  box-shadow: 0 20px 40px -32px rgba(43, 26, 33, 0.4);
+  margin-bottom: 5.5rem;
+}
+
+.faqSectionHeader {
+  text-align: center;
+  margin-bottom: 2.75rem;
+}
+
+.faqSectionHeader h3 {
+  font-size: clamp(1.8rem, 3.4vw, 2.3rem);
+  color: var(--plum);
+  margin-bottom: 0.6rem;
+}
+
+.faqSectionHeader p {
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.accordionList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.accordionItem {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--ivory);
+  overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+
+.accordionItem:hover {
+  border-color: #e7cfa6;
+}
+
+.accordionItemOpen {
+  border-color: var(--gold-bright);
+  background: #fff;
+  box-shadow: 0 14px 26px -14px rgba(43, 26, 33, 0.3);
+}
+
+.accordionTrigger {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.35rem 1.6rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--serif);
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--plum);
+  transition: color 0.2s;
+}
+
+.accordionTrigger:hover {
+  color: var(--rose-deep);
+}
+
+.accordionChevron {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  transition: transform 0.3s var(--ease), background 0.2s;
+  flex-shrink: 0;
+}
+
+.accordionChevronRotated {
+  transform: rotate(180deg);
+  background: var(--gold-bright);
+  color: var(--plum);
+  border-color: var(--gold-bright);
+}
+
+.accordionBody {
+  padding: 0 1.6rem 1.35rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ==========================================================================
+   3. THE CARDS BEFORE THE FOOTER — EXACT HOMEPAGE "WHY CHOOSE US" GRID
+   ========================================================================== */
+.charterSection {
+  margin-bottom: 2rem;
+}
+
+.charterHeader {
+  text-align: center;
+  margin-bottom: 3.25rem;
+}
+
+.charterHeader h3 {
+  font-size: clamp(2rem, 3.8vw, 2.7rem);
+  color: var(--plum);
+  margin-bottom: 0.6rem;
+}
+
+.charterHeader p {
+  font-size: 1.02rem;
+  color: var(--muted);
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* Exact Homepage whyGrid */
+.whyGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.4rem;
+}
+
+.whyGrid article {
+  position: relative;
+  padding: 1.8rem 1.8rem 1.6rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), border-color 0.3s;
+}
+
+.whyGrid article::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--gold-bright), var(--rose));
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.4s var(--ease);
+}
+
+.whyGrid article:hover {
+  transform: translateY(-4px);
+  border-color: #e7cfa6;
+  box-shadow: 0 26px 40px -28px rgba(43, 26, 33, 0.5);
+}
+
+.whyGrid article:hover::before {
+  transform: scaleY(1);
+}
+
+.whyTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+
+.featIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  color: #fff;
+  background: linear-gradient(145deg, var(--rose), var(--rose-deep));
+  box-shadow: 0 10px 18px -10px rgba(125, 49, 71, 0.8);
+}
+
+.whyNum {
+  font-family: var(--serif);
+  font-size: 2.1rem;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px #dcc59a;
+}
+
+.whyGrid h3 {
+  font-family: var(--sans);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin-bottom: 0.5rem;
+  color: var(--plum);
+}
+
+.whyGrid p {
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+/* ------------------------------ Responsive Queries ------------------------------ */
+@media (max-width: 900px) {
+  .heroInner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .heroCreditsCard {
+    width: 100%;
+  }
+  .guestPanel {
+    grid-template-columns: 1fr;
+  }
+  .guestPerksStrip {
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .activeDashHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .plansGrid {
+    grid-template-columns: 1fr;
+  }
+  .whyGrid {
+    grid-template-columns: 1fr;
+  }
+}

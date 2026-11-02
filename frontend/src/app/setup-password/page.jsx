@@ -3,7 +3,9 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { AlertCircle, CheckCircle2, ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
 import { verifySetupTokenApi, setupPasswordApi } from '@/lib/api';
+import styles from '../auth.module.css';
 
 function SetupPasswordContent() {
   const searchParams = useSearchParams();
@@ -22,7 +24,6 @@ function SetupPasswordContent() {
   const [submitError, setSubmitError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // 1. Verify token on mount (read-only verification without consuming token)
   useEffect(() => {
     let isMounted = true;
 
@@ -49,7 +50,7 @@ function SetupPasswordContent() {
       } catch (err) {
         if (isMounted) {
           setTokenStatus('invalid');
-          setTokenError('Unable to connect to the server to verify your invitation link.');
+          setTokenError('Unable to verify your invitation link. Please check your network connection and try again.');
         }
       }
     }
@@ -61,7 +62,6 @@ function SetupPasswordContent() {
     };
   }, [token]);
 
-  // Form Validation
   const validateForm = () => {
     const errors = {};
 
@@ -81,7 +81,6 @@ function SetupPasswordContent() {
     return Object.keys(errors).length === 0;
   };
 
-  // Submit Password Setup
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -115,10 +114,10 @@ function SetupPasswordContent() {
   // 1. Token Verification Loading State
   if (tokenStatus === 'verifying') {
     return (
-      <div className="auth-card" style={{ textAlign: 'center' }}>
-        <div className="status-spinner" style={{ margin: '0 auto 1.5rem auto' }}></div>
-        <h2 className="auth-title" style={{ fontSize: '1.25rem' }}>Verifying Invitation Link...</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+      <div className={styles.authContainerNarrow} style={{ textAlign: 'center', padding: '3.5rem 2rem' }}>
+        <RefreshCw size={32} className="animate-spin" style={{ color: 'var(--rose-deep)', margin: '0 auto 1.25rem' }} />
+        <h2 className={styles.formTitle} style={{ fontSize: '1.4rem' }}>Verifying Invitation Link...</h2>
+        <p style={{ color: 'var(--muted)', fontSize: '0.92rem', marginTop: '0.5rem' }}>
           Validating your single-use security token.
         </p>
       </div>
@@ -128,19 +127,32 @@ function SetupPasswordContent() {
   // 2. Token Invalid or Expired State
   if (tokenStatus === 'invalid') {
     return (
-      <div className="auth-card" style={{ textAlign: 'center' }}>
-        <span style={{ fontSize: '3rem', display: 'block', marginBottom: '1rem' }}>⚠️</span>
-        <h1 className="auth-title" style={{ color: 'var(--danger)', fontSize: '1.4rem' }}>
+      <div className={styles.authContainerNarrow} style={{ textAlign: 'center' }}>
+        <div
+          style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            backgroundColor: '#fee2e2',
+            color: '#dc2626',
+            display: 'grid',
+            placeItems: 'center',
+            margin: '0 auto 1.25rem auto',
+          }}
+        >
+          <AlertCircle size={32} />
+        </div>
+        <h1 className={styles.formTitle} style={{ color: '#991b1b', fontSize: '1.45rem' }}>
           Invitation Link Expired or Invalid
         </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: '1rem 0 2rem', lineHeight: 1.6 }}>
+        <p style={{ color: 'var(--muted)', fontSize: '0.95rem', margin: '1rem 0 1.5rem', lineHeight: 1.6 }}>
           {tokenError}
         </p>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>
+        <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '2rem' }}>
           If your invitation has expired, please contact the marriage bureau administrator to request a new invitation link.
         </p>
-        <Link href="/login" className="btn-primary" style={{ display: 'inline-block', padding: '0.75rem 1.75rem' }}>
-          Go to Sign In
+        <Link href="/login" className={styles.btnPrimary}>
+          Go to Sign In <ArrowRight size={16} />
         </Link>
       </div>
     );
@@ -149,101 +161,101 @@ function SetupPasswordContent() {
   // 3. Success State
   if (isSuccess) {
     return (
-      <div className="auth-card" style={{ textAlign: 'center' }}>
-        <span style={{ fontSize: '3rem', display: 'block', marginBottom: '1rem' }}>🎉</span>
-        <h1 className="auth-title" style={{ color: '#166534', fontSize: '1.4rem' }}>
-          Password Configured Successfully!
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: '1rem 0 2rem', lineHeight: 1.6 }}>
-          Your matrimonial candidate account has been activated. You can now log in using your email address (<strong>{candidateInfo.email}</strong>) and your chosen password.
-        </p>
-        <Link href="/login" className="btn-primary" style={{ display: 'inline-block', padding: '0.75rem 2rem' }}>
-          Sign In to Your Dashboard →
-        </Link>
+      <div className={styles.authContainerNarrow}>
+        <div className={styles.successCard}>
+          <div className={styles.successIconCircle} aria-hidden="true">
+            <CheckCircle2 size={32} />
+          </div>
+          <h2>Password Configured Successfully!</h2>
+          <p>
+            Your matrimonial candidate account has been activated. You can now log in using your email address (<strong>{candidateInfo.email}</strong>) and your chosen password.
+          </p>
+          <Link href="/login" className={styles.btnPrimary}>
+            Sign In with New Password <ArrowRight size={16} />
+          </Link>
+        </div>
       </div>
     );
   }
 
-  // 4. Password Setup Form State
+  // 4. Default Setup Password Form
   return (
-    <div className="auth-card">
-      <div className="auth-header">
-        <span className="auth-header-icon" role="img" aria-label="Key">
-          🔐
-        </span>
-        <h1 className="auth-title">Activate Candidate Account</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-          Welcome, <strong>{candidateInfo.name || 'Candidate'}</strong> ({candidateInfo.email}). Please choose a secure password to activate your account.
+    <div className={styles.authContainerNarrow}>
+      <header className={styles.formHeader}>
+        <span className={styles.kicker}>Account Activation</span>
+        <h1 className={styles.formTitle}>Set Up Your Password</h1>
+        <p className={styles.formSubtitle}>
+          Welcome, <strong>{candidateInfo.name || 'Candidate'}</strong>. Please choose a strong password to complete your matrimonial account setup.
         </p>
-      </div>
+      </header>
 
       {submitError && (
-        <div
-          style={{
-            padding: '0.85rem 1.25rem',
-            borderRadius: 'var(--radius-md)',
-            backgroundColor: '#fef2f2',
-            color: 'var(--danger)',
-            border: '1px solid #fecaca',
-            marginBottom: '1.5rem',
-            fontSize: '0.9rem',
-          }}
-        >
-          ⚠️ {submitError}
+        <div className={`${styles.alert} ${styles.alertDanger}`} role="alert">
+          <AlertCircle size={18} color="#dc2626" />
+          <span>{submitError}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-          <label htmlFor="newPasswordInput" className="form-label">
-            New Password <span style={{ color: 'var(--danger)' }}>*</span>
+      <div className={styles.userInfoBox} style={{ marginBottom: '1.5rem' }}>
+        <div className={styles.userInfoRow}>
+          <span className={styles.userInfoLabel}>Account Email:</span>
+          <span className={styles.userInfoVal}>{candidateInfo.email}</span>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className={styles.authForm} noValidate>
+        {/* New Password */}
+        <div className={styles.formGroup}>
+          <label htmlFor="password" className={styles.label}>
+            Create Password <span className={styles.reqMark}>*</span>
           </label>
           <input
-            id="newPasswordInput"
+            id="password"
+            name="password"
             type="password"
-            autoComplete="new-password"
-            required
-            placeholder="At least 12 characters"
+            placeholder="Minimum 12 characters"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
-              if (formErrors.password) setFormErrors((prev) => ({ ...prev, password: '' }));
+              if (formErrors.password) setFormErrors((p) => ({ ...p, password: '' }));
             }}
-            className="form-input"
+            className={`${styles.input} ${formErrors.password ? styles.inputError : ''}`}
+            disabled={isSubmitting}
+            autoComplete="new-password"
           />
-          {formErrors.password && <span className="form-error">{formErrors.password}</span>}
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginTop: '0.35rem' }}>
-            Must be at least 12 characters long.
-          </span>
+          {formErrors.password && <span className={styles.errorText}>{formErrors.password}</span>}
         </div>
 
-        <div className="form-group" style={{ marginBottom: '1.75rem' }}>
-          <label htmlFor="confirmPasswordInput" className="form-label">
-            Confirm Password <span style={{ color: 'var(--danger)' }}>*</span>
+        {/* Confirm Password */}
+        <div className={styles.formGroup}>
+          <label htmlFor="confirmPassword" className={styles.label}>
+            Confirm Password <span className={styles.reqMark}>*</span>
           </label>
           <input
-            id="confirmPasswordInput"
+            id="confirmPassword"
+            name="confirmPassword"
             type="password"
-            autoComplete="new-password"
-            required
-            placeholder="Re-enter your new password"
+            placeholder="Re-enter your password"
             value={confirmPassword}
             onChange={(e) => {
               setConfirmPassword(e.target.value);
-              if (formErrors.confirmPassword) setFormErrors((prev) => ({ ...prev, confirmPassword: '' }));
+              if (formErrors.confirmPassword) setFormErrors((p) => ({ ...p, confirmPassword: '' }));
             }}
-            className="form-input"
+            className={`${styles.input} ${formErrors.confirmPassword ? styles.inputError : ''}`}
+            disabled={isSubmitting}
+            autoComplete="new-password"
           />
-          {formErrors.confirmPassword && <span className="form-error">{formErrors.confirmPassword}</span>}
+          {formErrors.confirmPassword && (
+            <span className={styles.errorText}>{formErrors.confirmPassword}</span>
+          )}
         </div>
 
         <button
           type="submit"
+          className={styles.btnPrimary}
           disabled={isSubmitting}
-          className="btn-primary"
-          style={{ width: '100%', padding: '0.85rem', fontSize: '1rem', fontWeight: 600 }}
         >
-          {isSubmitting ? 'Activating Account...' : 'Set Password & Activate Account'}
+          {isSubmitting ? 'Configuring Password...' : 'Activate Account & Set Password'} <ArrowRight size={16} />
         </button>
       </form>
     </div>
@@ -252,17 +264,20 @@ function SetupPasswordContent() {
 
 export default function SetupPasswordPage() {
   return (
-    <main className="auth-page">
+    <div className={styles.page}>
+      <div className={styles.bgGlowTop} aria-hidden="true" />
+      <div className={styles.bgGlowBottom} aria-hidden="true" />
+
       <Suspense
         fallback={
-          <div className="auth-card" style={{ textAlign: 'center' }}>
-            <div className="status-spinner" style={{ margin: '0 auto 1.5rem auto' }}></div>
-            <p style={{ color: 'var(--text-muted)' }}>Loading invitation verification...</p>
+          <div className={styles.authContainerNarrow} style={{ textAlign: 'center', padding: '3.5rem 2rem' }}>
+            <RefreshCw size={30} className="animate-spin" style={{ color: 'var(--rose-deep)', margin: '0 auto 1.25rem' }} />
+            <p style={{ color: 'var(--muted)' }}>Loading invitation verification...</p>
           </div>
         }
       >
         <SetupPasswordContent />
       </Suspense>
-    </main>
+    </div>
   );
 }

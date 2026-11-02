@@ -11,7 +11,7 @@ const notFound = (req, res, next) => {
  * Centralized Error Handling Middleware
  */
 const errorHandler = (err, req, res, next) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  const statusCode = err.statusCode || err.status || (res.statusCode === 200 ? 500 : res.statusCode);
   
   res.status(statusCode).json({
     success: false,

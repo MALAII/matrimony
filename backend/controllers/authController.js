@@ -105,7 +105,11 @@ const registerUser = async (req, res, next) => {
       role: 'user',
     });
 
-    // 7. Return HTTP 201 with sanitized user data (no password or hash)
+    // 7. Generate JWT token and set in HttpOnly cookie for automatic authenticated session
+    const token = generateToken(newUser._id);
+    res.cookie('token', token, getCookieOptions());
+
+    // 8. Return HTTP 201 with sanitized user data (no password or hash)
     return res.status(201).json({
       success: true,
       message: 'User registered successfully',
@@ -244,6 +248,7 @@ const logoutUser = async (req, res) => {
 };
 
 const crypto = require('crypto');
+const emailService = require('../services/emailService');
 
 /**
  * Hash raw token using SHA-256 for database lookup
@@ -379,6 +384,182 @@ const setupPassword = async (req, res, next) => {
   }
 };
 
+/**
+ * @route   POST /api/auth/forgot-password
+ * @desc    Request password reset link (generic response to prevent user enumeration)
+ * @access  Public
+ */
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body || {};
+
+    // Standard generic message to return in all cases (prevents user enumeration)
+    const genericResponse = {
+      success: true,
+      message: 'If an account exists with this email address, you will receive a password reset link shortly.',
+    };
+
+    if (!email || typeof email !== 'string' || !email.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address.',
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!EMAIL_REGEX.test(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address.',
+      });
+    }
+
+    const user = await User.findOne({ email: normalizedEmail });
+
+    // Only issue reset link if user exists and account is not suspended/inactive
+    if (user && user.accountStatus !== 'suspended' && user.accountStatus !== 'inactive') {
+      const rawToken = crypto.randomBytes(32).toString('hex');
+      const tokenHash = hashToken(rawToken);
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+      user.passwordResetTokenHash = tokenHash;
+      user.passwordResetExpiresAt = expiresAt;
+      await user.save();
+
+      // Dispatch reset email
+      try {
+        await emailService.sendPasswordResetEmail({
+          to: user.email,
+          name: user.name,
+          rawToken,
+        });
+      } catch (mailErr) {
+        console.error(`[Forgot Password Mailer Error] ${mailErr.message}`);
+      }
+    }
+
+    return res.status(200).json(genericResponse);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   GET /api/auth/reset-password/verify?token=...
+ * @desc    Verify password reset token validity without consuming it
+ * @access  Public
+ */
+const verifyResetToken = async (req, res, next) => {
+  try {
+    const { token } = req.query;
+
+    if (!token || typeof token !== 'string' || !token.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Reset token is missing or malformed',
+      });
+    }
+
+    const tokenHash = hashToken(token.trim());
+
+    const user = await User.findOne({
+      passwordResetTokenHash: tokenHash,
+      passwordResetExpiresAt: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'This password reset link is invalid, expired, or has already been used.',
+      });
+    }
+
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+
+    return res.status(200).json({
+      success: true,
+      message: 'Reset token is valid',
+      data: {
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   POST /api/auth/reset-password
+ * @desc    Submit new password, consume reset token, and update password
+ * @access  Public
+ */
+const resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body || {};
+
+    if (!token || typeof token !== 'string' || !token.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Reset token is required',
+      });
+    }
+
+    if (!password || typeof password !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'New password is required',
+      });
+    }
+
+    // Enforce strong minimum password length (12 characters)
+    if (password.length < 12) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 12 characters long for security',
+      });
+    }
+
+    const tokenHash = hashToken(token.trim());
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    // Atomically find and consume token
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        passwordResetTokenHash: tokenHash,
+        passwordResetExpiresAt: { $gt: new Date() },
+      },
+      {
+        $set: {
+          passwordHash,
+          passwordResetTokenHash: null,
+          passwordResetExpiresAt: null,
+          accountStatus: 'active',
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'This password reset link is invalid, expired, or has already been used.',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Your password has been reset successfully. You can now log in with your new password.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -386,4 +567,7 @@ module.exports = {
   logoutUser,
   verifySetupToken,
   setupPassword,
+  forgotPassword,
+  verifyResetToken,
+  resetPassword,
 };

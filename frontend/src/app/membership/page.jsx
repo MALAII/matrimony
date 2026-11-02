@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Crown,
+  Gem,
   Sparkles,
   ShieldCheck,
   CheckCircle2,
@@ -17,8 +18,10 @@ import {
   User,
   RefreshCw,
   Check,
-  HelpCircle,
-  CreditCard,
+  ChevronRight,
+  ChevronDown,
+  Zap,
+  Award,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -27,6 +30,7 @@ import {
   createSubscriptionOrderApi,
   verifySubscriptionPaymentApi,
 } from '@/lib/api';
+import styles from './membership.module.css';
 
 function formatDate(dateVal) {
   if (!dateVal) return '—';
@@ -56,44 +60,60 @@ function loadRazorpayScript() {
 const MEMBERSHIP_PLANS = [
   {
     code: 'THREE_MONTHS',
-    name: 'Gold Plan',
-    tierSubtitle: 'Three-Month Membership',
-    badge: 'Quarterly Duration',
-    durationText: '3 Months (90 Days)',
-    priceText: 'Price announced soon',
-    priceSub: 'Official tariffs published upon launch',
-    sandboxPriceText: '₹1.00 (100 paise)',
-    sandboxNote: 'Temporary sandbox test amount — not official tariff',
+    name: 'Gold',
+    term: '3 Months',
+    blurb: 'A focused quarter of searching.',
+    total: '150',
     featured: false,
-    icon: Sparkles,
+    icon: Gem,
     features: [
-      'Full member directory access while active',
-      '50 contact credits per monthly cycle (150 total)',
-      '1 credit on first view; 0 credits on repeat views',
+      'Full candidate profile access',
+      '50 contact credits every month',
+      '1 credit on first view, 0 on repeat views',
       'Unused monthly credits do not carry forward',
-      '7-day browsing grace period upon expiry',
+      '7-day browsing grace period',
     ],
   },
   {
     code: 'SIX_MONTHS',
-    name: 'Platinum Plan',
-    tierSubtitle: 'Six-Month Membership',
-    badge: 'Traditional Choice • Most Popular',
-    durationText: '6 Months (180 Days)',
-    priceText: 'Price announced soon',
-    priceSub: 'Official tariffs published upon launch',
-    sandboxPriceText: '₹2.00 (200 paise)',
-    sandboxNote: 'Temporary sandbox test amount — not official tariff',
+    name: 'Platinum',
+    term: '6 Months',
+    blurb: 'Unhurried, continuous search.',
+    total: '300',
+    tag: 'Most popular',
     featured: true,
     icon: Crown,
     features: [
-      'Full member directory access while active',
-      '50 contact credits per monthly cycle (300 total)',
-      '1 credit on first view; 0 credits on repeat views',
+      'Full candidate profile access',
+      '50 contact credits every month',
+      '1 credit on first view, 0 on repeat views',
       'Unused monthly credits do not carry forward',
-      '7-day browsing grace period upon expiry',
-      'Extended 6-month continuous matrimonial search',
+      '7-day browsing grace period',
+      'Best value for a longer search',
     ],
+  },
+];
+
+const FAQ_ITEMS = [
+  {
+    q: 'How do contact view credits work?',
+    a: 'Each plan allocates 50 fresh contact unlocking credits per 30-day monthly cycle. When you unlock a candidate contact for the first time, 1 credit is consumed. Viewing that same candidate again in the future costs 0 credits forever.',
+  },
+  {
+    q: 'Do unused monthly credits carry forward?',
+    a: 'No. Unused credits expire at the end of each 30-day cycle to ensure active matchmaking engagement. A fresh quota of 50 credits is automatically allocated at the start of each new monthly cycle.',
+  },
+  {
+    q: 'What is the 7-day browsing grace period?',
+    a: 'When your subscription reaches its expiration date, you automatically enter a 7-day complimentary browsing grace period. You can continue searching candidate profiles; new contact unlocking resumes as soon as you renew.',
+  },
+  {
+    q: 'Why are candidate telephone numbers protected?',
+    a: 'To safeguard candidate privacy and maintain family dignity, phone numbers are never displayed publicly. They are strictly revealed only to verified members who consciously unlock a profile using their contact credits.',
+  },
+  {
+    q: 'Are online membership payments safe and verified?',
+    a: 'Yes. All subscription payments are encrypted using 256-bit industry-standard banking gateways with instant digital verification and automated credit allocation.',
   },
 ];
 
@@ -109,17 +129,19 @@ export default function MembershipPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [processingPlan, setProcessingPlan] = useState(null);
   const [checkoutNotice, setCheckoutNotice] = useState(null);
+  const [openFaqIndex, setOpenFaqIndex] = useState(0);
+
+  const toggleFaq = (index) => {
+    setOpenFaqIndex(openFaqIndex === index ? -1 : index);
+  };
 
   const loadMembershipDetails = useCallback(async () => {
     setLoading(true);
     setErrorMessage('');
 
     try {
-      // 1. Fetch Subscription status
       const subRes = await getMySubscriptionApi();
-
       if (subRes.status === 401) {
-        // Not logged in or session expired
         setSubscriptionData(null);
         setCreditData(null);
         setLoading(false);
@@ -132,7 +154,6 @@ export default function MembershipPage() {
         setSubscriptionData(null);
       }
 
-      // 2. Fetch Credit Balance (if member is active/has subscription)
       const credRes = await getMemberCreditsApi();
       if (credRes.success && credRes.data) {
         setCreditData(credRes.data);
@@ -164,7 +185,6 @@ export default function MembershipPage() {
   const handleInitiateCheckout = async (plan) => {
     setCheckoutNotice(null);
 
-    // 0. Environment guard: disallow checkout when flag is not enabled
     if (!isCheckoutEnabled) {
       setCheckoutNotice({
         type: 'error',
@@ -173,17 +193,15 @@ export default function MembershipPage() {
       return;
     }
 
-    // 1. Authentication check
     if (!currentUser) {
       router.push('/login?redirect=/membership');
       return;
     }
 
-    // 2. Existing active subscription check (renewal rules pending confirmation)
     if (hasSubscription && subscriptionStatus === 'active') {
       setCheckoutNotice({
         type: 'info',
-        message: 'You currently have an active subscription. Subscription renewal features will be available soon.',
+        message: 'You already have an active subscription. You can renew or extend your plan as your current cycle approaches its expiration date.',
       });
       return;
     }
@@ -195,7 +213,6 @@ export default function MembershipPage() {
     });
 
     try {
-      // Step A: Request server to create Razorpay Order
       const orderRes = await createSubscriptionOrderApi(plan.code);
 
       if (!orderRes.success) {
@@ -217,7 +234,6 @@ export default function MembershipPage() {
         return;
       }
 
-      // Step B: Load Razorpay Checkout modal script
       const scriptReady = await loadRazorpayScript();
       if (!scriptReady) {
         setCheckoutNotice({
@@ -230,16 +246,15 @@ export default function MembershipPage() {
 
       setCheckoutNotice({
         type: 'loading',
-        message: 'Opening Razorpay test payment window...',
+        message: 'Opening secure payment gateway...',
       });
 
-      // Step C: Initialize Razorpay instance
       const options = {
         key: keyId,
         amount: amount,
         currency: currency || 'INR',
         name: 'Vivahaa Matrimony',
-        description: `${planName || plan.name} (Test Mode Sandbox)`,
+        description: `${planName || plan.name} Membership`,
         order_id: orderId,
         prefill: {
           name: currentUser?.name || '',
@@ -247,7 +262,7 @@ export default function MembershipPage() {
           contact: currentUser?.phone || '',
         },
         theme: {
-          color: '#0B5D52',
+          color: '#7d3147',
         },
         modal: {
           ondismiss: function () {
@@ -259,12 +274,10 @@ export default function MembershipPage() {
           },
         },
         handler: async function (paymentResponse) {
-          // IMPORTANT: Never activate subscription on client callback alone.
-          // ALWAYS send credentials to backend verification API.
           setProcessingPlan(plan.code);
           setCheckoutNotice({
             type: 'loading',
-            message: 'Payment received by provider. Verifying signature on server and activating subscription...',
+            message: 'Payment received. Verifying transaction and activating membership credits...',
           });
 
           try {
@@ -279,7 +292,6 @@ export default function MembershipPage() {
                 type: 'success',
                 message: 'Payment verified successfully! Your subscription and 50 monthly contact view credits are now active.',
               });
-              // Refresh subscription and credits state
               await loadMembershipDetails();
             } else {
               setCheckoutNotice({
@@ -319,91 +331,79 @@ export default function MembershipPage() {
     }
   };
 
-  return (
-    <div
-      style={{
-        backgroundColor: '#FBF8F1',
-        minHeight: '85vh',
-        padding: '2.5rem 1rem 4rem 1rem',
-      }}
-    >
-      <div style={{ maxWidth: '1080px', margin: '0 auto' }}>
-        {/* Header Breadcrumb & Title */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <p
-            style={{
-              textTransform: 'uppercase',
-              letterSpacing: '0.12em',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              color: '#C5A15B',
-              marginBottom: '0.5rem',
-            }}
-          >
-            Matrimonial Privileges &amp; Contact Access
-          </p>
-          <h1
-            style={{
-              fontFamily: 'Playfair Display, Georgia, serif',
-              fontSize: '2.2rem',
-              fontWeight: 700,
-              color: '#07463F',
-              marginBottom: '0.75rem',
-            }}
-          >
-            Membership &amp; Credits Dashboard
-          </h1>
-          <p
-            style={{
-              fontSize: '0.98rem',
-              color: '#5e5952',
-              maxWidth: '620px',
-              margin: '0 auto',
-              lineHeight: 1.6,
-            }}
-          >
-            Review your active matrimonial subscription term, monthly contact unlocking credits, and transparent quarterly/half-yearly membership tiers.
-          </p>
-        </div>
+  const creditRemaining = credits?.creditsRemaining ?? 0;
+  const creditAllocated = credits?.creditsAllocated || 50;
+  const creditPercent = Math.min(100, Math.max(0, Math.round((creditRemaining / creditAllocated) * 100)));
 
+  return (
+    <div className={styles.page}>
+      {/* Editorial Luxury Hero */}
+      <section className={styles.hero}>
+        <div className={styles.heroInner}>
+          <div className={styles.heroContent}>
+            <nav className={styles.crumbs} aria-label="Breadcrumb">
+              <Link href="/">Home</Link>
+              <ChevronRight size={13} />
+              <span>Membership Plans</span>
+            </nav>
+            <div className={styles.kickerPill}>
+              <Sparkles size={13} /> Matrimonial Privileges &amp; Contact Access
+            </div>
+            <h1>Membership &amp; Credits Dashboard</h1>
+            <p className={styles.heroDesc}>
+              Review your active matrimonial subscription term, monthly contact unlocking credits, and transparent quarterly/half-yearly membership tiers.
+            </p>
+
+            <div className={styles.heroTrustStrip}>
+              <span className={styles.heroTrustPill}>
+                <ShieldCheck size={14} /> Phone Privacy Shield
+              </span>
+              <span className={styles.heroTrustPill}>
+                <Zap size={14} /> Zero Repeat Deductions
+              </span>
+              <span className={styles.heroTrustPill}>
+                <Clock size={14} /> 7-Day Browsing Grace Period
+              </span>
+            </div>
+          </div>
+
+          {/* Quick Credit Summary for Active Members */}
+          {currentUser && credits && (
+            <aside className={styles.heroCreditsCard} aria-label="Available contact credits">
+              <div className={styles.heroCreditsTop}>
+                <span><Phone size={15} /> Contact Credits</span>
+                <em>Cycle #{credits.cycleNumber || 1}</em>
+              </div>
+              <div className={styles.heroCreditsNum}>
+                <strong>{creditRemaining}</strong>
+                <span>/ {creditAllocated} remaining</span>
+              </div>
+              <div className={styles.heroBar} role="progressbar" aria-valuenow={creditRemaining} aria-valuemin="0" aria-valuemax={creditAllocated}>
+                <i style={{ width: `${creditPercent}%` }} />
+              </div>
+              <div className={styles.heroCreditsNote}>
+                {credits.creditsUsed || 0} unlocked this cycle • 0 credits on repeat views
+              </div>
+            </aside>
+          )}
+        </div>
+      </section>
+
+      {/* Main Container */}
+      <main className={styles.mainContainer}>
         {/* Global Error Banner */}
         {errorMessage && (
-          <div
-            style={{
-              backgroundColor: '#fef2f2',
-              border: '1px solid #fecaca',
-              borderRadius: '8px',
-              padding: '1rem 1.25rem',
-              marginBottom: '2rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '1rem',
-              color: '#991b1b',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div className={`${styles.noticeBanner} ${styles.noticeError}`} role="alert">
+            <div className={styles.noticeContent}>
               <AlertCircle size={20} />
-              <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{errorMessage}</span>
+              <span>{errorMessage}</span>
             </div>
             <button
               type="button"
               onClick={loadMembershipDetails}
-              style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #fca5a5',
-                color: '#991b1b',
-                padding: '0.4rem 0.85rem',
-                borderRadius: '6px',
-                fontSize: '0.82rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-              }}
+              className={styles.noticeRetry}
             >
-              <RefreshCw size={14} /> Retry
+              <RefreshCw size={13} /> Retry
             </button>
           </div>
         )}
@@ -411,68 +411,34 @@ export default function MembershipPage() {
         {/* Interactive Payment Checkout Notice Banner */}
         {checkoutNotice && (
           <div
-            style={{
-              backgroundColor:
-                checkoutNotice.type === 'success'
-                  ? '#ecfdf5'
-                  : checkoutNotice.type === 'error'
-                  ? '#fef2f2'
-                  : checkoutNotice.type === 'loading'
-                  ? '#f0fdfa'
-                  : '#fffbeb',
-              border:
-                checkoutNotice.type === 'success'
-                  ? '1.5px solid #6ee7b7'
-                  : checkoutNotice.type === 'error'
-                  ? '1.5px solid #fca5a5'
-                  : checkoutNotice.type === 'loading'
-                  ? '1.5px solid #5eead4'
-                  : '1.5px solid #fcd34d',
-              borderRadius: '10px',
-              padding: '1rem 1.25rem',
-              marginBottom: '2rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '1rem',
-              color:
-                checkoutNotice.type === 'success'
-                  ? '#065f46'
-                  : checkoutNotice.type === 'error'
-                  ? '#991b1b'
-                  : checkoutNotice.type === 'loading'
-                  ? '#0f766e'
-                  : '#92400e',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-            }}
+            className={`${styles.noticeBanner} ${
+              checkoutNotice.type === 'success'
+                ? styles.noticeSuccess
+                : checkoutNotice.type === 'error'
+                ? styles.noticeError
+                : checkoutNotice.type === 'loading'
+                ? styles.noticeLoading
+                : styles.noticeInfo
+            }`}
+            role="status"
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div className={styles.noticeContent}>
               {checkoutNotice.type === 'success' ? (
-                <CheckCircle2 size={20} color="#059669" />
+                <CheckCircle2 size={20} color="#15803d" />
               ) : checkoutNotice.type === 'error' ? (
                 <AlertCircle size={20} color="#dc2626" />
               ) : checkoutNotice.type === 'loading' ? (
-                <RefreshCw size={18} className="animate-spin" color="#0d9488" />
+                <RefreshCw size={18} className="animate-spin" color="#b08d4c" />
               ) : (
                 <AlertCircle size={20} color="#d97706" />
               )}
-              <span style={{ fontSize: '0.92rem', fontWeight: 600 }}>
-                {checkoutNotice.message}
-              </span>
+              <span>{checkoutNotice.message}</span>
             </div>
             {checkoutNotice.type !== 'loading' && (
               <button
                 type="button"
                 onClick={() => setCheckoutNotice(null)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'inherit',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                }}
+                className={styles.noticeDismiss}
               >
                 Dismiss
               </button>
@@ -480,324 +446,161 @@ export default function MembershipPage() {
           </div>
         )}
 
-        {/* SECTION 1: Active Member Status Banner / Guest Sign-In */}
-        <div style={{ marginBottom: '3rem' }}>
+        {/* SECTION 1: Member Status Banner / Guest Welcome Panel / Active VIP Dashboard */}
+        <div className={styles.statusWrapper}>
           {authLoading || loading ? (
             /* Loading Skeleton State */
-            <div
-              style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5ded2',
-                borderRadius: '12px',
-                padding: '2.5rem',
-                textAlign: 'center',
-                boxShadow: '0 2px 8px rgba(11, 93, 82, 0.04)',
-              }}
-            >
-              <RefreshCw
-                size={28}
-                className="animate-spin"
-                style={{ color: '#0B5D52', margin: '0 auto 1rem' }}
-              />
-              <p style={{ color: '#5e5952', fontSize: '0.95rem' }}>
-                Loading membership status and contact credit balance...
-              </p>
+            <div className={styles.loadingSkeleton}>
+              <RefreshCw size={30} className="animate-spin" style={{ color: 'var(--rose-deep)', margin: '0 auto' }} />
+              <p>Loading membership status and contact credit balance...</p>
             </div>
           ) : !currentUser ? (
-            /* Logged Out / Guest State */
-            <div
-              style={{
-                backgroundColor: '#ffffff',
-                border: '1.5px solid #dfcc9f',
-                borderRadius: '12px',
-                padding: '2.25rem 2rem',
-                textAlign: 'center',
-                boxShadow: '0 4px 16px rgba(197, 161, 91, 0.08)',
-              }}
-            >
-              <div
-                style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: '50%',
-                  backgroundColor: '#fbf6ec',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 1rem',
-                  color: '#C5A15B',
-                }}
-              >
-                <User size={28} strokeWidth={1.8} />
+            /* Guest Welcome Panel matching Homepage CTA Style */
+            <div className={styles.guestPanel}>
+              <div className={styles.guestLeft}>
+                <span className={styles.guestTag}>Matrimonial Membership</span>
+                <h2>Sign In to View Your Membership &amp; Credits</h2>
+                <p>
+                  Already have an account? Sign in to review your current plan duration, active monthly contact credits, and candidate profile privileges.
+                </p>
+                <div className={styles.guestActions}>
+                  <Link href="/login?redirect=/membership" className={styles.btnPrimary}>
+                    Sign In <ArrowRight size={16} />
+                  </Link>
+                  <Link href="/register" className={styles.btnOutline}>
+                    Register Free
+                  </Link>
+                </div>
               </div>
-              <h2
-                style={{
-                  fontSize: '1.3rem',
-                  fontWeight: 700,
-                  color: '#07463F',
-                  marginBottom: '0.5rem',
-                }}
-              >
-                Sign In to View Your Membership &amp; Credits
-              </h2>
-              <p
-                style={{
-                  fontSize: '0.92rem',
-                  color: '#5e5952',
-                  maxWidth: '520px',
-                  margin: '0 auto 1.5rem',
-                  lineHeight: 1.55,
-                }}
-              >
-                Already have an account? Sign in to review your current plan duration, active monthly contact credits, and member directory access privileges.
-              </p>
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '0.75rem',
-                  justifyContent: 'center',
-                  flexWrap: 'wrap',
-                }}
-              >
-                <Link
-                  href="/login?redirect=/membership"
-                  style={{
-                    backgroundColor: '#0B5D52',
-                    color: '#ffffff',
-                    padding: '0.65rem 1.4rem',
-                    borderRadius: '6px',
-                    fontWeight: 600,
-                    fontSize: '0.9rem',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                  }}
-                >
-                  Sign In <ArrowRight size={16} />
-                </Link>
-                <Link
-                  href="/register"
-                  style={{
-                    backgroundColor: '#ffffff',
-                    color: '#07463F',
-                    border: '1.5px solid #C5A15B',
-                    padding: '0.65rem 1.4rem',
-                    borderRadius: '6px',
-                    fontWeight: 600,
-                    fontSize: '0.9rem',
-                  }}
-                >
-                  Register Free
-                </Link>
+
+              {/* Quick Perks Strip for Guests */}
+              <div className={styles.guestPerksStrip}>
+                <div className={styles.guestPerkItem}>
+                  <div className={styles.guestPerkIcon}>
+                    <Phone size={18} />
+                  </div>
+                  <strong>50 Credits/Month</strong>
+                  <span>Unlock candidate contacts directly</span>
+                </div>
+                <div className={styles.guestPerkItem}>
+                  <div className={styles.guestPerkIcon}>
+                    <Zap size={18} />
+                  </div>
+                  <strong>Zero Repeat Costs</strong>
+                  <span>Re-view candidates anytime at 0 credits</span>
+                </div>
+                <div className={styles.guestPerkItem}>
+                  <div className={styles.guestPerkIcon}>
+                    <Clock size={18} />
+                  </div>
+                  <strong>7-Day Grace Period</strong>
+                  <span>Continued profile browsing upon expiry</span>
+                </div>
+                <div className={styles.guestPerkItem}>
+                  <div className={styles.guestPerkIcon}>
+                    <ShieldCheck size={18} />
+                  </div>
+                  <strong>Phone Privacy</strong>
+                  <span>Candidate numbers remain shielded</span>
+                </div>
               </div>
             </div>
           ) : hasSubscription && subscriptionStatus === 'active' ? (
-            /* Active Subscription State */
-            <div
-              style={{
-                backgroundColor: '#ffffff',
-                border: '1.5px solid #a7f3d0',
-                borderRadius: '12px',
-                padding: '2rem',
-                boxShadow: '0 4px 18px rgba(16, 185, 129, 0.08)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  flexWrap: 'wrap',
-                  gap: '1rem',
-                  marginBottom: '1.5rem',
-                  borderBottom: '1px solid #f1f5f9',
-                  paddingBottom: '1.25rem',
-                }}
-              >
-                <div>
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.35rem',
-                      backgroundColor: '#ecfdf5',
-                      border: '1px solid #6ee7b7',
-                      color: '#065f46',
-                      padding: '0.3rem 0.75rem',
-                      borderRadius: '9999px',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      letterSpacing: '0.04em',
-                      marginBottom: '0.6rem',
-                    }}
-                  >
-                    <ShieldCheck size={14} /> ACTIVE MEMBERSHIP
-                  </span>
-                  <h2 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#07463F' }}>
+            /* 1. ACTIVE MEMBERSHIP — HOMEPAGE-INSPIRED EXECUTIVE CTA PASS */
+            <div className={styles.activeDashboard}>
+              <div className={styles.activeDashHeader}>
+                <div className={styles.activeHeaderLeft}>
+                  <div className={styles.liveIndicator}>
+                    <span className={styles.liveDot} /> Active Membership Privileges
+                  </div>
+                  <h2>
                     {subscription.planCode === 'SIX_MONTHS'
                       ? 'Platinum Plan (6 Months)'
                       : 'Gold Plan (3 Months)'}
                   </h2>
+                  <p className={styles.activeDashSub}>
+                    <Award size={16} /> Certified Matrimonial Search &amp; Candidate Access Pass
+                  </p>
                 </div>
-                <Link
-                  href="/members"
-                  style={{
-                    backgroundColor: '#0B5D52',
-                    color: '#ffffff',
-                    padding: '0.6rem 1.25rem',
-                    borderRadius: '6px',
-                    fontWeight: 600,
-                    fontSize: '0.88rem',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                  }}
-                >
-                  Browse Member Directory <ArrowRight size={16} />
+                <Link href="/members" className={styles.btnGold}>
+                  Browse Candidate Profiles <ArrowRight size={16} />
                 </Link>
               </div>
 
-              {/* Status Details Grid */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                  gap: '1.25rem',
-                }}
-              >
-                {/* 1. Subscription Period */}
-                <div
-                  style={{
-                    backgroundColor: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    padding: '1.25rem',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      color: '#0B5D52',
-                      marginBottom: '0.6rem',
-                    }}
-                  >
-                    <Calendar size={18} />
-                    <span style={{ fontSize: '0.88rem', fontWeight: 700 }}>
-                      Validity &amp; Dates
-                    </span>
+              {/* 3 Frosted Metric Cards */}
+              <div className={styles.activeMetricsGrid}>
+                {/* 1. Validity & Term */}
+                <div className={styles.metricCard}>
+                  <div className={styles.metricHead}>
+                    <div className={styles.metricIconWrap}>
+                      <Calendar size={18} />
+                    </div>
+                    <span>Term Validity &amp; Timeline</span>
                   </div>
-                  <div style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.6 }}>
-                    <div>
-                      <span style={{ color: '#64748b' }}>Activated: </span>
+                  <div className={styles.metricBody}>
+                    <div className={styles.metricRow}>
+                      <label>Activated On:</label>
                       <strong>{formatDate(subscription.startDate)}</strong>
                     </div>
-                    <div>
-                      <span style={{ color: '#64748b' }}>Expires On: </span>
+                    <div className={styles.metricRow}>
+                      <label>Term Ends On:</label>
                       <strong>{formatDate(subscription.endDate)}</strong>
                     </div>
-                    {subscription.gracePeriodEndDate && (
-                      <div style={{ fontSize: '0.8rem', color: '#047857', marginTop: '0.3rem' }}>
-                        7-day browsing grace period through{' '}
-                        {formatDate(subscription.gracePeriodEndDate)}
-                      </div>
-                    )}
                   </div>
                 </div>
 
                 {/* 2. Contact View Credits */}
-                <div
-                  style={{
-                    backgroundColor: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    borderRadius: '8px',
-                    padding: '1.25rem',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      color: '#065f46',
-                      marginBottom: '0.6rem',
-                    }}
-                  >
-                    <Phone size={18} />
-                    <span style={{ fontSize: '0.88rem', fontWeight: 700 }}>
-                      Contact Unlocking Credits
-                    </span>
-                  </div>
-                  {credits ? (
-                    <div>
-                      <div
-                        style={{
-                          fontSize: '1.4rem',
-                          fontWeight: 800,
-                          color: '#065f46',
-                          marginBottom: '0.2rem',
-                        }}
-                      >
-                        {credits.creditsRemaining}{' '}
-                        <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#047857' }}>
-                          / {credits.creditsAllocated} Available
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '0.8rem', color: '#047857', lineHeight: 1.45 }}>
-                        Cycle #{credits.cycleNumber} • {credits.creditsUsed} used this cycle.
-                        <br />
-                        Viewing an already unlocked candidate costs 0 credits forever.
-                      </p>
+                <div className={styles.metricCard}>
+                  <div className={styles.metricHead}>
+                    <div className={styles.metricIconWrap}>
+                      <Phone size={18} />
                     </div>
-                  ) : (
-                    <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                      50 credits allocated per monthly cycle.
+                    <span>Contact Unlocking Credits</span>
+                  </div>
+                  <div className={styles.metricBody}>
+                    <div className={styles.metricCreditsBig}>
+                      {credits ? credits.creditsRemaining : 50}{' '}
+                      <span className={styles.metricCreditsSub}>
+                        / {credits ? credits.creditsAllocated : 50} Available
+                      </span>
+                    </div>
+                    <div
+                      className={styles.creditProgressBar}
+                      role="progressbar"
+                      aria-valuenow={creditRemaining}
+                      aria-valuemin="0"
+                      aria-valuemax={creditAllocated}
+                    >
+                      <i style={{ width: `${creditPercent}%` }} />
+                    </div>
+                    <p style={{ fontSize: '0.82rem', color: 'rgba(255, 255, 255, 0.72)', margin: 0, lineHeight: 1.45 }}>
+                      Cycle #{credits?.cycleNumber || 1} • {credits?.creditsUsed || 0} unlocked this cycle.
+                      <br />
+                      Re-viewing unlocked candidates costs 0 credits forever.
                     </p>
-                  )}
+                  </div>
                 </div>
 
                 {/* 3. Directory Access Privileges */}
-                <div
-                  style={{
-                    backgroundColor: '#fbf6ec',
-                    border: '1px solid #dfcc9f',
-                    borderRadius: '8px',
-                    padding: '1.25rem',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      color: '#ad8a45',
-                      marginBottom: '0.6rem',
-                    }}
-                  >
-                    <CheckCircle2 size={18} />
-                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#07463F' }}>
-                      Directory Privileges
-                    </span>
+                <div className={styles.metricCard}>
+                  <div className={styles.metricHead}>
+                    <div className={styles.metricIconWrap}>
+                      <ShieldCheck size={18} />
+                    </div>
+                    <span>Certified Member Privileges</span>
                   </div>
-                  <ul
-                    style={{
-                      listStyle: 'none',
-                      padding: 0,
-                      margin: 0,
-                      fontSize: '0.85rem',
-                      color: '#343434',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Check size={14} color="#0B5D52" /> Full Jathagam &amp; candidate browsing
+                  <ul className={styles.metricList}>
+                    <li>
+                      <span className={styles.metricCheckIcon}><Check size={12} strokeWidth={3} /></span>
+                      <span>Unrestricted Verified Profile Access</span>
                     </li>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Check size={14} color="#0B5D52" /> Zero repeat credit deductions
+                    <li>
+                      <span className={styles.metricCheckIcon}><Check size={12} strokeWidth={3} /></span>
+                      <span>Zero Repeat Deductions for Unlocked Contacts</span>
                     </li>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Check size={14} color="#0B5D52" /> 7-day post-expiry browsing grace period
+                    <li>
+                      <span className={styles.metricCheckIcon}><Check size={12} strokeWidth={3} /></span>
+                      <span>7-Day Complimentary Post-Expiry Grace Period</span>
                     </li>
                   </ul>
                 </div>
@@ -805,481 +608,116 @@ export default function MembershipPage() {
             </div>
           ) : subscriptionStatus === 'grace_period' ? (
             /* Grace Period Active State */
-            <div
-              style={{
-                backgroundColor: '#fffbeb',
-                border: '1.5px solid #fde68a',
-                borderRadius: '12px',
-                padding: '2rem',
-                boxShadow: '0 4px 18px rgba(217, 119, 6, 0.08)',
-              }}
-            >
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  backgroundColor: '#fef3c7',
-                  border: '1px solid #fcd34d',
-                  color: '#92400e',
-                  padding: '0.3rem 0.75rem',
-                  borderRadius: '9999px',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  marginBottom: '0.75rem',
-                }}
-              >
-                <Clock size={14} /> 7-DAY BROWSING GRACE PERIOD
-              </span>
-              <h2
-                style={{
-                  fontSize: '1.35rem',
-                  fontWeight: 700,
-                  color: '#78350f',
-                  marginBottom: '0.5rem',
-                }}
-              >
-                Your Active Term Has Ended
-              </h2>
-              <p
-                style={{
-                  fontSize: '0.92rem',
-                  color: '#92400e',
-                  maxWidth: '680px',
-                  lineHeight: 1.6,
-                  marginBottom: '1.25rem',
-                }}
-              >
-                Your membership ended on <strong>{formatDate(subscription?.endDate)}</strong>. You are currently browsing in your complimentary 7-day grace period ending on <strong>{formatDate(subscription?.gracePeriodEndDate)}</strong>. Directory viewing remains active; new contact unlocking is paused until plan renewal.
+            <div className={styles.gracePanel}>
+              <span className={styles.kicker} style={{ color: 'var(--gold)' }}>7-Day Browsing Grace Period</span>
+              <h2 style={{ marginTop: '0.4rem' }}>Your Active Term Has Ended</h2>
+              <p>
+                Your membership ended on <strong>{formatDate(subscription?.endDate)}</strong>. You are currently browsing in your complimentary 7-day grace period ending on <strong>{formatDate(subscription?.gracePeriodEndDate)}</strong>. Profile viewing remains active; new contact unlocking is paused until plan renewal.
               </p>
-              <Link
-                href="/members"
-                style={{
-                  backgroundColor: '#0B5D52',
-                  color: '#ffffff',
-                  padding: '0.6rem 1.25rem',
-                  borderRadius: '6px',
-                  fontWeight: 600,
-                  fontSize: '0.88rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                }}
-              >
-                Browse Directory in Grace Period <ArrowRight size={16} />
+              <Link href="/members" className={styles.btnPrimary}>
+                Browse Profiles in Grace Period <ArrowRight size={16} />
               </Link>
             </div>
           ) : subscriptionStatus === 'expired' ? (
             /* Expired State */
-            <div
-              style={{
-                backgroundColor: '#ffffff',
-                border: '1.5px solid #fecaca',
-                borderRadius: '12px',
-                padding: '2rem',
-                boxShadow: '0 4px 18px rgba(239, 68, 68, 0.06)',
-              }}
-            >
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  backgroundColor: '#fee2e2',
-                  border: '1px solid #fca5a5',
-                  color: '#991b1b',
-                  padding: '0.3rem 0.75rem',
-                  borderRadius: '9999px',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  marginBottom: '0.75rem',
-                }}
-              >
-                <AlertCircle size={14} /> SUBSCRIPTION EXPIRED
-              </span>
-              <h2
-                style={{
-                  fontSize: '1.35rem',
-                  fontWeight: 700,
-                  color: '#07463F',
-                  marginBottom: '0.5rem',
-                }}
-              >
-                Membership &amp; Grace Period Expired
-              </h2>
-              <p
-                style={{
-                  fontSize: '0.92rem',
-                  color: '#64748b',
-                  maxWidth: '680px',
-                  lineHeight: 1.6,
-                  marginBottom: '0.75rem',
-                }}
-              >
+            <div className={styles.expiredPanel}>
+              <span className={styles.kicker} style={{ color: 'var(--rose-deep)' }}>Subscription Expired</span>
+              <h2 style={{ marginTop: '0.4rem' }}>Membership &amp; Grace Period Expired</h2>
+              <p>
                 Your subscription and 7-day browsing grace period expired on{' '}
-                <strong>{formatDate(subscription?.gracePeriodEndDate || subscription?.endDate)}</strong>. Member directory privileges and contact view credits are currently disabled.
+                <strong>{formatDate(subscription?.gracePeriodEndDate || subscription?.endDate)}</strong>. Candidate contact view credits are currently disabled.
               </p>
-              <p style={{ fontSize: '0.85rem', color: '#0B5D52', fontWeight: 600 }}>
-                Choose a plan below to renew your membership via secure test sandbox checkout.
+              <p style={{ fontSize: '0.94rem', color: 'var(--rose-deep)', fontWeight: 600, marginBottom: '1.25rem' }}>
+                Choose a plan below to renew your membership and unlock verified candidate contacts.
               </p>
             </div>
           ) : (
             /* Registered User Without Active Subscription */
-            <div
-              style={{
-                backgroundColor: '#ffffff',
-                border: '1.5px solid #dfcc9f',
-                borderRadius: '12px',
-                padding: '2rem',
-                boxShadow: '0 4px 16px rgba(11, 93, 82, 0.05)',
-              }}
-            >
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  backgroundColor: '#fbf6ec',
-                  border: '1px solid #dfcc9f',
-                  color: '#07463F',
-                  padding: '0.3rem 0.75rem',
-                  borderRadius: '9999px',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  marginBottom: '0.75rem',
-                }}
-              >
-                <Sparkles size={14} /> REGISTERED ACCOUNT • NO ACTIVE PLAN
-              </span>
-              <h2
-                style={{
-                  fontSize: '1.35rem',
-                  fontWeight: 700,
-                  color: '#07463F',
-                  marginBottom: '0.5rem',
-                }}
-              >
-                Welcome, {currentUser?.name || 'Member'}
-              </h2>
-              <p
-                style={{
-                  fontSize: '0.92rem',
-                  color: '#5e5952',
-                  maxWidth: '660px',
-                  lineHeight: 1.6,
-                }}
-              >
-                Your account is registered. To access verified candidate profiles and receive 50 monthly contact credits, select our Gold or Platinum plan below using secure sandbox checkout.
+            <div className={styles.registeredPanel}>
+              <span className={styles.kicker}>Registered Account • No Active Plan</span>
+              <h2 style={{ marginTop: '0.4rem' }}>Welcome, {currentUser?.name || 'Member'}</h2>
+              <p>
+                Your account is registered. To access verified candidate profiles and receive 50 monthly contact credits, select our Gold or Platinum plan below.
               </p>
             </div>
           )}
         </div>
 
-        {/* SECTION 2: Checkout Notice */}
-        {isCheckoutEnabled ? (
-          <div
-            style={{
-              backgroundColor: '#fdfbf7',
-              border: '1.5px solid #dfcc9f',
-              borderRadius: '10px',
-              padding: '1.25rem 1.5rem',
-              marginBottom: '3rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-            }}
-          >
-            <div
-              style={{
-                width: '42px',
-                height: '42px',
-                borderRadius: '50%',
-                backgroundColor: '#fbf6ec',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                color: '#C5A15B',
-              }}
-            >
-              <CreditCard size={20} />
-            </div>
-            <div>
-              <h3
-                style={{
-                  fontSize: '0.96rem',
-                  fontWeight: 700,
-                  color: '#07463F',
-                  marginBottom: '0.2rem',
-                }}
-              >
-                Razorpay Test Mode Sandbox Environment
-              </h3>
-              <p style={{ fontSize: '0.86rem', color: '#5e5952', lineHeight: 1.5 }}>
-                Online checkout is configured with Razorpay Test Mode credentials for sandbox verification. Nominal amounts (₹1.00 and ₹2.00) are temporary test values and not official membership tariffs. Production payment checkout remains disabled until public tariffs are officially released.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div
-            style={{
-              backgroundColor: '#fdfbf7',
-              border: '1.5px solid #dfcc9f',
-              borderRadius: '10px',
-              padding: '1.25rem 1.5rem',
-              marginBottom: '3rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-            }}
-          >
-            <div
-              style={{
-                width: '42px',
-                height: '42px',
-                borderRadius: '50%',
-                backgroundColor: '#fbf6ec',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                color: '#C5A15B',
-              }}
-            >
-              <Lock size={20} />
-            </div>
-            <div>
-              <h3
-                style={{
-                  fontSize: '0.96rem',
-                  fontWeight: 700,
-                  color: '#07463F',
-                  marginBottom: '0.2rem',
-                }}
-              >
-                Online Subscription Checkout Notice
-              </h3>
-              <p style={{ fontSize: '0.86rem', color: '#5e5952', lineHeight: 1.5 }}>
-                Online payment gateway checkout is currently unavailable while official pricing tariffs and payment gateway setup are finalized. Registration, profile creation, and horoscope entry remain 100% free.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* SECTION 3: Membership Plan Comparison Cards */}
-        <div style={{ marginBottom: '3.5rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h2
-              style={{
-                fontFamily: 'Playfair Display, Georgia, serif',
-                fontSize: '1.8rem',
-                fontWeight: 700,
-                color: '#07463F',
-                marginBottom: '0.5rem',
-              }}
-            >
-              Subscription Plan Options
-            </h2>
-            <p style={{ fontSize: '0.92rem', color: '#5e5952' }}>
-              Choose quarterly or half-yearly terms with 50 contact unlocking credits per monthly cycle.
-            </p>
+        {/* ==========================================================================
+            2. SUBSCRIPTION PLAN OPTIONS — EXACT HOMEPAGE WORDINGS & STYLE
+            ========================================================================== */}
+        <section className={styles.plansSection} aria-labelledby="plans-heading">
+          <div className={styles.sectionHeading}>
+            <span className={styles.kicker}>Membership</span>
+            <h2 id="plans-heading">Choose how long you search</h2>
           </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: '1.75rem',
-              alignItems: 'stretch',
-            }}
-          >
+          <div className={styles.plansGrid}>
             {MEMBERSHIP_PLANS.map((plan) => {
               const PlanIcon = plan.icon;
               const isCurrentActive = hasSubscription && subscriptionStatus === 'active';
               const isProcessing = processingPlan === plan.code;
 
               return (
-                <div
+                <article
                   key={plan.code}
-                  style={{
-                    backgroundColor: '#ffffff',
-                    border: plan.featured ? '2px solid #C5A15B' : '1px solid #e5ded2',
-                    borderRadius: '14px',
-                    padding: '2rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    boxShadow: plan.featured
-                      ? '0 8px 24px rgba(197, 161, 91, 0.14)'
-                      : '0 4px 12px rgba(11, 93, 82, 0.04)',
-                    position: 'relative',
-                  }}
+                  className={`${styles.planCard} ${plan.featured ? styles.planFeatured : ''}`}
                 >
                   {plan.featured && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '-12px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        backgroundColor: '#C5A15B',
-                        color: '#ffffff',
-                        padding: '0.25rem 0.85rem',
-                        borderRadius: '9999px',
-                        fontSize: '0.74rem',
-                        fontWeight: 700,
-                        letterSpacing: '0.04em',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                      }}
-                    >
-                      <Sparkles size={12} /> {plan.badge}
-                    </div>
+                    <span className={styles.planTag}>
+                      {plan.tag}
+                    </span>
                   )}
 
                   <div>
                     {/* Header */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.75rem',
-                        marginBottom: '0.75rem',
-                        marginTop: plan.featured ? '0.5rem' : 0,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '42px',
-                          height: '42px',
-                          borderRadius: '8px',
-                          backgroundColor: plan.featured ? '#fbf6ec' : '#e8f4f2',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: plan.featured ? '#C5A15B' : '#0B5D52',
-                        }}
-                      >
-                        <PlanIcon size={22} strokeWidth={1.8} />
+                    <header className={styles.planHead}>
+                      <span className={styles.planIcon}>
+                        <PlanIcon size={24} strokeWidth={1.6} />
+                      </span>
+                      <div>
+                        <h3>{plan.name}</h3>
+                        <p>{plan.blurb}</p>
+                      </div>
+                    </header>
+
+                    {/* Exact Homepage 2-Box Stat Body */}
+                    <div className={styles.planBody}>
+                      <div>
+                        <strong>{plan.term}</strong>
+                        <span>of full profile<br />access</span>
                       </div>
                       <div>
-                        <h3
-                          style={{
-                            fontSize: '1.25rem',
-                            fontWeight: 700,
-                            color: '#07463F',
-                            lineHeight: 1.2,
-                          }}
-                        >
-                          {plan.name}
-                        </h3>
-                        <p style={{ fontSize: '0.82rem', color: '#64748b' }}>
-                          {plan.tierSubtitle}
-                        </p>
+                        <strong>{plan.total}</strong>
+                        <span>contact credits<br />in total</span>
                       </div>
                     </div>
 
-                    {/* Price Box with Sandbox Badge */}
-                    <div
-                      style={{
-                        backgroundColor: '#f8fafc',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        padding: '0.9rem 1.1rem',
-                        marginBottom: '1.5rem',
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: '1.15rem',
-                          fontWeight: 700,
-                          color: '#07463F',
-                        }}
-                      >
-                        {plan.priceText}
-                      </div>
-                      <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.15rem' }}>
-                        {plan.priceSub}
-                      </div>
-                      {isCheckoutEnabled && plan.sandboxPriceText && (
-                        <div
-                          style={{
-                            marginTop: '0.5rem',
-                            padding: '0.35rem 0.6rem',
-                            backgroundColor: '#fef3c7',
-                            border: '1px dashed #d97706',
-                            borderRadius: '6px',
-                            fontSize: '0.74rem',
-                            color: '#92400e',
-                            fontWeight: 600,
-                            lineHeight: 1.4,
-                          }}
-                        >
-                          Sandbox Test Price: {plan.sandboxPriceText}
-                          <br />
-                          <span style={{ fontWeight: 400, fontSize: '0.7rem', color: '#78350f' }}>
-                            ({plan.sandboxNote})
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Features List */}
-                    <ul
-                      style={{
-                        listStyle: 'none',
-                        padding: 0,
-                        margin: '0 0 1.75rem 0',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.65rem',
-                      }}
-                    >
+                    {/* Features List with Homepage Bullets */}
+                    <ul className={styles.planFeaturesList}>
                       {plan.features.map((feat) => (
-                        <li
-                          key={feat}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: '0.5rem',
-                            fontSize: '0.88rem',
-                            color: '#334155',
-                            lineHeight: 1.45,
-                          }}
-                        >
-                          <ShieldCheck
-                            size={16}
-                            color="#0B5D52"
-                            style={{ flexShrink: 0, marginTop: '2px' }}
-                          />
+                        <li key={feat}>
+                          <span className={styles.featureBullet}>
+                            <Check size={13} strokeWidth={3} />
+                          </span>
                           <span>{feat}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  {/* Action / Checkout Button */}
-                  <div>
+                  {/* Foot Action */}
+                  <div className={styles.planFoot}>
+                    <p className={styles.priceLabel}>
+                      Pricing announced soon
+                    </p>
+
                     {isCurrentActive ? (
                       <button
                         type="button"
                         disabled
-                        style={{
-                          width: '100%',
-                          backgroundColor: '#f1f5f9',
-                          color: '#64748b',
-                          border: '1px solid #cbd5e1',
-                          padding: '0.75rem 1rem',
-                          borderRadius: '6px',
-                          fontSize: '0.88rem',
-                          fontWeight: 600,
-                          cursor: 'not-allowed',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.4rem',
-                        }}
+                        className={styles.btnOutline}
+                        style={{ cursor: 'not-allowed', opacity: 0.65 }}
                       >
                         <Check size={16} /> Plan Already Active
                       </button>
@@ -1287,21 +725,8 @@ export default function MembershipPage() {
                       <button
                         type="button"
                         disabled
-                        style={{
-                          width: '100%',
-                          backgroundColor: '#f1f5f9',
-                          color: '#64748b',
-                          border: '1px solid #cbd5e1',
-                          padding: '0.75rem 1rem',
-                          borderRadius: '6px',
-                          fontSize: '0.88rem',
-                          fontWeight: 600,
-                          cursor: 'not-allowed',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.4rem',
-                        }}
+                        className={styles.btnOutline}
+                        style={{ cursor: 'not-allowed', opacity: 0.65 }}
                       >
                         <Lock size={15} /> Checkout Unavailable
                       </button>
@@ -1309,21 +734,8 @@ export default function MembershipPage() {
                       <button
                         type="button"
                         disabled
-                        style={{
-                          width: '100%',
-                          backgroundColor: '#0B5D52',
-                          color: '#ffffff',
-                          border: 'none',
-                          padding: '0.75rem 1rem',
-                          borderRadius: '6px',
-                          fontSize: '0.88rem',
-                          fontWeight: 600,
-                          cursor: 'wait',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.4rem',
-                        }}
+                        className={styles.btnPrimary}
+                        style={{ cursor: 'wait' }}
                       >
                         <RefreshCw size={15} className="animate-spin" /> Processing Payment...
                       </button>
@@ -1333,108 +745,132 @@ export default function MembershipPage() {
                         onClick={() => handleInitiateCheckout(plan)}
                         disabled={Boolean(processingPlan)}
                         data-plan-btn={plan.code}
-                        style={{
-                          width: '100%',
-                          backgroundColor: plan.featured ? '#0B5D52' : '#ffffff',
-                          color: plan.featured ? '#ffffff' : '#07463F',
-                          border: plan.featured ? 'none' : '1.5px solid #0B5D52',
-                          padding: '0.75rem 1rem',
-                          borderRadius: '6px',
-                          fontSize: '0.88rem',
-                          fontWeight: 600,
-                          cursor: processingPlan ? 'not-allowed' : 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.4rem',
-                          boxShadow: plan.featured ? '0 2px 8px rgba(11, 93, 82, 0.2)' : 'none',
-                        }}
+                        className={plan.featured ? styles.btnGold : styles.btnPrimary}
                       >
-                        <Sparkles size={15} /> Select Plan (Test Checkout)
+                        Get started <ArrowRight size={16} />
                       </button>
                     )}
-                    <p
-                      style={{
-                        fontSize: '0.74rem',
-                        color: '#94a3b8',
-                        textAlign: 'center',
-                        marginTop: '0.45rem',
-                      }}
-                    >
+                    <p className={styles.planFootNote}>
                       {isCurrentActive
                         ? 'Renewal rules will open upon term expiry'
                         : !isCheckoutEnabled
                         ? 'Tariffs published upon payment gateway launch'
-                        : 'Simulated Razorpay sandbox payment'}
+                        : 'Instant digital activation upon order completion'}
                     </p>
                   </div>
+                </article>
+              );
+            })}
+          </div>
+
+          <p className={styles.note}>
+            Registration is free. Online payments open once pricing is finalised.
+          </p>
+        </section>
+
+        {/* SECTION 3: Interactive FAQ Accordion */}
+        <section className={styles.faqSection} aria-labelledby="faq-heading">
+          <div className={styles.faqSectionHeader}>
+            <span className={styles.kicker}>Common Inquiries</span>
+            <h3 id="faq-heading" style={{ marginTop: '0.6rem' }}>Frequently Asked Questions</h3>
+            <p>Everything you need to know about contact unlocking and membership terms</p>
+          </div>
+
+          <div className={styles.accordionList}>
+            {FAQ_ITEMS.map((item, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div
+                  key={item.q}
+                  className={`${styles.accordionItem} ${isOpen ? styles.accordionItemOpen : ''}`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleFaq(idx)}
+                    className={styles.accordionTrigger}
+                    aria-expanded={isOpen}
+                  >
+                    <span>{item.q}</span>
+                    <span className={`${styles.accordionChevron} ${isOpen ? styles.accordionChevronRotated : ''}`}>
+                      <ChevronDown size={16} />
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <div className={styles.accordionBody}>
+                      <p>{item.a}</p>
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
-        </div>
+        </section>
 
-        {/* SECTION 4: Credit System Integrity & Principles */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #e5ded2',
-            borderRadius: '12px',
-            padding: '2rem',
-            boxShadow: '0 2px 10px rgba(11, 93, 82, 0.03)',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.6rem',
-              marginBottom: '1.25rem',
-              color: '#07463F',
-            }}
-          >
-            <HelpCircle size={22} color="#C5A15B" />
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>
-              Dignified &amp; Transparent Contact Credits Model
-            </h3>
+        {/* ==========================================================================
+            4. THE CARDS BEFORE THE FOOTER — EXACT HOMEPAGE "WHY CHOOSE US" GRID
+            ========================================================================== */}
+        <section className={styles.charterSection} aria-labelledby="charter-heading">
+          <div className={styles.charterHeader}>
+            <span className={styles.kicker}>Platform Integrity</span>
+            <h3 id="charter-heading" style={{ marginTop: '0.6rem' }}>Our Matrimonial Charter</h3>
+            <p>Four dignified principles safeguarding candidate privacy and genuine matrimonial alliances</p>
           </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: '1.5rem',
-              fontSize: '0.88rem',
-              color: '#5e5952',
-              lineHeight: 1.55,
-            }}
-          >
-            <div>
-              <strong style={{ color: '#07463F', display: 'block', marginBottom: '0.25rem' }}>
-                Zero Repeat Deductions
-              </strong>
-              Once you unlock a verified candidate contact, you can re-view it anytime during your membership without consuming another credit.
-            </div>
-            <div>
-              <strong style={{ color: '#07463F', display: 'block', marginBottom: '0.25rem' }}>
-                50 Monthly Credits
-              </strong>
-              Each 30-day monthly cycle provides a fresh quota of 50 contact view credits. Unused credits expire at cycle end and do not roll over.
-            </div>
-            <div>
-              <strong style={{ color: '#07463F', display: 'block', marginBottom: '0.25rem' }}>
-                7-Day Browsing Grace Period
-              </strong>
-              If your plan lapses, enjoy a full 7-day grace period to continue browsing eligible candidate profiles before renewal.
-            </div>
-            <div>
-              <strong style={{ color: '#07463F', display: 'block', marginBottom: '0.25rem' }}>
-                Candidate Phone Privacy
-              </strong>
-              Raw telephone numbers are strictly protected and never displayed in directory search cards or public profile listings.
-            </div>
+
+          <div className={styles.whyGrid}>
+            <article>
+              <div className={styles.whyTop}>
+                <div className={styles.featIcon}>
+                  <Zap size={22} />
+                </div>
+                <span className={styles.whyNum}>01</span>
+              </div>
+              <h3>Zero Repeat Deductions</h3>
+              <p>
+                Once you unlock a verified candidate contact, you can re-view and reference it anytime throughout your membership without consuming an additional credit.
+              </p>
+            </article>
+
+            <article>
+              <div className={styles.whyTop}>
+                <div className={styles.featIcon}>
+                  <Phone size={22} />
+                </div>
+                <span className={styles.whyNum}>02</span>
+              </div>
+              <h3>50 Monthly Unlocks</h3>
+              <p>
+                Each 30-day monthly cycle provides a fresh allocation of 50 contact view credits, enabling meaningful family discussions without artificial throttling.
+              </p>
+            </article>
+
+            <article>
+              <div className={styles.whyTop}>
+                <div className={styles.featIcon}>
+                  <Clock size={22} />
+                </div>
+                <span className={styles.whyNum}>03</span>
+              </div>
+              <h3>7-Day Grace Period</h3>
+              <p>
+                If your subscription lapses, you automatically receive a full 7-day complimentary browsing grace period to keep reviewing profiles without interruption.
+              </p>
+            </article>
+
+            <article>
+              <div className={styles.whyTop}>
+                <div className={styles.featIcon}>
+                  <ShieldCheck size={22} />
+                </div>
+                <span className={styles.whyNum}>04</span>
+              </div>
+              <h3>Phone Privacy Shield</h3>
+              <p>
+                Raw telephone numbers are strictly protected and never displayed in candidate search cards, public listing pages, or search engine indexes.
+              </p>
+            </article>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

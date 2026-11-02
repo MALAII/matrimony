@@ -146,6 +146,100 @@ const matrimonialProfileSchema = new mongoose.Schema(
         trim: true,
         maxlength: [100, 'Location cannot exceed 100 characters'],
       },
+      weight: {
+        type: Number, // weight in kg
+        min: [20, 'Weight must be at least 20 kg'],
+        max: [250, 'Weight cannot exceed 250 kg'],
+        default: null,
+      },
+      bloodGroup: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      complexion: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      diet: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      physicalStatus: {
+        type: String,
+        trim: true,
+        default: 'Normal',
+      },
+      disabilityDetails: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      nativity: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      placeOfBirth: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      timeOfBirth: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      presentAddress: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      permanentAddress: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      contactPerson: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      alternatePhone: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+    },
+
+    // 1b. Community & Lineage Details
+    communityDetails: {
+      religion: {
+        type: String,
+        trim: true,
+        maxlength: [50, 'Religion cannot exceed 50 characters'],
+        default: 'Hindu',
+      },
+      caste: {
+        type: String,
+        trim: true,
+        maxlength: [100, 'Caste cannot exceed 100 characters'],
+        default: null,
+      },
+      subcaste: {
+        type: String,
+        trim: true,
+        maxlength: [100, 'Subcaste cannot exceed 100 characters'],
+        default: null,
+      },
+      gothram: {
+        type: String,
+        trim: true,
+        maxlength: [100, 'Gothram cannot exceed 100 characters'],
+        default: null,
+      },
     },
 
     // 2. Education and Professional Details
@@ -179,6 +273,72 @@ const matrimonialProfileSchema = new mongoose.Schema(
 
     // 3. Family Details
     familyDetails: {
+      fatherName: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      fatherAlive: {
+        type: String,
+        trim: true,
+        set: (v) => (typeof v === 'boolean' ? (v ? 'Yes' : 'No') : (typeof v === 'string' && v.trim() ? (v.trim().toLowerCase() === 'no' ? 'No' : 'Yes') : null)),
+        enum: ['Yes', 'No', null],
+        default: 'Yes',
+      },
+      fatherOccupation: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      motherName: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      motherAlive: {
+        type: String,
+        trim: true,
+        set: (v) => (typeof v === 'boolean' ? (v ? 'Yes' : 'No') : (typeof v === 'string' && v.trim() ? (v.trim().toLowerCase() === 'no' ? 'No' : 'Yes') : null)),
+        enum: ['Yes', 'No', null],
+        default: 'Yes',
+      },
+      motherOccupation: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      marriedElderBrothers: {
+        type: Number,
+        default: 0,
+      },
+      unmarriedElderBrothers: {
+        type: Number,
+        default: 0,
+      },
+      marriedYoungerBrothers: {
+        type: Number,
+        default: 0,
+      },
+      unmarriedYoungerBrothers: {
+        type: Number,
+        default: 0,
+      },
+      marriedElderSisters: {
+        type: Number,
+        default: 0,
+      },
+      unmarriedElderSisters: {
+        type: Number,
+        default: 0,
+      },
+      marriedYoungerSisters: {
+        type: Number,
+        default: 0,
+      },
+      unmarriedYoungerSisters: {
+        type: Number,
+        default: 0,
+      },
       familyInformation: {
         type: String,
         trim: true,
@@ -229,6 +389,42 @@ const matrimonialProfileSchema = new mongoose.Schema(
         type: String,
         trim: true,
         maxlength: [100, 'Occupation preference cannot exceed 100 characters'],
+      },
+      jobRequirement: {
+        type: String,
+        trim: true,
+        enum: ['Must', 'Optional', 'Not required', null],
+        default: null,
+      },
+      maritalStatusPreference: {
+        type: [String],
+        default: [],
+      },
+      dietPreference: {
+        type: [String],
+        default: [],
+      },
+      horoscopeRequired: {
+        type: String,
+        trim: true,
+        set: (v) => (v === 'Must Match' ? 'Yes' : v === 'Not Necessary' ? 'No' : v),
+        enum: ['Yes', 'No', 'Must Match', 'Not Necessary', "Doesn't Matter", null],
+        default: 'Yes',
+      },
+      castePreference: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      subcastePreference: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      incomePreference: {
+        type: String,
+        trim: true,
+        default: null,
       },
       otherPreferences: {
         type: String,
@@ -281,6 +477,147 @@ const matrimonialProfileSchema = new mongoose.Schema(
         'Candidate profile cannot exceed a maximum of 3 photos',
       ],
       default: [],
+    },
+
+    // 6. Astrological Details (Jathagam / Prokerala Integration)
+    horoscope: {
+      requestStatus: {
+        type: String,
+        enum: ['none', 'pending', 'processing', 'completed', 'failed'],
+        default: 'none',
+      },
+      requestedAt: {
+        type: Date,
+        default: null,
+      },
+      processedAt: {
+        type: Date,
+        default: null,
+      },
+      failedReason: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      isGenerated: {
+        type: Boolean,
+        default: false,
+      },
+      isSimulated: {
+        type: Boolean,
+        default: false,
+      },
+      generatedAt: {
+        type: Date,
+        default: null,
+      },
+      timeOfBirth: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      placeOfBirth: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      birthCoordinates: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      timezone: {
+        type: String,
+        trim: true,
+        default: '+05:30',
+      },
+      rasi: {
+        type: String,
+        trim: true,
+        default: null,
+        index: true,
+      },
+      nakshatram: {
+        type: String,
+        trim: true,
+        default: null,
+        index: true,
+      },
+      padam: {
+        type: Number,
+        min: 1,
+        max: 4,
+        default: null,
+      },
+      lagnam: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      dosham: {
+        hasChevvaiDosham: {
+          type: Boolean,
+          default: false,
+        },
+        hasNagaDosham: {
+          type: Boolean,
+          default: false,
+        },
+        doshamSummary: {
+          type: String,
+          trim: true,
+          default: 'None',
+        },
+        description: {
+          type: String,
+          trim: true,
+          default: null,
+        },
+      },
+      dasaBalance: {
+        text: {
+          type: String,
+          trim: true,
+          default: null,
+        },
+        planet: {
+          type: String,
+          trim: true,
+          default: null,
+        },
+        years: {
+          type: Number,
+          default: null,
+        },
+        months: {
+          type: Number,
+          default: null,
+        },
+        days: {
+          type: Number,
+          default: null,
+        },
+      },
+      rasiChartSvg: {
+        type: String,
+        default: null,
+      },
+      navamsaChartSvg: {
+        type: String,
+        default: null,
+      },
+      rasiChartBoxes: {
+        type: [String],
+        default: () => Array(12).fill(''),
+      },
+      navamsaChartBoxes: {
+        type: [String],
+        default: () => Array(12).fill(''),
+      },
+      attribution: {
+        type: String,
+        default: 'Astrological calculations powered by Prokerala Astrology API',
+      },
     },
   },
   {

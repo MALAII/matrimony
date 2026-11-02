@@ -1,68 +1,202 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Lock, Hourglass } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowRight,
+  BadgeCheck,
+  Briefcase,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  CreditCard,
+  GraduationCap,
+  Heart,
+  Hourglass,
+  KeyRound,
+  Languages,
+  Lock,
+  MapPin,
+  Phone,
+  RotateCcw,
+  Ruler,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+  Users,
+  X,
+  Compass,
+  Star,
+  CheckCircle2,
+} from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { getMemberDirectoryApi, unlockMemberContactApi } from '@/lib/api';
+import styles from './members.module.css';
+
+const RASI_OPTIONS = [
+  'Mesham (Aries)', 'Rishabam (Taurus)', 'Mithunam (Gemini)', 'Kadagam (Cancer)',
+  'Simmam (Leo)', 'Kanni (Virgo)', 'Thulaam (Libra)', 'Viruchigam (Scorpio)',
+  'Dhanusu (Sagittarius)', 'Magaram (Capricorn)', 'Kumbam (Aquarius)', 'Meenam (Pisces)',
+];
+
+const NAKSHATRAM_OPTIONS = [
+  'Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashirsha', 'Ardra',
+  'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni', 'Uttara Phalguni',
+  'Hasta', 'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha',
+  'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha',
+  'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati',
+];
+
+const POPULAR_CASTES = [
+  'Vanniyar',
+  'Mudaliar',
+  'Pillai',
+  'Chettiar',
+  'Brahmin - Iyer',
+  'Brahmin - Iyengar',
+  'Nadar',
+  'Naidu',
+  'Reddiar',
+  'Viswakarma',
+  'Kongu Vellalar',
+  'Thevar / Mukkulathor',
+  'Sengunthar / Kaikolar',
+  'Yadava',
+  'Gounder',
+  'Sourashtra',
+  'Devanga',
+  'Adidravidar',
+  'Naicker',
+  'Muthuraja',
+  'Intercaste',
+];
+
+const EMPTY_FILTERS = {
+  gender: '',
+  minAge: '',
+  maxAge: '',
+  minHeight: '',
+  maxHeight: '',
+  maritalStatus: '',
+  location: '',
+  education: '',
+  occupation: '',
+  religion: '',
+  caste: '',
+  subcaste: '',
+  gothram: '',
+  rasi: '',
+  nakshatram: '',
+  diet: '',
+  dosham: '',
+};
+
+const FILTER_LABELS = {
+  gender: 'Looking For',
+  maritalStatus: 'Status',
+  location: 'City / Location',
+  education: 'Education',
+  occupation: 'Profession',
+  religion: 'Religion',
+  caste: 'Caste',
+  subcaste: 'Subcaste',
+  gothram: 'Gothram',
+  rasi: 'Rasi',
+  nakshatram: 'Nakshatram',
+  diet: 'Diet',
+  dosham: 'Dosham Status',
+};
 
 function formatDateDisplay(dateVal) {
   if (!dateVal) return null;
   const d = new Date(dateVal);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString('en-IN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  return d.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function pageWindow(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages = new Set([1, total, current, current - 1, current + 1]);
+  const sorted = [...pages].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b);
+  const out = [];
+  sorted.forEach((p, i) => {
+    if (i > 0 && p - sorted[i - 1] > 1) out.push('…');
+    out.push(p);
   });
+  return out;
+}
+
+function CopyButton({ value }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* clipboard unavailable */
+    }
+  };
+  return (
+    <button type="button" className={styles.iconBtn} onClick={copy} aria-label="Copy phone number" title="Copy to clipboard">
+      {copied ? <Check size={14} color="#15803d" /> : <Copy size={14} />}
+    </button>
+  );
+}
+
+function Fact({ Icon, children }) {
+  if (!children) return null;
+  return (
+    <li>
+      <Icon size={14} aria-hidden="true" />
+      <span>{children}</span>
+    </li>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className={`${styles.card} ${styles.skeleton}`} aria-hidden="true">
+      <div className={styles.skPhoto} />
+      <div className={styles.cardBody}>
+        <div className={styles.skLine} style={{ width: '70%' }} />
+        <div className={styles.skLine} style={{ width: '90%' }} />
+        <div className={styles.skLine} style={{ width: '60%' }} />
+        <div className={styles.skLine} style={{ width: '80%' }} />
+      </div>
+    </div>
+  );
 }
 
 export default function MemberDirectoryPage() {
   const router = useRouter();
+  const { currentUser } = useAuth();
 
-  // Directory Data, Credit Summary & Pagination State
+  // Directory data, credit summary & pagination
   const [profiles, setProfiles] = useState([]);
   const [subscriptionAccess, setSubscriptionAccess] = useState(null);
   const [creditSummary, setCreditSummary] = useState(null);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 12,
-    totalRecords: 0,
-    totalPages: 1,
-  });
+  const [pagination, setPagination] = useState({ page: 1, limit: 12, totalRecords: 0, totalPages: 1 });
 
-  // Per-card Contact Unlock State (phone numbers never preloaded)
+  // Per-card contact unlock state
   const [unlockingByProfileId, setUnlockingByProfileId] = useState({});
   const [unlockedContactsByProfileId, setUnlockedContactsByProfileId] = useState({});
   const [unlockErrorByProfileId, setUnlockErrorByProfileId] = useState({});
 
-  // Search & Filter Controls
+  // Search & filters
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(12);
+  const [form, setForm] = useState(EMPTY_FILTERS);
+  const [activeFilters, setActiveFilters] = useState(EMPTY_FILTERS);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Structured Filters Form State
-  const [filterGender, setFilterGender] = useState('');
-  const [filterMinAge, setFilterMinAge] = useState('');
-  const [filterMaxAge, setFilterMaxAge] = useState('');
-  const [filterMaritalStatus, setFilterMaritalStatus] = useState('');
-  const [filterLocation, setFilterLocation] = useState('');
-  const [filterEducation, setFilterEducation] = useState('');
-  const [filterOccupation, setFilterOccupation] = useState('');
-
-  // Active Applied Structured Filters
-  const [activeFilters, setActiveFilters] = useState({
-    gender: '',
-    minAge: '',
-    maxAge: '',
-    maritalStatus: '',
-    location: '',
-    education: '',
-    occupation: '',
-  });
-
-  // Status & Access Gating State
+  // Status & access gating
   const [loading, setLoading] = useState(true);
   const [accessDenialCode, setAccessDenialCode] = useState(null);
   const [accessDenialMessage, setAccessDenialMessage] = useState('');
@@ -81,17 +215,16 @@ export default function MemberDirectoryPage() {
           page: targetPage,
           limit: targetLimit,
           search: targetSearch,
-          gender: targetFilters.gender,
-          minAge: targetFilters.minAge,
-          maxAge: targetFilters.maxAge,
-          maritalStatus: targetFilters.maritalStatus,
-          location: targetFilters.location,
-          education: targetFilters.education,
-          occupation: targetFilters.occupation,
+          ...targetFilters,
         });
 
         if (res.status === 401) {
-          router.replace('/login');
+          setProfiles([]);
+          setSubscriptionAccess(null);
+          setCreditSummary(null);
+          setAccessDenialCode('UNAUTHENTICATED');
+          setAccessDenialMessage('Please sign in or register for a free account to browse matching matrimonial profiles.');
+          setLoading(false);
           return;
         }
 
@@ -100,9 +233,7 @@ export default function MemberDirectoryPage() {
           setSubscriptionAccess(res.subscriptionAccess || null);
           setCreditSummary(null);
           setAccessDenialCode(res.code || 'NO_SUBSCRIPTION');
-          setAccessDenialMessage(
-            res.message || 'An active subscription is required to browse the member directory.'
-          );
+          setAccessDenialMessage(res.message || 'An active subscription is required to browse profiles.');
           setLoading(false);
           return;
         }
@@ -113,72 +244,131 @@ export default function MemberDirectoryPage() {
           setProfiles(res.data || []);
           setSubscriptionAccess(res.subscriptionAccess || null);
           setCreditSummary(res.credits || res.subscriptionAccess?.credits || null);
-          if (res.pagination) {
-            setPagination(res.pagination);
-          }
+          if (res.pagination) setPagination(res.pagination);
         } else {
-          setErrorMessage(res.message || 'Failed to load member directory profiles.');
+          setErrorMessage(res.message || 'Failed to load profiles.');
         }
-      } catch (err) {
+      } catch {
         setErrorMessage('Network connection error while loading member profiles.');
       } finally {
         setLoading(false);
         isFetchingRef.current = false;
       }
     },
-    [router]
+    []
   );
 
   useEffect(() => {
     fetchMembers(page, limit, activeSearch, activeFilters);
   }, [page, limit, activeSearch, activeFilters, fetchMembers]);
 
+  // Lock body scroll while the mobile filter drawer is open
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [drawerOpen]);
+
+  const setField = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+
   const handleApplyFilters = (e) => {
     if (e) e.preventDefault();
     setPage(1);
     setActiveSearch(searchTerm.trim());
     setActiveFilters({
-      gender: filterGender,
-      minAge: filterMinAge,
-      maxAge: filterMaxAge,
-      maritalStatus: filterMaritalStatus,
-      location: filterLocation.trim(),
-      education: filterEducation.trim(),
-      occupation: filterOccupation.trim(),
+      ...form,
+      location: form.location.trim(),
+      education: form.education.trim(),
+      occupation: form.occupation.trim(),
+      caste: form.caste.trim(),
+      subcaste: form.subcaste.trim(),
+      gothram: form.gothram.trim(),
+      diet: form.diet.trim(),
+      dosham: form.dosham.trim(),
     });
+    setDrawerOpen(false);
   };
 
   const handleResetFilters = () => {
     setSearchTerm('');
     setActiveSearch('');
-    setFilterGender('');
-    setFilterMinAge('');
-    setFilterMaxAge('');
-    setFilterMaritalStatus('');
-    setFilterLocation('');
-    setFilterEducation('');
-    setFilterOccupation('');
-    setActiveFilters({
-      gender: '',
-      minAge: '',
-      maxAge: '',
-      maritalStatus: '',
-      location: '',
-      education: '',
-      occupation: '',
-    });
+    setForm(EMPTY_FILTERS);
+    setActiveFilters(EMPTY_FILTERS);
     setPage(1);
   };
 
-  const activeFilterCount = [
-    activeSearch,
-    activeFilters.gender,
-    activeFilters.minAge || activeFilters.maxAge,
-    activeFilters.maritalStatus,
-    activeFilters.location,
-    activeFilters.education,
-    activeFilters.occupation,
-  ].filter(Boolean).length;
+  const removeChip = (keys) => {
+    const list = Array.isArray(keys) ? keys : [keys];
+    if (list.includes('search')) {
+      setSearchTerm('');
+      setActiveSearch('');
+    }
+    const patch = Object.fromEntries(list.filter((k) => k !== 'search').map((k) => [k, '']));
+    setForm((f) => ({ ...f, ...patch }));
+    setActiveFilters((a) => ({ ...a, ...patch }));
+    setPage(1);
+  };
+
+  // Active filter chips
+  const chips = useMemo(() => {
+    const list = [];
+    if (activeSearch) list.push({ id: 'search', keys: 'search', label: `“${activeSearch}”` });
+    Object.keys(FILTER_LABELS).forEach((k) => {
+      if (!activeFilters[k]) return;
+      let shown = activeFilters[k];
+      if (k === 'gender') {
+        shown = activeFilters[k] === 'Female' ? 'Bride' : activeFilters[k] === 'Male' ? 'Groom' : activeFilters[k];
+        list.push({ id: k, keys: k, label: shown });
+        return;
+      }
+      if (k === 'dosham') {
+        shown =
+          activeFilters[k] === 'no_dosham'
+            ? 'Dosham Free / No Chevvai'
+            : activeFilters[k] === 'chevvai'
+            ? 'Chevvai / Sevvai Dosham'
+            : activeFilters[k] === 'rahu_ketu'
+            ? 'Rahu / Ketu Dosham'
+            : activeFilters[k];
+        list.push({ id: k, keys: k, label: shown });
+        return;
+      }
+      list.push({ id: k, keys: k, label: `${FILTER_LABELS[k]}: ${shown}` });
+    });
+    if (activeFilters.minAge || activeFilters.maxAge) {
+      list.push({
+        id: 'age',
+        keys: ['minAge', 'maxAge'],
+        label: `Age: ${activeFilters.minAge || 18}–${activeFilters.maxAge || 'any'}`,
+      });
+    }
+    if (activeFilters.minHeight || activeFilters.maxHeight) {
+      list.push({
+        id: 'height',
+        keys: ['minHeight', 'maxHeight'],
+        label: `Height: ${activeFilters.minHeight || 140}–${activeFilters.maxHeight || 200} cm`,
+      });
+    }
+    return list;
+  }, [activeSearch, activeFilters]);
+
+  const activeFilterCount = chips.length;
+
+  // Sorting profiles client-side
+  const sortedProfiles = useMemo(() => {
+    const list = [...profiles];
+    if (sortBy === 'age_asc') {
+      return list.sort((a, b) => (a.personalDetails?.age || 0) - (b.personalDetails?.age || 0));
+    }
+    if (sortBy === 'age_desc') {
+      return list.sort((a, b) => (b.personalDetails?.age || 0) - (a.personalDetails?.age || 0));
+    }
+    if (sortBy === 'height_desc') {
+      return list.sort((a, b) => (b.personalDetails?.height || 0) - (a.personalDetails?.height || 0));
+    }
+    return list;
+  }, [profiles, sortBy]);
 
   const handleUnlockContact = async (profileId) => {
     if (!profileId || unlockingByProfileId[profileId]) return;
@@ -209,62 +399,36 @@ export default function MemberDirectoryPage() {
         }));
 
         if (res.data.credits) {
-          setCreditSummary((prev) => ({
-            ...(prev || {}),
-            ...res.data.credits,
-          }));
+          setCreditSummary((prev) => ({ ...(prev || {}), ...res.data.credits }));
         }
 
-        setProfiles((prev) =>
-          prev.map((item) =>
-            item.id === profileId ? { ...item, isContactUnlocked: true } : item
-          )
-        );
+        setProfiles((prev) => prev.map((item) => (item.id === profileId ? { ...item, isContactUnlocked: true } : item)));
       } else {
         if (res.credits) {
-          setCreditSummary((prev) => ({
-            ...(prev || {}),
-            ...res.credits,
-          }));
+          setCreditSummary((prev) => ({ ...(prev || {}), ...res.credits }));
         }
 
-        let contextualMessage =
-          res.message || 'Unable to unlock candidate contact number right now.';
+        let contextualMessage = res.message || 'Unable to unlock candidate contact number right now.';
 
         if (res.code === 'CREDITS_EXHAUSTED') {
-          contextualMessage =
-            res.message ||
-            'You have used all 50 contact credits for your current monthly cycle.';
+          contextualMessage = res.message || 'You have used all 50 contact credits for your current monthly cycle.';
         } else if (res.code === 'PHONE_NOT_AVAILABLE') {
-          contextualMessage =
-            'Candidate phone number is not available for this profile. No credit was deducted.';
-        } else if (
-          res.code === 'GRACE_PERIOD_CONTACTS_LOCKED' ||
-          res.code === 'GRACE_PERIOD_CONTACT_RESTRICTED'
-        ) {
-          contextualMessage =
-            'Contact unlocking is disabled during your 7-day grace period. Please renew your subscription.';
+          contextualMessage = 'Candidate phone number is not available for this profile. No credit was deducted.';
+        } else if (res.code === 'GRACE_PERIOD_CONTACTS_LOCKED' || res.code === 'GRACE_PERIOD_CONTACT_RESTRICTED') {
+          contextualMessage = 'Contact unlocking is disabled during your 7-day grace period. Please renew your subscription.';
         } else if (
           res.code === 'NO_SUBSCRIPTION' ||
           res.code === 'SUBSCRIPTION_EXPIRED' ||
           res.code === 'SUBSCRIPTION_REQUIRED'
         ) {
-          contextualMessage =
-            'An active subscription is required to view candidate contact numbers.';
-        } else if (
-          res.code === 'PROFILE_NOT_FOUND' ||
-          res.code === 'PROFILE_NOT_ELIGIBLE'
-        ) {
-          contextualMessage =
-            'This profile is no longer active or eligible for contact unlocking. No credit was deducted.';
+          contextualMessage = 'An active subscription is required to view candidate contact numbers.';
+        } else if (res.code === 'PROFILE_NOT_FOUND' || res.code === 'PROFILE_NOT_ELIGIBLE') {
+          contextualMessage = 'This profile is no longer active or eligible for contact unlocking. No credit was deducted.';
         }
 
-        setUnlockErrorByProfileId((prev) => ({
-          ...prev,
-          [profileId]: contextualMessage,
-        }));
+        setUnlockErrorByProfileId((prev) => ({ ...prev, [profileId]: contextualMessage }));
       }
-    } catch (err) {
+    } catch {
       setUnlockErrorByProfileId((prev) => ({
         ...prev,
         [profileId]: 'Network error while unlocking contact. Please try again.',
@@ -274,627 +438,607 @@ export default function MemberDirectoryPage() {
     }
   };
 
-  // 1. Subscription Access Denied Views (403)
+  /* ------------------------------------------------------------------ */
+  /* Access denied views                                                */
+  /* ------------------------------------------------------------------ */
   if (!loading && accessDenialCode) {
+    const isUnauthenticated = accessDenialCode === 'UNAUTHENTICATED' || !currentUser;
     const isExpired = accessDenialCode === 'SUBSCRIPTION_EXPIRED';
 
     return (
-      <div className="admin-page">
-        <div className="admin-container">
-          <div className="admin-header-area">
-            <div className="admin-title-group">
-              <h1>Member Directory</h1>
-              <p>Explore eligible matrimonial profiles with an active subscription.</p>
-            </div>
-            <Link href="/profile" className="btn-secondary">
-              My Profile
-            </Link>
+      <div className={styles.page}>
+        <section className={styles.gate}>
+          <span className={styles.gateIcon}>
+            {isExpired ? <Hourglass size={34} strokeWidth={1.6} aria-hidden="true" /> : <Lock size={34} strokeWidth={1.6} aria-hidden="true" />}
+          </span>
+          <span className={styles.kicker}>Sacred Matrimonial Registry</span>
+          <h1>
+            {isUnauthenticated
+              ? 'Sign in to Explore Verified Matches'
+              : isExpired
+              ? 'Your Membership Cycle Has Concluded'
+              : 'Active Membership Required to Browse'}
+          </h1>
+          <p>
+            {isUnauthenticated
+              ? 'Sign in with your account or register free to discover auspicious profiles across Tamil Nadu and South India with full privacy safeguards.'
+              : isExpired
+              ? accessDenialMessage ||
+                'Your subscription has expired. Renew your plan to unlock contact credentials and browse full biodata.'
+              : accessDenialMessage ||
+                'Subscribe to a 3-month or 6-month royal plan to unlock direct contact access and astrological porutham details.'}
+          </p>
+          <ul className={styles.gateList}>
+            <li><CheckCircle2 size={16} aria-hidden="true" color="var(--gold)" /> Exhaustive Biodata with Vedic Astrology &amp; Sibling Breakdown</li>
+            <li><CheckCircle2 size={16} aria-hidden="true" color="var(--gold)" /> 50 Contact Credits every 30 days</li>
+            <li><CheckCircle2 size={16} aria-hidden="true" color="var(--gold)" /> Golden Privacy Shield: Phones protected until explicitly unlocked</li>
+          </ul>
+          <div className={styles.gateActions}>
+            {isUnauthenticated ? (
+              <>
+                <Link href="/login?redirect=/members" className={styles.btnPrimary}>Sign In to Account</Link>
+                <Link href="/register" className={styles.btnOutline}>Register Free</Link>
+              </>
+            ) : (
+              <>
+                <Link href="/membership" className={styles.btnPrimary}>
+                  View Membership Plans <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+                <Link href="/" className={styles.btnOutline}>Return Home</Link>
+              </>
+            )}
           </div>
-
-          <div className="admin-state-box">
-            <span
-              className="admin-state-icon"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--primary)',
-              }}
-            >
-              {isExpired ? (
-                <Hourglass size={44} strokeWidth={1.75} aria-hidden="true" />
-              ) : (
-                <Lock size={44} strokeWidth={1.75} aria-hidden="true" />
-              )}
-            </span>
-            <h2 className="admin-state-title">
-              {isExpired
-                ? 'Subscription & Grace Period Expired'
-                : 'Subscription Required to Browse Profiles'}
-            </h2>
-            <p className="admin-state-desc">
-              {isExpired
-                ? accessDenialMessage ||
-                  'Your subscription and 7-day grace period have ended. Expired members cannot access the protected member directory. Please renew your subscription to continue browsing profiles.'
-                : accessDenialMessage ||
-                  'You must have an active 3-month or 6-month subscription before browsing matrimonial profiles in the member directory.'}
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <Link href="/membership" className="btn-primary" style={{ width: 'auto' }}>
-                View Membership Plans
-              </Link>
-              <Link href="/" className="btn-secondary">
-                Return Home
-              </Link>
-            </div>
-          </div>
-        </div>
+        </section>
       </div>
     );
   }
 
   const isActiveAccess = subscriptionAccess?.accessMode === 'active';
   const isGraceAccess = Boolean(subscriptionAccess?.inGracePeriod);
+  const remaining = creditSummary?.creditsRemaining ?? 0;
+  const allocated = creditSummary?.creditsAllocated ?? 50;
+  const creditPct = allocated > 0 ? Math.max(0, Math.min(100, (remaining / allocated) * 100)) : 0;
 
-  return (
-    <div className="admin-page">
-      <div className="admin-container">
-        {/* Page Header */}
-        <div className="admin-header-area">
-          <div className="admin-title-group">
-            <h1>Member Directory</h1>
-            <p>Explore eligible matrimonial profiles. Candidate contact details remain private.</p>
-          </div>
-          <Link href="/profile" className="btn-secondary">
-            Manage My Profile
-          </Link>
-        </div>
+  const filterPanel = (
+    <form onSubmit={handleApplyFilters} className={styles.filterForm}>
+      <div className={styles.filterHead}>
+        <h2><SlidersHorizontal size={17} aria-hidden="true" /> Filter Matches</h2>
+        <button type="button" className={styles.drawerClose} onClick={() => setDrawerOpen(false)} aria-label="Close filters">
+          <X size={20} />
+        </button>
+      </div>
 
-        {/* Active Subscription Monthly Contact Credit Cycle Banner */}
-        {isActiveAccess && creditSummary && (
-          <div className="credit-summary-banner" role="region" aria-label="Monthly Contact Credits">
-            <div className="credit-summary-left">
-              <div className="credit-summary-title">
-                <span>🎟️ Monthly Contact Credits</span>
-                {creditSummary.cycleNumber && (
-                  <span className="badge badge-info">
-                    Cycle {creditSummary.cycleNumber}
-                    {creditSummary.totalCycles ? ` of ${creditSummary.totalCycles}` : ''}
-                  </span>
-                )}
-              </div>
-              <div className="credit-summary-meta">
-                {creditSummary.cycleStart && creditSummary.cycleEnd ? (
-                  <>
-                    Current cycle: <strong>{formatDateDisplay(creditSummary.cycleStart)}</strong> to{' '}
-                    <strong>{formatDateDisplay(creditSummary.cycleEnd)}</strong> • Unused credits do
-                    not carry forward
-                  </>
-                ) : (
-                  '50 contact credits allocated per monthly subscription cycle.'
-                )}
-              </div>
-            </div>
-
-            <div className="credit-summary-stats">
-              <div className="credit-stat-pill credit-stat-pill-highlight">
-                <span className="credit-stat-number">{creditSummary.creditsRemaining ?? 0}</span>
-                <span className="credit-stat-label">
-                  / {creditSummary.creditsAllocated ?? 50} Remaining
-                </span>
-              </div>
-              <div className="credit-stat-pill">
-                <span className="credit-stat-number" style={{ color: '#334155' }}>
-                  {creditSummary.creditsUsed ?? 0}
-                </span>
-                <span className="credit-stat-label">Used This Cycle</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 7-Day Grace Period Notice Banner */}
-        {isGraceAccess && (
-          <div className="alert alert-warning-banner" role="status">
-            <span className="alert-icon">⚠️</span>
-            <div>
-              <strong>7-Day Grace Period Active:</strong> Your subscription term has ended, and you
-              are currently browsing within your 7-day grace period
-              {subscriptionAccess.gracePeriodEndDate
-                ? ` (ends ${formatDateDisplay(subscriptionAccess.gracePeriodEndDate)})`
-                : ''}
-              . Profile browsing is permitted during the grace period, but contact unlocking is
-              disabled until you renew your subscription.
-            </div>
-          </div>
-        )}
-
-        {/* Structured Search & Filter Controls */}
-        <div className="directory-filter-section" role="search" aria-label="Member Directory Filters">
-          <div className="directory-filter-header">
-            <div className="directory-filter-title">
-              <span>🔍 Search & Filter Profiles</span>
-              {activeFilterCount > 0 && (
-                <span className="directory-filter-badge">
-                  {activeFilterCount} {activeFilterCount === 1 ? 'filter active' : 'filters active'}
-                </span>
-              )}
-            </div>
-
-            <div className="pagination-controls">
-              <label htmlFor="directory-limit-select" style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                Profiles per page:
-              </label>
-              <select
-                id="directory-limit-select"
-                className="limit-select"
-                value={limit}
-                onChange={(e) => {
-                  setLimit(Number(e.target.value));
-                  setPage(1);
-                }}
-                disabled={loading}
-              >
-                <option value={6}>6</option>
-                <option value={12}>12</option>
-                <option value={24}>24</option>
-              </select>
-            </div>
-          </div>
-
-          <form onSubmit={handleApplyFilters}>
-            <div className="directory-filter-grid">
-              {/* Keyword Search */}
-              <div className="directory-filter-field" style={{ gridColumn: 'span 1' }}>
-                <label htmlFor="filter-search" className="directory-filter-label">
-                  Keyword Search
-                </label>
-                <input
-                  id="filter-search"
-                  type="text"
-                  className="directory-filter-input"
-                  placeholder="Name, city, role, company..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  maxLength={100}
-                />
-              </div>
-
-              {/* Gender Filter */}
-              <div className="directory-filter-field">
-                <label htmlFor="filter-gender" className="directory-filter-label">
-                  Gender
-                </label>
-                <select
-                  id="filter-gender"
-                  className="directory-filter-select"
-                  value={filterGender}
-                  onChange={(e) => setFilterGender(e.target.value)}
-                >
-                  <option value="">All Genders</option>
-                  <option value="Female">Female</option>
-                  <option value="Male">Male</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              {/* Age Range Filter */}
-              <div className="directory-filter-field">
-                <label className="directory-filter-label">Age Range (Years)</label>
-                <div className="directory-filter-range">
-                  <input
-                    type="number"
-                    className="directory-filter-input"
-                    placeholder="Min"
-                    min="18"
-                    max="100"
-                    value={filterMinAge}
-                    onChange={(e) => setFilterMinAge(e.target.value)}
-                    aria-label="Minimum candidate age"
-                  />
-                  <span className="directory-filter-range-sep">to</span>
-                  <input
-                    type="number"
-                    className="directory-filter-input"
-                    placeholder="Max"
-                    min="18"
-                    max="100"
-                    value={filterMaxAge}
-                    onChange={(e) => setFilterMaxAge(e.target.value)}
-                    aria-label="Maximum candidate age"
-                  />
-                </div>
-              </div>
-
-              {/* Marital Status Filter */}
-              <div className="directory-filter-field">
-                <label htmlFor="filter-marital-status" className="directory-filter-label">
-                  Marital Status
-                </label>
-                <select
-                  id="filter-marital-status"
-                  className="directory-filter-select"
-                  value={filterMaritalStatus}
-                  onChange={(e) => setFilterMaritalStatus(e.target.value)}
-                >
-                  <option value="">All Marital Statuses</option>
-                  <option value="Never Married">Never Married</option>
-                  <option value="Divorced">Divorced</option>
-                  <option value="Widowed">Widowed</option>
-                  <option value="Awaiting Divorce">Awaiting Divorce</option>
-                </select>
-              </div>
-
-              {/* Location Filter */}
-              <div className="directory-filter-field">
-                <label htmlFor="filter-location" className="directory-filter-label">
-                  Location / City
-                </label>
-                <input
-                  id="filter-location"
-                  type="text"
-                  className="directory-filter-input"
-                  placeholder="e.g. Chennai, Bangalore"
-                  value={filterLocation}
-                  onChange={(e) => setFilterLocation(e.target.value)}
-                  maxLength={100}
-                />
-              </div>
-
-              {/* Education Filter */}
-              <div className="directory-filter-field">
-                <label htmlFor="filter-education" className="directory-filter-label">
-                  Education Qualification
-                </label>
-                <input
-                  id="filter-education"
-                  type="text"
-                  className="directory-filter-input"
-                  placeholder="e.g. B.Tech, M.S., MBA"
-                  value={filterEducation}
-                  onChange={(e) => setFilterEducation(e.target.value)}
-                  maxLength={100}
-                />
-              </div>
-
-              {/* Occupation Filter */}
-              <div className="directory-filter-field">
-                <label htmlFor="filter-occupation" className="directory-filter-label">
-                  Occupation / Profession
-                </label>
-                <input
-                  id="filter-occupation"
-                  type="text"
-                  className="directory-filter-input"
-                  placeholder="e.g. Software, Banking, Doctor"
-                  value={filterOccupation}
-                  onChange={(e) => setFilterOccupation(e.target.value)}
-                  maxLength={100}
-                />
-              </div>
-            </div>
-
-            <div className="directory-filter-actions">
-              <button type="submit" className="btn-filter-apply" disabled={loading}>
-                Apply Filters
-              </button>
-              <button
-                type="button"
-                className="btn-filter-reset"
-                onClick={handleResetFilters}
-                disabled={loading}
-              >
-                Reset Filters
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Error Banner */}
-        {errorMessage && (
-          <div className="alert alert-danger" role="alert">
-            <span className="alert-icon">⚠️</span>
-            <div style={{ flex: 1 }}>
-              <strong>Unable to Load Profiles:</strong> {errorMessage}
-            </div>
+      {/* Gender / Looking For */}
+      <fieldset className={styles.group}>
+        <legend>Looking For</legend>
+        <div className={styles.segmented} role="radiogroup" aria-label="Gender">
+          {[
+            ['', 'All'],
+            ['Female', 'Bride'],
+            ['Male', 'Groom'],
+          ].map(([val, label]) => (
             <button
               type="button"
-              className="btn-reset"
-              onClick={() => fetchMembers(page, limit, activeSearch, activeFilters)}
+              key={label}
+              role="radio"
+              aria-checked={form.gender === val}
+              className={form.gender === val ? styles.segOn : ''}
+              onClick={() => setForm((f) => ({ ...f, gender: val }))}
             >
-              Retry
+              {label}
             </button>
+          ))}
+        </div>
+      </fieldset>
+
+      {/* Age Range */}
+      <fieldset className={styles.group}>
+        <legend>Age Range</legend>
+        <div className={styles.range}>
+          <input type="number" min="18" max="90" placeholder="Min" value={form.minAge} onChange={setField('minAge')} aria-label="Minimum age" />
+          <span>to</span>
+          <input type="number" min="18" max="90" placeholder="Max" value={form.maxAge} onChange={setField('maxAge')} aria-label="Maximum age" />
+        </div>
+      </fieldset>
+
+      {/* Height Range */}
+      <fieldset className={styles.group}>
+        <legend>Height Range (cm)</legend>
+        <div className={styles.range}>
+          <input type="number" min="120" max="220" placeholder="Min cm" value={form.minHeight} onChange={setField('minHeight')} aria-label="Minimum height" />
+          <span>to</span>
+          <input type="number" min="120" max="220" placeholder="Max cm" value={form.maxHeight} onChange={setField('maxHeight')} aria-label="Maximum height" />
+        </div>
+      </fieldset>
+
+      {/* Marital Status */}
+      <div className={styles.group}>
+        <label htmlFor="f-marital">Marital Status</label>
+        <select id="f-marital" value={form.maritalStatus} onChange={setField('maritalStatus')}>
+          <option value="">Any Status</option>
+          <option value="Never Married">Never Married</option>
+          <option value="Divorced">Divorced</option>
+          <option value="Widowed">Widowed</option>
+          <option value="Awaiting Divorce">Awaiting Divorce</option>
+        </select>
+      </div>
+
+      {/* Vedic Astrology - Rasi */}
+      <div className={styles.group}>
+        <label htmlFor="f-rasi">Rasi (Moon Sign)</label>
+        <select id="f-rasi" value={form.rasi} onChange={setField('rasi')}>
+          <option value="">Any Rasi</option>
+          {RASI_OPTIONS.map((r) => (
+            <option key={r} value={r}>{r}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Vedic Astrology - Nakshatram */}
+      <div className={styles.group}>
+        <label htmlFor="f-nakshatram">Nakshatram (Birth Star)</label>
+        <select id="f-nakshatram" value={form.nakshatram} onChange={setField('nakshatram')}>
+          <option value="">Any Nakshatram</option>
+          {NAKSHATRAM_OPTIONS.map((n) => (
+            <option key={n} value={n}>{n}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Vedic Astrology - Chevvai / Sevvai Dosham */}
+      <div className={styles.group}>
+        <label htmlFor="f-dosham">Chevvai / Sevvai Dosham</label>
+        <select id="f-dosham" value={form.dosham} onChange={setField('dosham')}>
+          <option value="">Any Dosham Status</option>
+          <option value="no_dosham">No Chevvai Dosham (Dosham Free)</option>
+          <option value="chevvai">Has Chevvai / Sevvai Dosham</option>
+          <option value="rahu_ketu">Has Rahu / Ketu / Naga Dosham</option>
+        </select>
+      </div>
+
+      {/* Community / Caste */}
+      <div className={styles.group}>
+        <label htmlFor="f-caste">Caste / Community</label>
+        <input
+          id="f-caste"
+          type="text"
+          list="caste-suggestions"
+          placeholder="e.g. Vanniyar, Mudaliar, Brahmin"
+          value={form.caste}
+          onChange={setField('caste')}
+          maxLength={100}
+        />
+        <datalist id="caste-suggestions">
+          {POPULAR_CASTES.map((c) => (
+            <option key={c} value={c} />
+          ))}
+        </datalist>
+      </div>
+
+      {/* Subcaste */}
+      <div className={styles.group}>
+        <label htmlFor="f-subcaste">Subcaste</label>
+        <input id="f-subcaste" type="text" placeholder="e.g. Padayachi, Thondaimandalam" value={form.subcaste} onChange={setField('subcaste')} maxLength={100} />
+      </div>
+
+      {/* Gothram */}
+      <div className={styles.group}>
+        <label htmlFor="f-gothram">Gothram / Kulam</label>
+        <input id="f-gothram" type="text" placeholder="e.g. Shiva, Vishvamitra, Koundinya" value={form.gothram} onChange={setField('gothram')} maxLength={100} />
+      </div>
+
+      {/* Location */}
+      <div className={styles.group}>
+        <label htmlFor="f-location">Location / Native City</label>
+        <input id="f-location" type="text" placeholder="e.g. Chennai, Coimbatore, Madurai, Bangalore" value={form.location} onChange={setField('location')} maxLength={100} />
+      </div>
+
+      {/* Education */}
+      <div className={styles.group}>
+        <label htmlFor="f-education">Education</label>
+        <input id="f-education" type="text" placeholder="e.g. B.Tech, MBA, MBBS, MCA" value={form.education} onChange={setField('education')} maxLength={100} />
+      </div>
+
+      {/* Occupation */}
+      <div className={styles.group}>
+        <label htmlFor="f-occupation">Occupation / Career</label>
+        <input id="f-occupation" type="text" placeholder="e.g. Software, Banking, Doctor, Government" value={form.occupation} onChange={setField('occupation')} maxLength={100} />
+      </div>
+
+      {/* Diet */}
+      <div className={styles.group}>
+        <label htmlFor="f-diet">Diet</label>
+        <select id="f-diet" value={form.diet} onChange={setField('diet')}>
+          <option value="">Any Diet</option>
+          <option value="Vegetarian">Vegetarian</option>
+          <option value="Non-Vegetarian">Non-Vegetarian</option>
+          <option value="Eggetarian">Eggetarian</option>
+        </select>
+      </div>
+
+      <div className={styles.filterActions}>
+        <button type="submit" className={styles.btnPrimary} disabled={loading}>
+          <Search size={16} aria-hidden="true" /> Apply Filters
+        </button>
+        <button type="button" className={styles.btnText} onClick={handleResetFilters} disabled={loading}>
+          <RotateCcw size={14} aria-hidden="true" /> Reset All
+        </button>
+      </div>
+    </form>
+  );
+
+  return (
+    <div className={styles.page}>
+      {/* ------------------------------ Hero Header ------------------------------ */}
+      <header className={styles.hero}>
+        <div className={styles.heroInner}>
+          <div>
+            <nav className={styles.crumbs} aria-label="Breadcrumb">
+              <Link href="/">Home</Link>
+              <ChevronRight size={14} aria-hidden="true" />
+              <span>Verified Matches</span>
+            </nav>
+            <h1>Browse Matrimonial Matches</h1>
+            <p>Explore verified South Indian biodatas honoring traditional values, family heritage, and candidate contact privacy.</p>
+          </div>
+
+          {isActiveAccess && creditSummary && (
+            <aside className={styles.credits} role="region" aria-label="Monthly contact credits">
+              <div className={styles.creditsTop}>
+                <span><CreditCard size={16} aria-hidden="true" /> Contact Credits</span>
+                {creditSummary.cycleNumber && (
+                  <em>
+                    Cycle {creditSummary.cycleNumber}
+                    {creditSummary.totalCycles ? ` of ${creditSummary.totalCycles}` : ''}
+                  </em>
+                )}
+              </div>
+              <div className={styles.creditsNum}>
+                <strong>{remaining}</strong>
+                <span>/ {allocated} Available</span>
+              </div>
+              <div className={styles.bar} aria-hidden="true">
+                <i style={{ width: `${creditPct}%` }} />
+              </div>
+              <p>
+                {creditSummary.cycleStart && creditSummary.cycleEnd
+                  ? `Resets on ${formatDateDisplay(creditSummary.cycleEnd)}`
+                  : 'Monthly credits reset every 30 days'}
+                {' · '}{creditSummary.creditsUsed ?? 0} unlocked this cycle
+              </p>
+            </aside>
+          )}
+        </div>
+      </header>
+
+      <div className={styles.container}>
+        {isGraceAccess && (
+          <div className={styles.notice} role="status">
+            <AlertCircle size={20} aria-hidden="true" />
+            <div>
+              <strong>7-day grace period active.</strong> Your membership term has concluded. You can continue browsing profiles
+              {subscriptionAccess.gracePeriodEndDate ? ` until ${formatDateDisplay(subscriptionAccess.gracePeriodEndDate)}` : ''}, but
+              contact unlocking is disabled until renewal.
+              <Link href="/membership"> Renew Membership</Link>
+            </div>
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && (
-          <div className="admin-state-box">
-            <span className="admin-state-icon">⏳</span>
-            <h2 className="admin-state-title">Loading Member Profiles...</h2>
-            <p className="admin-state-desc">
-              Fetching eligible matrimonial profiles for your directory view.
-            </p>
-          </div>
-        )}
+        <div className={styles.shell}>
+          {/* ------------------------------ Sidebar ------------------------------ */}
+          <aside className={`${styles.sidebar} ${drawerOpen ? styles.sidebarOpen : ''}`} aria-label="Search filters">
+            {filterPanel}
+          </aside>
+          {drawerOpen && <div className={styles.backdrop} onClick={() => setDrawerOpen(false)} aria-hidden="true" />}
 
-        {/* Empty / No-Results State */}
-        {!loading && !errorMessage && profiles.length === 0 && (
-          <div className="admin-state-box">
-            <span className="admin-state-icon">🔍</span>
-            <h2 className="admin-state-title">
-              {activeFilterCount > 0 ? 'No Matching Profiles Found' : 'No Eligible Profiles Available Yet'}
-            </h2>
-            <p className="admin-state-desc">
-              {activeFilterCount > 0
-                ? 'No active matrimonial profiles matched your search and filter criteria. Try adjusting your age range, location, or reset filters to view all profiles.'
-                : 'There are currently no other active matrimonial profiles to display in the directory.'}
-            </p>
-            {activeFilterCount > 0 && (
-              <button type="button" className="btn-secondary" onClick={handleResetFilters}>
-                Reset All Filters
+          {/* ------------------------------ Results Section ------------------------------ */}
+          <section className={styles.results} aria-live="polite">
+            <form className={styles.searchBar} onSubmit={handleApplyFilters} role="search">
+              <Search size={18} aria-hidden="true" />
+              <input
+                type="text"
+                placeholder="Search candidate name, city, caste, or profession..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                maxLength={100}
+                aria-label="Search profiles"
+              />
+              <button type="submit" disabled={loading}>Search</button>
+              <button type="button" className={styles.filterToggle} onClick={() => setDrawerOpen(true)}>
+                <SlidersHorizontal size={16} aria-hidden="true" /> Filters
+                {activeFilterCount > 0 && <b>{activeFilterCount}</b>}
               </button>
+            </form>
+
+            <div className={styles.toolbar}>
+              <p className={styles.count}>
+                {loading ? (
+                  'Searching eligible profiles…'
+                ) : errorMessage ? null : (
+                  <>
+                    <strong>{pagination.totalRecords}</strong> {pagination.totalRecords === 1 ? 'verified match' : 'verified matches'} found
+                  </>
+                )}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                <label className={styles.perPage}>
+                  Sort by
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                    <option value="newest">Newest First</option>
+                    <option value="age_asc">Age: Young to Old</option>
+                    <option value="age_desc">Age: Old to Young</option>
+                    <option value="height_desc">Height: Tall First</option>
+                  </select>
+                </label>
+                <label className={styles.perPage}>
+                  Show
+                  <select
+                    value={limit}
+                    onChange={(e) => {
+                      setLimit(Number(e.target.value));
+                      setPage(1);
+                    }}
+                    disabled={loading}
+                  >
+                    <option value={6}>6</option>
+                    <option value={12}>12</option>
+                    <option value={24}>24</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            {chips.length > 0 && (
+              <div className={styles.chips} aria-label="Active filters">
+                {chips.map((c) => (
+                  <button type="button" key={c.id} onClick={() => removeChip(c.keys)} aria-label={`Remove filter ${c.label}`}>
+                    {c.label} <X size={13} aria-hidden="true" />
+                  </button>
+                ))}
+                <button type="button" className={styles.clearAll} onClick={handleResetFilters}>Clear all filters</button>
+              </div>
             )}
-          </div>
-        )}
 
-        {/* Directory Profile Cards Grid */}
-        {!loading && !errorMessage && profiles.length > 0 && (
-          <>
-            <div className="member-directory-grid">
-              {profiles.map((profile) => {
-                const pDetails = profile.personalDetails || {};
-                const eduDetails = profile.educationAndProfession || {};
-                const famDetails = profile.familyDetails || {};
-                const prefDetails = profile.partnerPreferences || {};
-                const prefAge = prefDetails.preferredAgeRange || {};
+            {errorMessage && (
+              <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
+                <AlertCircle size={20} aria-hidden="true" />
+                <div>
+                  <strong>Unable to load profiles.</strong> {errorMessage}
+                </div>
+                <button type="button" onClick={() => fetchMembers(page, limit, activeSearch, activeFilters)}>Retry</button>
+              </div>
+            )}
 
-                // Safe candidate display name with neutral fallback
-                const displayName = profile.candidateName || 'Member Profile';
-                const initialLetter = displayName.charAt(0).toUpperCase();
+            {loading && (
+              <div className={styles.grid}>
+                {Array.from({ length: Math.min(limit, 6) }).map((_, i) => <SkeletonCard key={i} />)}
+              </div>
+            )}
 
-                const isUnlocking = Boolean(unlockingByProfileId[profile.id]);
-                const unlockedInfo = unlockedContactsByProfileId[profile.id] || null;
-                const unlockError = unlockErrorByProfileId[profile.id] || '';
-                const isAlreadyUnlocked = Boolean(profile.isContactUnlocked || unlockedInfo);
-                const creditsExhausted =
-                  !isAlreadyUnlocked &&
-                  creditSummary &&
-                  typeof creditSummary.creditsRemaining === 'number' &&
-                  creditSummary.creditsRemaining <= 0;
+            {!loading && !errorMessage && sortedProfiles.length === 0 && (
+              <div className={styles.empty}>
+                <span><Search size={32} strokeWidth={1.5} aria-hidden="true" /></span>
+                <h2>{activeFilterCount > 0 ? 'No Matching Profiles' : 'No Profiles Available'}</h2>
+                <p>
+                  {activeFilterCount > 0
+                    ? 'Try expanding the age range, removing specific caste/community filters, or searching nearby districts.'
+                    : 'There are currently no active profiles matching your viewing permissions.'}
+                </p>
+                {activeFilterCount > 0 && (
+                  <button type="button" className={styles.btnOutline} onClick={handleResetFilters}>
+                    <RotateCcw size={15} aria-hidden="true" /> Reset All Filters
+                  </button>
+                )}
+              </div>
+            )}
 
-                return (
-                  <article key={profile.id} className="member-card">
-                    {/* Card Header: Photo + Primary Identity */}
-                    <div className="member-card-header">
-                      <div className="member-card-avatar">
-                        {profile.profilePhotoUrl ? (
-                          <img
-                            src={profile.profilePhotoUrl}
-                            alt={`${displayName} profile photo`}
-                            className="member-card-avatar-img"
-                          />
-                        ) : (
-                          <span aria-hidden="true">{initialLetter}</span>
-                        )}
-                      </div>
+            {!loading && !errorMessage && sortedProfiles.length > 0 && (
+              <>
+                <div className={styles.grid}>
+                  {sortedProfiles.map((profile) => {
+                    const p = profile.personalDetails || {};
+                    const edu = profile.educationAndProfession || {};
+                    const fam = profile.familyDetails || {};
+                    const pref = profile.partnerPreferences || {};
+                    const prefAge = pref.preferredAgeRange || {};
+                    const comm = profile.communityDetails || {};
+                    const h = profile.horoscope || {};
 
-                      <div className="member-card-heading">
-                        <div className="member-card-badges">
-                          <span
-                            className={`badge ${
-                              profile.source === 'broker' ? 'badge-info' : 'badge-success'
-                            }`}
-                          >
-                            {profile.source === 'broker' ? 'Broker Profile' : 'Direct Profile'}
+                    const displayName = profile.candidateName || 'Candidate';
+                    const initial = displayName.charAt(0).toUpperCase();
+
+                    const isUnlocking = Boolean(unlockingByProfileId[profile.id]);
+                    const unlockedInfo = unlockedContactsByProfileId[profile.id] || null;
+                    const unlockError = unlockErrorByProfileId[profile.id] || '';
+                    const isAlreadyUnlocked = Boolean(profile.isContactUnlocked || unlockedInfo);
+                    const creditsExhausted =
+                      !isAlreadyUnlocked &&
+                      creditSummary &&
+                      typeof creditSummary.creditsRemaining === 'number' &&
+                      creditSummary.creditsRemaining <= 0;
+
+                    const community = [
+                      comm.caste,
+                      comm.subcaste,
+                      comm.gothram ? `Gothram: ${comm.gothram}` : null,
+                      !comm.caste ? comm.religion : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ');
+
+                    const horoscopeText = [
+                      h.rasi ? `Rasi: ${h.rasi}` : null,
+                      h.nakshatram ? `Star: ${h.nakshatram}` : null,
+                      h.dosham && h.dosham !== 'None' && h.dosham !== 'No Dosham' ? `Dosham: ${h.dosham}` : null,
+                    ].filter(Boolean).join(' · ');
+
+                    const prefText = [
+                      prefAge.min || prefAge.max ? `Age ${prefAge.min || 18}–${prefAge.max || ''} yrs` : null,
+                      pref.preferredLocation ? `Location: ${pref.preferredLocation}` : null,
+                      pref.educationPreference ? `Education: ${pref.educationPreference}` : null,
+                      pref.occupationPreference ? `Job: ${pref.occupationPreference}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ');
+
+                    return (
+                      <article key={profile.id} className={styles.card}>
+                        <Link href={`/members/${profile.id}`} className={styles.photo} aria-label={`View ${displayName}'s full profile`}>
+                          {profile.profilePhotoUrl ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img src={profile.profilePhotoUrl} alt={`${displayName} portrait`} loading="lazy" />
+                          ) : (
+                            <span className={styles.placeholder} aria-hidden="true">{initial}</span>
+                          )}
+                          <span className={styles.source}>
+                            <BadgeCheck size={12} aria-hidden="true" color="var(--rose-deep)" />
+                            Verified Biodata
                           </span>
-                          {pDetails.gender && (
-                            <span className="badge badge-neutral">{pDetails.gender}</span>
+                          {Array.isArray(profile.photos) && profile.photos.length > 1 && (
+                            <span
+                              style={{
+                                position: 'absolute',
+                                top: '0.9rem',
+                                right: isAlreadyUnlocked ? '6.5rem' : '0.9rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                padding: '0.25rem 0.55rem',
+                                borderRadius: '999px',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                background: 'rgba(0, 0, 0, 0.65)',
+                                color: '#ffffff',
+                                backdropFilter: 'blur(4px)',
+                              }}
+                            >
+                              📷 {profile.photos.length} Photos
+                            </span>
+                          )}
+                          {isAlreadyUnlocked && (
+                            <span className={styles.unlockedTag}><BadgeCheck size={12} aria-hidden="true" /> Unlocked</span>
+                          )}
+                          <span className={styles.nameplate}>
+                            <strong>{displayName}</strong>
+                            <small>
+                              {p.age !== null && p.age !== undefined ? `${p.age} yrs` : 'Age n/a'}
+                              {p.height ? ` · ${Math.floor(p.height / 2.54 / 12)}'${Math.round((p.height / 2.54) % 12)}" (${p.height} cm)` : ''}
+                              {p.maritalStatus ? ` · ${p.maritalStatus}` : ''}
+                            </small>
+                          </span>
+                        </Link>
+
+                        <div className={styles.cardBody}>
+                          <ul className={styles.facts}>
+                            <Fact Icon={MapPin}>
+                              {[p.location, p.nativity ? `Native: ${p.nativity}` : (fam.familyLocation && fam.familyLocation !== p.location ? `Native: ${fam.familyLocation}` : null)].filter(Boolean).join(' · ') || 'Location not specified'}
+                            </Fact>
+                            <Fact Icon={GraduationCap}>{edu.educationalQualification || 'Education not specified'}</Fact>
+                            <Fact Icon={Briefcase}>
+                              {edu.occupation ? `${edu.occupation}${edu.company ? ` at ${edu.company}` : ''}` : 'Occupation not specified'}
+                            </Fact>
+                            <Fact Icon={Users}>{community || 'Community not specified'}</Fact>
+                            {horoscopeText && <Fact Icon={Sparkles}>{horoscopeText}</Fact>}
+                            {p.motherTongue && <Fact Icon={Languages}>{p.motherTongue}</Fact>}
+                          </ul>
+
+                          {/* Quick Badges Row */}
+                          <div className={styles.tags}>
+                            {p.gender && <span>{p.gender}</span>}
+                            {p.diet && <span>{p.diet}</span>}
+                            {p.complexion && <span>{p.complexion}</span>}
+                            {edu.income && <span>₹ {edu.income}</span>}
+                          </div>
+
+                          {prefText && (
+                            <details className={styles.prefs}>
+                              <summary><Sparkles size={13} aria-hidden="true" /> Partner Expectations</summary>
+                              <p>{prefText}</p>
+                            </details>
                           )}
                         </div>
 
-                        <h2 className="member-card-name">{displayName}</h2>
-
-                        <p className="member-card-submeta">
-                          {pDetails.age !== null && pDetails.age !== undefined
-                            ? `${pDetails.age} yrs`
-                            : 'Age not specified'}
-                          {pDetails.height ? ` • ${pDetails.height} cm` : ''}
-                          {pDetails.maritalStatus ? ` • ${pDetails.maritalStatus}` : ''}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Personal & Education Details */}
-                    <div className="member-card-body">
-                      <div className="member-detail-row">
-                        <span className="member-detail-label">Location:</span>
-                        <span className="member-detail-value">
-                          {pDetails.location || 'Not specified'}
-                        </span>
-                      </div>
-
-                      <div className="member-detail-row">
-                        <span className="member-detail-label">Mother Tongue:</span>
-                        <span className="member-detail-value">
-                          {pDetails.motherTongue || 'Not specified'}
-                        </span>
-                      </div>
-
-                      {famDetails.familyLocation && (
-                        <div className="member-detail-row">
-                          <span className="member-detail-label">Native Place:</span>
-                          <span className="member-detail-value">{famDetails.familyLocation}</span>
+                        <div className={styles.cardFoot}>
+                          {unlockedInfo ? (
+                            <div className={styles.phoneBox} role="status" aria-live="polite">
+                              <div>
+                                <a href={`tel:${unlockedInfo.candidatePhone}`}><Phone size={15} aria-hidden="true" /> {unlockedInfo.candidatePhone}</a>
+                                <small>
+                                  {unlockedInfo.alreadyUnlocked ? 'Previously unlocked · 0 credits deducted' : 'Contact unlocked · 1 credit deducted'}
+                                </small>
+                              </div>
+                              <CopyButton value={unlockedInfo.candidatePhone} />
+                            </div>
+                          ) : isActiveAccess ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleUnlockContact(profile.id)}
+                                disabled={isUnlocking || creditsExhausted}
+                                className={`${styles.unlockBtn} ${isAlreadyUnlocked ? styles.unlockFree : ''}`}
+                              >
+                                <KeyRound size={16} aria-hidden="true" />
+                                {isUnlocking
+                                  ? 'Unlocking Contact…'
+                                  : isAlreadyUnlocked
+                                  ? 'View Phone Number (Free)'
+                                  : creditsExhausted
+                                  ? 'No Credits Remaining'
+                                  : 'Unlock Phone · 1 Credit'}
+                              </button>
+                              {unlockError && <p className={styles.unlockError} role="alert">{unlockError}</p>}
+                            </>
+                          ) : (
+                            <p className={styles.locked}>
+                              <Lock size={14} aria-hidden="true" /> Contact unlocking is paused during grace period.
+                            </p>
+                          )}
+                          <Link href={`/members/${profile.id}`} className={styles.viewLink}>
+                            View Full Biodata &amp; Horoscope <ArrowRight size={15} aria-hidden="true" />
+                          </Link>
                         </div>
-                      )}
+                      </article>
+                    );
+                  })}
+                </div>
 
-                      <div className="member-detail-row">
-                        <span className="member-detail-label">Education:</span>
-                        <span className="member-detail-value">
-                          {eduDetails.educationalQualification || 'Not specified'}
-                        </span>
-                      </div>
-
-                      <div className="member-detail-row">
-                        <span className="member-detail-label">Occupation:</span>
-                        <span className="member-detail-value">
-                          {eduDetails.occupation
-                            ? `${eduDetails.occupation}${
-                                eduDetails.company ? ` at ${eduDetails.company}` : ''
-                              }`
-                            : 'Not specified'}
-                        </span>
-                      </div>
-
-                      {eduDetails.workLocation && (
-                        <div className="member-detail-row">
-                          <span className="member-detail-label">Work Location:</span>
-                          <span className="member-detail-value">{eduDetails.workLocation}</span>
-                        </div>
-                      )}
-
-                      {eduDetails.income && (
-                        <div className="member-detail-row">
-                          <span className="member-detail-label">Annual Income:</span>
-                          <span className="member-detail-value">{eduDetails.income}</span>
-                        </div>
-                      )}
-
-                      {(prefAge.min ||
-                        prefAge.max ||
-                        prefDetails.preferredLocation ||
-                        prefDetails.educationPreference) && (
-                        <div className="member-detail-block">
-                          <span className="member-detail-label">Partner Preferences:</span>
-                          <p className="member-detail-text">
-                            {[
-                              prefAge.min || prefAge.max
-                                ? `Age: ${prefAge.min || 18}–${prefAge.max || ''} yrs`
-                                : null,
-                              prefDetails.preferredLocation
-                                ? `Location: ${prefDetails.preferredLocation}`
-                                : null,
-                              prefDetails.educationPreference
-                                ? `Education: ${prefDetails.educationPreference}`
-                                : null,
-                            ]
-                              .filter(Boolean)
-                              .join(' • ')}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Contact Action Footer */}
-                    <div className="member-card-footer">
-                      <Link
-                        href={`/members/${profile.id}`}
-                        className="btn-view-profile"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.4rem',
-                          padding: '0.55rem 1rem',
-                          borderRadius: '6px',
-                          backgroundColor: '#FBF8F1',
-                          color: '#0B5D52',
-                          border: '1.5px solid #0B5D52',
-                          fontWeight: 600,
-                          fontSize: '0.85rem',
-                          textDecoration: 'none',
-                          transition: 'all 0.15s ease',
-                          marginBottom: '0.25rem',
-                        }}
-                      >
-                        View Full Profile →
-                      </Link>
-
-                      {unlockedInfo ? (
-                        <div className="contact-unlocked-box" role="status" aria-live="polite">
-                          <span className="contact-unlocked-phone">
-                            📞 {unlockedInfo.candidatePhone}
-                          </span>
-                          <span className="contact-unlocked-sub">
-                            {unlockedInfo.alreadyUnlocked
-                              ? 'Previously unlocked • 0 credits deducted'
-                              : 'Contact unlocked • 1 credit deducted'}
-                          </span>
-                        </div>
-                      ) : isActiveAccess ? (
-                        <>
+                {pagination.totalPages > 1 && (
+                  <nav className={styles.pager} aria-label="Pagination">
+                    <button type="button" onClick={() => setPage((prev) => Math.max(1, prev - 1))} disabled={loading || pagination.page <= 1}>
+                      <ChevronLeft size={16} aria-hidden="true" /> Prev
+                    </button>
+                    <div className={styles.pages}>
+                      {pageWindow(pagination.page, pagination.totalPages).map((n, i) =>
+                        n === '…' ? (
+                          <span key={`e${i}`} className={styles.dots}>…</span>
+                        ) : (
                           <button
                             type="button"
-                            onClick={() => handleUnlockContact(profile.id)}
-                            disabled={isUnlocking || creditsExhausted}
-                            className={`btn-unlock-contact ${
-                              isAlreadyUnlocked ? 'btn-unlock-contact-secondary' : ''
-                            }`}
+                            key={n}
+                            className={n === pagination.page ? styles.pageOn : ''}
+                            onClick={() => setPage(n)}
+                            disabled={loading}
+                            aria-current={n === pagination.page ? 'page' : undefined}
+                            aria-label={`Page ${n}`}
                           >
-                            {isUnlocking
-                              ? 'Unlocking Contact...'
-                              : isAlreadyUnlocked
-                              ? '📞 View Unlocked Phone Number (Free)'
-                              : creditsExhausted
-                              ? 'Monthly Contact Credits Exhausted (0 Left)'
-                              : '📞 View Contact Number (1 Credit)'}
+                            {n}
                           </button>
-
-                          {unlockError && (
-                            <div
-                              className="contact-unlock-feedback contact-unlock-feedback-error"
-                              role="alert"
-                            >
-                              {unlockError}
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <span className="contact-locked-pill">
-                          🔒 Contact unlocking is disabled during your 7-day grace period. Renew
-                          your subscription to view candidate phone numbers.
-                        </span>
+                        )
                       )}
                     </div>
-                  </article>
-                );
-              })}
-            </div>
-
-            {/* Pagination Footer */}
-            <div className="pagination-bar">
-              <div>
-                Showing page <strong>{pagination.page}</strong> of{' '}
-                <strong>{pagination.totalPages}</strong> ({pagination.totalRecords} eligible{' '}
-                {pagination.totalRecords === 1 ? 'profile' : 'profiles'})
-              </div>
-
-              <div className="pagination-controls">
-                <button
-                  type="button"
-                  className="btn-page"
-                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                  disabled={loading || pagination.page <= 1}
-                >
-                  ← Previous
-                </button>
-                <span style={{ padding: '0 0.5rem', fontWeight: 600, color: '#334155' }}>
-                  Page {pagination.page} / {pagination.totalPages}
-                </span>
-                <button
-                  type="button"
-                  className="btn-page"
-                  onClick={() =>
-                    setPage((prev) => Math.min(pagination.totalPages, prev + 1))
-                  }
-                  disabled={loading || pagination.page >= pagination.totalPages}
-                >
-                  Next →
-                </button>
-              </div>
-            </div>
-          </>
-        )}
+                    <button
+                      type="button"
+                      onClick={() => setPage((prev) => Math.min(pagination.totalPages, prev + 1))}
+                      disabled={loading || pagination.page >= pagination.totalPages}
+                    >
+                      Next <ChevronRight size={16} aria-hidden="true" />
+                    </button>
+                  </nav>
+                )}
+              </>
+            )}
+          </section>
+        </div>
       </div>
     </div>
   );

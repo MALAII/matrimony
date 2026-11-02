@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Member Directory | Matrimony Web Platform',
-  description: 'Private matrimonial member directory for active subscribers.',
+  title: 'Browse Profiles | Matrimony Platform',
+  description: 'Private matrimonial candidate profiles for active members.',
   robots: {
     index: false,
     follow: false,

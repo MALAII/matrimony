@@ -1,0 +1,984 @@
+/* ==========================================================================
+   MATRIMONIAL CANDIDATE PROFILE BIODATA (detail.module.css)
+   ========================================================================== */
+
+.container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+}
+
+/* ------------------------------ Topbar & Breadcrumbs ------------------------------ */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: var(--muted, #75606a);
+  min-width: 0;
+}
+
+.crumbs a, .back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: var(--rose-deep, #7d3147);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.crumbs a:hover, .back:hover {
+  color: #9e3d5a;
+  text-decoration: underline;
+}
+
+.crumbs span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 24ch;
+  color: var(--ink, #3f2b32);
+  font-weight: 500;
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.creditChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: var(--rose-deep, #7d3147);
+  background: #fff;
+  border: 1px solid #e7cfa6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.creditChip strong {
+  font-family: var(--serif, Georgia, serif);
+  font-size: 1.05rem;
+}
+
+.btnTopAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink, #3f2b32);
+  background: #ffffff;
+  border: 1px solid var(--line, #eadbd0);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnTopAction:hover {
+  background: #faf4ef;
+  border-color: var(--rose-deep, #7d3147);
+  color: var(--rose-deep, #7d3147);
+}
+
+/* ------------------------------ Hero Profile Banner ------------------------------ */
+.heroBanner {
+  background: #ffffff;
+  border: 1.5px solid var(--line, #eadbd0);
+  border-radius: 24px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 30px -10px rgba(43, 26, 33, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.heroBanner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--rose-deep, #7d3147) 0%, var(--gold, #b08d4c) 50%, var(--rose, #b85c78) 100%);
+}
+
+.heroHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.heroIdRow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.profileIdTag {
+  font-family: var(--sans, monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--rose-deep, #7d3147);
+  background: #fdf2f4;
+  border: 1px solid #f9d5dc;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+}
+
+.verifiedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+}
+
+.profileSourceTag {
+  font-size: 0.76rem;
+  color: var(--muted, #75606a);
+  font-weight: 500;
+}
+
+.candidateTitle {
+  font-family: var(--serif, Georgia, serif);
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--plum, #2b1a21);
+  line-height: 1.2;
+  margin: 0.15rem 0 0.5rem;
+}
+
+.candidateSummaryLine {
+  font-size: 0.98rem;
+  color: var(--ink, #3f2b32);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Quick Metrics Ribbon */
+.metricsRibbon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--line, #eadbd0);
+}
+
+.metricPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--plum, #2b1a21);
+  background: #faf5f0;
+  border: 1px solid var(--line, #eadbd0);
+}
+
+.metricPill svg {
+  flex-shrink: 0;
+  color: var(--rose-deep, #7d3147);
+}
+
+/* ------------------------------ 2-Column Layout ------------------------------ */
+.layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+/* ------------------------------ Left Column (Sidebar) ------------------------------ */
+.side {
+  position: sticky;
+  top: 110px;
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Photo Showcase Card */
+.photoCard {
+  background: #ffffff;
+  border: 1.5px solid var(--line, #eadbd0);
+  border-radius: 22px;
+  padding: 1.2rem;
+  box-shadow: 0 16px 36px -24px rgba(43, 26, 33, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.photoFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #2b1a21, #5a2638);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.photoFrameImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.photoFrame:hover .photoFrameImg {
+  transform: scale(1.02);
+}
+
+.photoCounterBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  z-index: 2;
+}
+
+.zoomHint {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.72rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  opacity: 0.85;
+}
+
+/* Avatar Placeholder When No Photo Uploaded */
+.avatarPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background: radial-gradient(circle at 50% 30%, #5a2335, #2a111a);
+  color: #ffffff;
+}
+
+.avatarMonogram {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 2px dashed rgba(224, 189, 119, 0.65);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f7e7ce;
+  font-family: var(--serif, Georgia, serif);
+  font-size: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.avatarTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+/* Thumbnails Strip */
+.thumbnailsRow {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.thumbBtn {
+  width: 58px;
+  height: 68px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid var(--line, #eadbd0);
+  padding: 0;
+  background: #111;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.thumbBtnActive {
+  border-color: var(--rose-deep, #7d3147);
+  box-shadow: 0 0 0 2px rgba(125, 49, 71, 0.3);
+  opacity: 1;
+}
+
+.thumbBtn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Confidential Contact Card */
+.contactCard {
+  background: #ffffff;
+  border: 1.5px solid #e7cfa6;
+  border-radius: 22px;
+  padding: 1.4rem;
+  box-shadow: 0 0 0 4px rgba(224, 189, 119, 0.15), 0 10px 25px -10px rgba(43, 26, 33, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contactHead {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.contactShieldIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--gold, #b08d4c), #cfab64);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(176, 141, 76, 0.35);
+}
+
+.contactHead h3 {
+  font-family: var(--sans, sans-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--plum, #2b1a21);
+  margin: 0;
+}
+
+.contactHead p {
+  font-size: 0.8rem;
+  color: var(--muted, #75606a);
+  margin: 0.15rem 0 0;
+  line-height: 1.35;
+}
+
+/* Unlocked Phone Box */
+.unlockedPhoneBox {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.phoneRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.phoneLink {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #166534;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  letter-spacing: 0.02em;
+}
+
+.phoneLink:hover {
+  text-decoration: underline;
+}
+
+.contactActionButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btnCall {
+  flex: 1;
+  padding: 0.55rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #16a34a;
+  border: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnCall:hover {
+  background: #15803d;
+}
+
+.btnWhatsapp {
+  flex: 1;
+  padding: 0.55rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #059669;
+  border: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnWhatsapp:hover {
+  background: #047857;
+}
+
+/* Unlock CTA */
+.btnUnlockContact {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--rose-deep, #7d3147) 0%, #9e3d5a 100%);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(125, 49, 71, 0.45);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  transition: transform 0.2s var(--ease, ease), box-shadow 0.2s, filter 0.2s;
+}
+
+.btnUnlockContact:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 8px 24px rgba(125, 49, 71, 0.6);
+}
+
+.btnUnlockContact:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.privacyShieldNote {
+  font-size: 0.76rem;
+  color: var(--muted, #75606a);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  line-height: 1.35;
+}
+
+.privacyShieldNote svg {
+  color: var(--gold, #b08d4c);
+  flex-shrink: 0;
+}
+
+/* ------------------------------ Right Column (Main Dossier) ------------------------------ */
+.main {
+  display: grid;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+/* Sticky In-Page Section Tabs */
+.sectionTabs {
+  position: sticky;
+  top: 110px;
+  background: rgba(255, 250, 245, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 0.5rem 0;
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  z-index: 10;
+  border-bottom: 1px solid var(--line, #eadbd0);
+}
+
+.sectionTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tabLink {
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted, #75606a);
+  text-decoration: none;
+  white-space: nowrap;
+  background: #ffffff;
+  border: 1px solid var(--line, #eadbd0);
+  transition: all 0.15s;
+}
+
+.tabLink:hover {
+  background: var(--rose-deep, #7d3147);
+  color: #ffffff;
+  border-color: var(--rose-deep, #7d3147);
+}
+
+/* Dossier Section Card */
+.dossierCard {
+  background: #ffffff;
+  border: 1px solid var(--line, #eadbd0);
+  border-radius: 24px;
+  padding: 1.75rem 2rem;
+  box-shadow: 0 4px 20px -8px rgba(43, 26, 33, 0.05);
+  position: relative;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.35rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line, #eadbd0);
+}
+
+.cardMedallion {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fcecee, #f9e2e6);
+  border: 1.5px solid #f3c2cd;
+  color: var(--rose-deep, #7d3147);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.cardTitleGroup h2 {
+  font-family: var(--serif, Georgia, serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--plum, #2b1a21);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.cardTitleGroup p {
+  font-size: 0.8rem;
+  color: var(--muted, #75606a);
+  margin: 0.15rem 0 0;
+}
+
+/* Grid Layouts for Data Fields */
+.dataGrid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem 2rem;
+}
+
+.dataGrid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem 1.5rem;
+}
+
+.dataField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fieldLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted, #75606a);
+}
+
+.fieldValue {
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: var(--plum, #2b1a21);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.fieldEmpty {
+  color: #a89aa0;
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* Narrative / Quote Box */
+.narrativeBox {
+  background: #faf6f1;
+  border-left: 3.5px solid var(--gold, #b08d4c);
+  border-radius: 0 14px 14px 0;
+  padding: 1.15rem 1.35rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: var(--ink, #3f2b32);
+}
+
+/* Sibling Box in Family Card */
+.siblingsOverview {
+  background: #faf7f4;
+  border: 1px solid var(--line, #eadbd0);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.siblingTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--rose-deep, #7d3147);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.siblingPillRow {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.siblingChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background: #ffffff;
+  border: 1px solid #e5d5c9;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--plum, #2b1a21);
+}
+
+/* Horoscope Highlights Card */
+.astroHighlightBanner {
+  background: linear-gradient(135deg, #fdf8f0, #fcf4e8);
+  border: 1px solid #ebd9b8;
+  border-radius: 16px;
+  padding: 1.15rem 1.35rem;
+  margin-bottom: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1rem;
+}
+
+.astroPill {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.astroPillLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gold, #b08d4c);
+  letter-spacing: 0.06em;
+}
+
+.astroPillValue {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--plum, #2b1a21);
+}
+
+.doshamCleanBadge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.doshamActiveBadge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+/* South Indian 12-Box Rasi Chart */
+.chartContainer {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line, #eadbd0);
+}
+
+.chartTitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--plum, #2b1a21);
+  margin: 0 0 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.southIndianChartGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 1 / 1;
+  border: 2px solid var(--plum, #2b1a21);
+  background: #ffffff;
+  margin: 0 auto;
+}
+
+.chartBox {
+  border: 1px solid #c9b4a4;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  overflow: hidden;
+  font-size: 0.7rem;
+  position: relative;
+}
+
+.chartBoxName {
+  font-size: 0.62rem;
+  color: var(--muted, #75606a);
+  font-weight: 600;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.chartBoxPlanets {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--rose-deep, #7d3147);
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.chartCenter {
+  grid-column: 2 / span 2;
+  grid-row: 2 / span 2;
+  border: 1px solid #c9b4a4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: var(--serif, Georgia, serif);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--plum, #2b1a21);
+  background: #faf6f1;
+}
+
+/* Lightbox Modal */
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.lightboxContent {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lightboxImg {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 14px;
+  object-fit: contain;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.lightboxCloseBtn {
+  position: absolute;
+  top: -45px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #ffffff;
+  padding: 0.4rem;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.lightboxCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* ------------------------------ Responsive Media Queries ------------------------------ */
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 320px 1fr;
+    gap: 1.35rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .side {
+    position: static;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .photoCard {
+    max-width: 400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 680px) {
+  .container {
+    padding: 1rem 1rem 3rem;
+  }
+
+  .heroBanner {
+    padding: 1.25rem 1.25rem;
+    border-radius: 18px;
+  }
+
+  .candidateTitle {
+    font-size: 1.6rem;
+  }
+
+  .side {
+    grid-template-columns: 1fr;
+  }
+
+  .photoCard {
+    max-width: 100%;
+  }
+
+  .dataGrid2, .dataGrid3 {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .dossierCard {
+    padding: 1.25rem 1.25rem;
+    border-radius: 18px;
+  }
+
+  .sectionTabs {
+    top: 0;
+  }
+}
+
+/* ------------------------------ Print Stylesheet ------------------------------ */
+@media print {
+  .container {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .topbar, .sectionTabs, .quickActionsCard, .btnUnlockContact, .thumbnailsRow, .topActions {
+    display: none !important;
+  }
+
+  .layout {
+    grid-template-columns: 240px 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  .side {
+    position: static !important;
+  }
+
+  .heroBanner, .dossierCard, .photoCard, .contactCard {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    page-break-inside: avoid;
+  }
+}

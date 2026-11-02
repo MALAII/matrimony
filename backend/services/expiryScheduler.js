@@ -1,13 +1,62 @@
 const {
-  JOB_NAME,
-  logStructured,
+  JOB_NAME: DEACTIVATION_JOB_NAME,
+  logStructured: logDeactivationStructured,
   runSubscriptionExpiryDeactivation,
 } = require('../scripts/deactivateExpiredProfilesPhase5C');
+const {
+  JOB_NAME: REMINDER_JOB_NAME,
+  runSubscriptionExpiryReminders,
+} = require('./subscriptionReminderService');
 
 const DEFAULT_SCHEDULER_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours default
 
 let schedulerTimer = null;
-let isJobExecuting = false;
+let isDeactivationExecuting = false;
+let isReminderExecuting = false;
+
+/**
+ * Triggers a single execution of the 7-day subscription expiry email reminder job with distributed lock.
+ *
+ * @param {object} [options]
+ * @param {boolean} [options.apply=true]
+ * @param {string} [options.workerId]
+ * @returns {Promise<object>}
+ */
+const triggerReminderRun = async ({
+  apply = true,
+  workerId = `in-process-reminder-${process.pid}`,
+} = {}) => {
+  if (isReminderExecuting) {
+    console.warn(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level: 'warn',
+      event: 'reminder_execution_overlap_skipped',
+      workerId,
+    }));
+    return { skipped: true, reason: 'execution_in_progress' };
+  }
+
+  isReminderExecuting = true;
+  try {
+    const summary = await runSubscriptionExpiryReminders({
+      now: new Date(),
+      apply,
+      acquireLock: true,
+      workerId,
+    });
+    return summary;
+  } catch (err) {
+    console.error(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level: 'error',
+      event: 'reminder_trigger_failed',
+      error: err.message,
+    }));
+    return { error: err.message };
+  } finally {
+    isReminderExecuting = false;
+  }
+};
 
 /**
  * Triggers a single execution of the deactivation job with distributed lock acquisition.
@@ -19,14 +68,14 @@ let isJobExecuting = false;
  */
 const triggerDeactivationRun = async ({
   apply = true,
-  workerId = `in-process-${process.pid}`,
+  workerId = `in-process-deactivation-${process.pid}`,
 } = {}) => {
-  if (isJobExecuting) {
-    logStructured('warn', 'scheduler_execution_overlap_skipped', { workerId });
+  if (isDeactivationExecuting) {
+    logDeactivationStructured('warn', 'scheduler_execution_overlap_skipped', { workerId });
     return { skipped: true, reason: 'execution_in_progress' };
   }
 
-  isJobExecuting = true;
+  isDeactivationExecuting = true;
   try {
     const summary = await runSubscriptionExpiryDeactivation({
       now: new Date(),
@@ -36,11 +85,25 @@ const triggerDeactivationRun = async ({
     });
     return summary;
   } catch (err) {
-    logStructured('error', 'scheduler_trigger_failed', { error: err.message });
+    logDeactivationStructured('error', 'scheduler_trigger_failed', { error: err.message });
     return { error: err.message };
   } finally {
-    isJobExecuting = false;
+    isDeactivationExecuting = false;
   }
+};
+
+/**
+ * Triggers both daily subscription jobs sequentially:
+ * 1. 7-Day Expiry Email Reminders (user reminder & admin digest)
+ * 2. Grace-Period Profile Deactivations
+ *
+ * @param {object} [options]
+ * @returns {Promise<{ reminders: object, deactivation: object }>}
+ */
+const triggerAllExpiryJobs = async ({ apply = true, workerId } = {}) => {
+  const reminderSummary = await triggerReminderRun({ apply, workerId });
+  const deactivationSummary = await triggerDeactivationRun({ apply, workerId });
+  return { reminders: reminderSummary, deactivation: deactivationSummary };
 };
 
 /**
@@ -66,22 +129,26 @@ const startSubscriptionExpiryScheduler = ({
   const isEnabled = forceEnable || process.env.ENABLE_IN_PROCESS_SCHEDULER === 'true';
 
   if (!isEnabled) {
-    logStructured('info', 'in_process_scheduler_disabled', {
+    logDeactivationStructured('info', 'in_process_scheduler_disabled', {
       message: 'In-process scheduler is disabled. Use external cron (Render/AWS/Linux crontab) or set ENABLE_IN_PROCESS_SCHEDULER=true.',
     });
     return {
       isRunning: () => false,
       stop: () => {},
-      triggerNow: () => triggerDeactivationRun({ apply: true }),
+      triggerNow: () => triggerAllExpiryJobs({ apply: true }),
+      triggerRemindersNow: () => triggerReminderRun({ apply: true }),
+      triggerDeactivationNow: () => triggerDeactivationRun({ apply: true }),
     };
   }
 
   if (schedulerTimer) {
-    logStructured('warn', 'in_process_scheduler_already_running');
+    logDeactivationStructured('warn', 'in_process_scheduler_already_running');
     return {
       isRunning: () => Boolean(schedulerTimer),
       stop: stopSubscriptionExpiryScheduler,
-      triggerNow: () => triggerDeactivationRun({ apply: true }),
+      triggerNow: () => triggerAllExpiryJobs({ apply: true }),
+      triggerRemindersNow: () => triggerReminderRun({ apply: true }),
+      triggerDeactivationNow: () => triggerDeactivationRun({ apply: true }),
     };
   }
 
@@ -94,23 +161,22 @@ const startSubscriptionExpiryScheduler = ({
   const shouldRunOnStartup =
     runImmediately || process.env.RUN_EXPIRY_SCHEDULER_ON_STARTUP === 'true';
 
-  logStructured('info', 'in_process_scheduler_started', {
+  logDeactivationStructured('info', 'in_process_scheduler_started', {
     intervalMs: resolvedInterval,
     runOnStartup: shouldRunOnStartup,
   });
 
   if (shouldRunOnStartup) {
-    // Schedule asynchronous immediate run after startup tick
     setImmediate(() => {
-      triggerDeactivationRun({ apply: true }).catch((err) => {
-        logStructured('error', 'startup_run_failed', { error: err.message });
+      triggerAllExpiryJobs({ apply: true }).catch((err) => {
+        logDeactivationStructured('error', 'startup_run_failed', { error: err.message });
       });
     });
   }
 
   schedulerTimer = setInterval(() => {
-    triggerDeactivationRun({ apply: true }).catch((err) => {
-      logStructured('error', 'scheduled_run_failed', { error: err.message });
+    triggerAllExpiryJobs({ apply: true }).catch((err) => {
+      logDeactivationStructured('error', 'scheduled_run_failed', { error: err.message });
     });
   }, resolvedInterval);
 
@@ -121,7 +187,9 @@ const startSubscriptionExpiryScheduler = ({
   return {
     isRunning: () => Boolean(schedulerTimer),
     stop: stopSubscriptionExpiryScheduler,
-    triggerNow: () => triggerDeactivationRun({ apply: true }),
+    triggerNow: () => triggerAllExpiryJobs({ apply: true }),
+    triggerRemindersNow: () => triggerReminderRun({ apply: true }),
+    triggerDeactivationNow: () => triggerDeactivationRun({ apply: true }),
   };
 };
 
@@ -132,13 +200,16 @@ const stopSubscriptionExpiryScheduler = () => {
   if (schedulerTimer) {
     clearInterval(schedulerTimer);
     schedulerTimer = null;
-    logStructured('info', 'in_process_scheduler_stopped');
+    logDeactivationStructured('info', 'in_process_scheduler_stopped');
   }
 };
 
 module.exports = {
-  JOB_NAME,
+  DEACTIVATION_JOB_NAME,
+  REMINDER_JOB_NAME,
+  triggerReminderRun,
   triggerDeactivationRun,
+  triggerAllExpiryJobs,
   startSubscriptionExpiryScheduler,
   stopSubscriptionExpiryScheduler,
 };

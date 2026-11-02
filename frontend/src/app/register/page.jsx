@@ -2,14 +2,32 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Sparkles, Check } from 'lucide-react';
-import { registerUserApi } from '@/lib/api';
+import { useRouter } from 'next/navigation';
+import {
+  Sparkles,
+  Check,
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  Phone,
+  Heart,
+  UserCheck,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
+import { registerUserApi, getCurrentUserApi } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
+import styles from '../auth.module.css';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 6;
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { setCurrentUser, setAuthenticatedUser, checkAuth } = useAuth();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -18,36 +36,33 @@ export default function RegisterPage() {
   });
 
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
   const [successData, setSuccessData] = useState(null);
 
-  // Validate form fields
   const validateForm = () => {
     const newErrors = {};
 
-    // 1. Full Name validation
     if (!formData.name.trim()) {
       newErrors.name = 'Full Name is required';
     } else if (formData.name.trim().length < 2) {
       newErrors.name = 'Full Name must be at least 2 characters';
     }
 
-    // 2. Email Address validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email Address is required';
     } else if (!EMAIL_REGEX.test(formData.email.trim())) {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    // 3. Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < MIN_PASSWORD_LENGTH) {
       newErrors.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters long`;
     }
 
-    // 4. Confirm Password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Confirm Password is required';
     } else if (formData.password !== formData.confirmPassword) {
@@ -65,7 +80,6 @@ export default function RegisterPage() {
       [name]: value,
     }));
 
-    // Clear specific field error as user types
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -73,7 +87,6 @@ export default function RegisterPage() {
       }));
     }
 
-    // Clear server error banner upon edit
     if (serverError) {
       setServerError('');
     }
@@ -83,7 +96,6 @@ export default function RegisterPage() {
     e.preventDefault();
     setServerError('');
 
-    // Frontend validation
     if (!validateForm()) {
       return;
     }
@@ -98,8 +110,26 @@ export default function RegisterPage() {
       });
 
       if (response.success && response.status === 201) {
-        setSuccessData(response.data);
-        // Clear passwords and form data immediately upon success
+        // Automatically establish authenticated session in global state
+        let authedUser = response.data;
+        try {
+          const meResponse = await getCurrentUserApi();
+          if (meResponse && meResponse.success && meResponse.data) {
+            authedUser = meResponse.data;
+          }
+        } catch (_) {}
+
+        if (setCurrentUser) {
+          setCurrentUser(authedUser);
+        } else if (setAuthenticatedUser) {
+          setAuthenticatedUser(authedUser);
+        }
+
+        if (checkAuth) {
+          checkAuth();
+        }
+
+        setSuccessData(authedUser);
         setFormData({
           name: '',
           email: '',
@@ -107,10 +137,13 @@ export default function RegisterPage() {
           confirmPassword: '',
         });
         setErrors({});
+
+        // Automatically navigate to profile completion after a short welcome delay
+        setTimeout(() => {
+          window.location.href = '/profile';
+        }, 1800);
       } else {
-        // Handle 400, 409, or other API errors
         setServerError(response.message || 'Registration failed. Please check your details.');
-        // Clear password fields on failed submission for security
         setFormData((prev) => ({
           ...prev,
           password: '',
@@ -124,202 +157,249 @@ export default function RegisterPage() {
     }
   };
 
-  const handleRegisterAnother = () => {
-    setSuccessData(null);
-    setServerError('');
-    setFormData({
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    });
-    setErrors({});
-  };
-
   return (
-    <div className="auth-page">
-      {/* Background Kolam Ornaments (tasteful, subtle, behind form) */}
-      <div className="auth-kolam-bg auth-kolam-tl" aria-hidden="true">
-        <Image src="/images/kolam-corner.svg" alt="" width={150} height={150} />
-      </div>
-      <div className="auth-kolam-bg auth-kolam-br" aria-hidden="true">
-        <Image src="/images/kolam-corner.svg" alt="" width={150} height={150} />
-      </div>
-      <div className="auth-kolam-watermark" aria-hidden="true">
-        <Image src="/images/kolam-watermark.svg" alt="" width={300} height={300} />
-      </div>
+    <div className={styles.page}>
+      <div className={styles.bgGlowTop} aria-hidden="true" />
+      <div className={styles.bgGlowBottom} aria-hidden="true" />
 
-      <div className="auth-card">
-        {/* Header with existing brand emblem mark & traditions eyebrow */}
-        <div className="auth-header">
-          <div className="auth-brand-mark" aria-hidden="true">
-            <span className="brand-emblem">
-              <Sparkles size={20} />
-            </span>
-          </div>
-          <div className="auth-eyebrow">
-            <Sparkles size={12} className="auth-eyebrow-sparkle" aria-hidden="true" />
-            <span>South Indian Matrimonial Traditions</span>
-          </div>
-          <h1 className="auth-title">Create Account</h1>
-          <p className="auth-subtitle">
-            Begin your matrimonial journey with trusted profiles and families.
-          </p>
-        </div>
-
-        {/* Success Confirmation View */}
-        {successData ? (
-          <div className="success-card">
-            <div className="success-badge-icon" aria-hidden="true">
-              <Check size={30} strokeWidth={2.4} />
-            </div>
-            <h2 className="success-title">
-              Registration Successful!
-            </h2>
-            <p className="success-subtitle">
-              Your matrimonial account has been registered successfully.
-            </p>
-
-            <div className="success-user-box">
-              <div className="success-user-row">
-                <span className="success-user-label">Full Name:</span>
-                <strong className="success-user-val">{successData.name}</strong>
-              </div>
-              <div className="success-user-row">
-                <span className="success-user-label">Email Address:</span>
-                <strong className="success-user-val">{successData.email}</strong>
-              </div>
-              <div className="success-user-row">
-                <span className="success-user-label">Account Role:</span>
-                <strong className="success-user-val">{successData.role}</strong>
-              </div>
-            </div>
-
-            <div className="success-actions">
-              <button
-                type="button"
-                onClick={handleRegisterAnother}
-                className="btn-secondary"
-              >
-                Register Another Account
-              </button>
-              <Link href="/" className="btn-secondary">
-                Return to Home
-              </Link>
-            </div>
-          </div>
-        ) : (
-          /* Registration Form View */
+      <div className={styles.authContainer}>
+        {/* Left Side: Brand Showcase */}
+        <aside className={styles.showcaseSide}>
           <div>
-            {/* Server Error Alert */}
-            {serverError && (
-              <div className="alert alert-danger" role="alert">
-                <span className="alert-icon">⚠</span>
-                <div>{serverError}</div>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="auth-form" noValidate>
-              {/* Full Name */}
-              <div className="form-group">
-                <label htmlFor="name" className="form-label">
-                  Full Name <span className="required-mark">*</span>
-                </label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  placeholder="e.g. Anand Kumar"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={`form-input ${errors.name ? 'input-error' : ''}`}
-                  disabled={isSubmitting}
-                  autoComplete="name"
-                />
-                {errors.name && <span className="field-error">{errors.name}</span>}
-              </div>
-
-              {/* Email Address */}
-              <div className="form-group">
-                <label htmlFor="email" className="form-label">
-                  Email Address <span className="required-mark">*</span>
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`form-input ${errors.email ? 'input-error' : ''}`}
-                  disabled={isSubmitting}
-                  autoComplete="email"
-                />
-                {errors.email && <span className="field-error">{errors.email}</span>}
-              </div>
-
-              {/* Password */}
-              <div className="form-group">
-                <label htmlFor="password" className="form-label">
-                  Password <span className="required-mark">*</span>
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Minimum 6 characters"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`form-input ${errors.password ? 'input-error' : ''}`}
-                  disabled={isSubmitting}
-                  autoComplete="new-password"
-                />
-                {errors.password && <span className="field-error">{errors.password}</span>}
-              </div>
-
-              {/* Confirm Password */}
-              <div className="form-group">
-                <label htmlFor="confirmPassword" className="form-label">
-                  Confirm Password <span className="required-mark">*</span>
-                </label>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  placeholder="Re-enter your password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className={`form-input ${errors.confirmPassword ? 'input-error' : ''}`}
-                  disabled={isSubmitting}
-                  autoComplete="new-password"
-                />
-                {errors.confirmPassword && (
-                  <span className="field-error">{errors.confirmPassword}</span>
-                )}
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="btn-primary"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Registering Account...' : 'Register'}
-              </button>
-            </form>
-
-            <div className="auth-footer-links">
-              Already have an account?{' '}
-              <Link href="/login">
-                Login here
-              </Link>
+            <div className={styles.brandBadge}>
+              <Sparkles size={13} /> South Indian Matrimonial Traditions
             </div>
-
-            <p className="auth-agreement-text">
-              By registering, you agree to find genuine matrimonial matches with verified profiles.
+            <h2>
+              Begin Your Family&apos;s <em>Sacred Journey</em>
+            </h2>
+            <p className={styles.showcaseDesc}>
+              Create a free matrimonial account to browse verified candidate profiles, share family biodata, and find dignified matches.
             </p>
           </div>
-        )}
+
+          <div className={styles.perksList}>
+            <div className={styles.perkItem}>
+              <div className={styles.perkIconBox}>
+                <UserCheck size={18} />
+              </div>
+              <div>
+                <strong>100% Free Registration</strong>
+                <span>Create your profile and start exploring candidates at zero cost.</span>
+              </div>
+            </div>
+
+            <div className={styles.perkItem}>
+              <div className={styles.perkIconBox}>
+                <ShieldCheck size={18} />
+              </div>
+              <div>
+                <strong>Candidate Contact Shield</strong>
+                <span>Personal phone numbers remain confidential and shielded from public search.</span>
+              </div>
+            </div>
+
+            <div className={styles.perkItem}>
+              <div className={styles.perkIconBox}>
+                <Heart size={18} />
+              </div>
+              <div>
+                <strong>Traditional Values</strong>
+                <span>Designed specifically around Tamil, Telugu, Kannada, and Malayalam family values.</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Right Side: Registration Form / Success Confirmation */}
+        <main className={styles.formSide}>
+          {successData ? (
+            /* Registration Success Confirmation */
+            <div className={styles.successCard}>
+              <div className={styles.successIconCircle} aria-hidden="true">
+                <Check size={32} strokeWidth={2.4} />
+              </div>
+
+              <h2>Welcome, {successData.name}!</h2>
+              <p>Your matrimonial account is active and you are now signed in.</p>
+
+              <div className={styles.userInfoBox}>
+                <div className={styles.userInfoRow}>
+                  <span className={styles.userInfoLabel}>Full Name:</span>
+                  <span className={styles.userInfoVal}>{successData.name}</span>
+                </div>
+                <div className={styles.userInfoRow}>
+                  <span className={styles.userInfoLabel}>Email Address:</span>
+                  <span className={styles.userInfoVal}>{successData.email}</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
+                <Link
+                  href="/profile"
+                  className={styles.btnPrimary}
+                >
+                  Complete Your Profile <ArrowRight size={16} />
+                </Link>
+                <Link href="/members" className={styles.btnOutline}>
+                  Browse Profiles
+                </Link>
+                <Link href="/" className={styles.btnOutline}>
+                  Explore Website
+                </Link>
+              </div>
+            </div>
+          ) : (
+            /* Registration Form */
+            <div>
+              <header className={styles.formHeader}>
+                <span className={styles.kicker}>New Membership</span>
+                <h1 className={styles.formTitle}>Create Account</h1>
+                <p className={styles.formSubtitle}>
+                  Begin your matrimonial journey with trusted profiles and families.
+                </p>
+              </header>
+
+              {/* Server Error Alert */}
+              {serverError && (
+                <div className={`${styles.alert} ${styles.alertDanger}`} role="alert">
+                  <AlertCircle size={18} color="#dc2626" />
+                  <span>{serverError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className={styles.authForm} noValidate>
+                {/* Full Name */}
+                <div className={styles.formGroup}>
+                  <label htmlFor="name" className={styles.label}>
+                    Full Name <span className={styles.reqMark}>*</span>
+                  </label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    placeholder="e.g. Anand Kumar"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className={`${styles.input} ${errors.name ? styles.inputError : ''}`}
+                    disabled={isSubmitting}
+                    autoComplete="name"
+                  />
+                  {errors.name && <span className={styles.errorText}>{errors.name}</span>}
+                </div>
+
+                {/* Email Address */}
+                <div className={styles.formGroup}>
+                  <label htmlFor="email" className={styles.label}>
+                    Email Address <span className={styles.reqMark}>*</span>
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
+                    disabled={isSubmitting}
+                    autoComplete="email"
+                  />
+                  {errors.email && <span className={styles.errorText}>{errors.email}</span>}
+                </div>
+
+                {/* Password & Confirm Password Row */}
+                <div className={styles.formRow}>
+                  {/* Password */}
+                  <div className={styles.formGroup}>
+                    <label htmlFor="password" className={styles.label}>
+                      Password <span className={styles.reqMark}>*</span>
+                    </label>
+                    <div className={styles.passwordWrapper}>
+                      <input
+                        id="password"
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Min 6 chars"
+                        value={formData.password}
+                        onChange={handleChange}
+                        className={`${styles.input} ${styles.passwordInput} ${errors.password ? styles.inputError : ''}`}
+                        disabled={isSubmitting}
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className={styles.passwordToggle}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                      </button>
+                    </div>
+                    {errors.password && <span className={styles.errorText}>{errors.password}</span>}
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className={styles.formGroup}>
+                    <label htmlFor="confirmPassword" className={styles.label}>
+                      Confirm Password <span className={styles.reqMark}>*</span>
+                    </label>
+                    <div className={styles.passwordWrapper}>
+                      <input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        placeholder="Re-enter"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        className={`${styles.input} ${styles.passwordInput} ${errors.confirmPassword ? styles.inputError : ''}`}
+                        disabled={isSubmitting}
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword((prev) => !prev)}
+                        className={styles.passwordToggle}
+                        aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && (
+                      <span className={styles.errorText}>{errors.confirmPassword}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  className={styles.btnPrimary}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Registering Account...' : 'Register Free'} <ArrowRight size={16} />
+                </button>
+              </form>
+
+              {/* Link to Login */}
+              <div className={styles.footerLinks}>
+                Already have an account?{' '}
+                <Link href="/login">
+                  Sign in here
+                </Link>
+              </div>
+
+              <p className={styles.agreementText}>
+                By registering, you agree to find genuine matrimonial matches with verified profiles.
+              </p>
+
+              {/* Return to Home Link */}
+              <div className={styles.returnHome}>
+                <Link href="/" className={styles.returnHomeLink}>
+                  <ArrowLeft size={14} /> Return to Home
+                </Link>
+              </div>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );

@@ -30,10 +30,47 @@ const HEADER_MAPPINGS = {
   'height': 'personalDetails.height',
   'height (cm)': 'personalDetails.height',
   'height(cm)': 'personalDetails.height',
+  'weight': 'personalDetails.weight',
+  'weight (kg)': 'personalDetails.weight',
+  'weight(kg)': 'personalDetails.weight',
+  'blood group': 'personalDetails.bloodGroup',
+  'complexion': 'personalDetails.complexion',
+  'diet': 'personalDetails.diet',
+  'dietary preference': 'personalDetails.diet',
+  'physical status': 'personalDetails.physicalStatus',
+  'nativity': 'personalDetails.nativity',
+  'native place': 'personalDetails.nativity',
+  'place of birth': 'personalDetails.placeOfBirth',
+  'time of birth': 'personalDetails.timeOfBirth',
+  'present address': 'personalDetails.presentAddress',
+  'permanent address': 'personalDetails.permanentAddress',
+  'contact person': 'personalDetails.contactPerson',
+  'alternate phone': 'personalDetails.alternatePhone',
   'marital status': 'personalDetails.maritalStatus',
   'mother tongue': 'personalDetails.motherTongue',
   'current location': 'personalDetails.location',
   'location': 'personalDetails.location',
+
+  // Community details
+  'religion': 'communityDetails.religion',
+  'caste': 'communityDetails.caste',
+  'subcaste': 'communityDetails.subcaste',
+  'sub caste': 'communityDetails.subcaste',
+  'gothram': 'communityDetails.gothram',
+  'kulam': 'communityDetails.gothram',
+
+  // Vedic astrology / horoscope
+  'rasi': 'horoscope.rasi',
+  'moon sign': 'horoscope.rasi',
+  'nakshatram': 'horoscope.nakshatram',
+  'birth star': 'horoscope.nakshatram',
+  'star': 'horoscope.nakshatram',
+  'padam': 'horoscope.padam',
+  'lagnam': 'horoscope.lagnam',
+  'ascendant': 'horoscope.lagnam',
+  'dosham': 'horoscope.dosham.doshamSummary',
+  'dosham status': 'horoscope.dosham.doshamSummary',
+  'dasa balance': 'horoscope.dasaBalance.planet',
 
   // Education & profession
   'education qualification': 'educationAndProfession.educationalQualification',
@@ -47,6 +84,20 @@ const HEADER_MAPPINGS = {
   'income': 'educationAndProfession.income',
 
   // Family details
+  'father name': 'familyDetails.fatherName',
+  'father status': 'familyDetails.fatherAlive',
+  'father occupation': 'familyDetails.fatherOccupation',
+  'mother name': 'familyDetails.motherName',
+  'mother status': 'familyDetails.motherAlive',
+  'mother occupation': 'familyDetails.motherOccupation',
+  'married elder brothers': 'familyDetails.marriedElderBrothers',
+  'unmarried elder brothers': 'familyDetails.unmarriedElderBrothers',
+  'married younger brothers': 'familyDetails.marriedYoungerBrothers',
+  'unmarried younger brothers': 'familyDetails.unmarriedYoungerBrothers',
+  'married elder sisters': 'familyDetails.marriedElderSisters',
+  'unmarried elder sisters': 'familyDetails.unmarriedElderSisters',
+  'married younger sisters': 'familyDetails.marriedYoungerSisters',
+  'unmarried younger sisters': 'familyDetails.unmarriedYoungerSisters',
   'family details': 'familyDetails.familyInformation',
   'family info': 'familyDetails.familyInformation',
   'parent details': 'familyDetails.parentInformation',
@@ -68,8 +119,26 @@ const HEADER_MAPPINGS = {
   'education preference': 'partnerPreferences.educationPreference',
   'partner occupation preference': 'partnerPreferences.occupationPreference',
   'occupation preference': 'partnerPreferences.occupationPreference',
+  'partner job requirement': 'partnerPreferences.jobRequirement',
+  'job requirement': 'partnerPreferences.jobRequirement',
+  'partner marital status preference': 'partnerPreferences.maritalStatusPreference',
+  'partner diet preference': 'partnerPreferences.dietPreference',
+  'horoscope match required': 'partnerPreferences.horoscopeRequired',
+  'partner horoscope required': 'partnerPreferences.horoscopeRequired',
+  'partner caste preference': 'partnerPreferences.castePreference',
+  'caste preference': 'partnerPreferences.castePreference',
+  'partner income preference': 'partnerPreferences.incomePreference',
   'other preferences': 'partnerPreferences.otherPreferences',
   'partner other preferences': 'partnerPreferences.otherPreferences',
+
+  // Photos (up to 3 URLs)
+  'photo 1 url': 'rawPhotos.photo1',
+  'photo 1': 'rawPhotos.photo1',
+  'primary photo url': 'rawPhotos.photo1',
+  'photo 2 url': 'rawPhotos.photo2',
+  'photo 2': 'rawPhotos.photo2',
+  'photo 3 url': 'rawPhotos.photo3',
+  'photo 3': 'rawPhotos.photo3',
 };
 
 const VALID_GENDERS = ['Male', 'Female', 'Other'];
@@ -340,7 +409,7 @@ const validateCandidateImport = async (req, res, next) => {
 
       // Database duplicate checks
       if (normalizedPhoneDigits && dbPhonesSet.has(normalizedPhoneDigits)) {
-        reasons.push('Duplicate candidate: Phone already registered in database');
+        reasons.push('Duplicate candidate: Phone number is already registered to an existing candidate');
         isDuplicate = true;
       }
 
@@ -449,9 +518,31 @@ const validateCandidateImport = async (req, res, next) => {
 
         // Populate nested groups
         for (const [key, val] of Object.entries(rowValues)) {
-          if (!['candidateName', 'candidatePhone', 'candidateEmail'].includes(key)) {
+          if (!['candidateName', 'candidatePhone', 'candidateEmail', 'rawPhotos.photo1', 'rawPhotos.photo2', 'rawPhotos.photo3'].includes(key)) {
             setDeepProp(candidatePayload, key, val);
           }
+        }
+
+        // Process rawPhotos into valid photos gallery if valid URLs are provided
+        const photoUrls = [
+          rowValues['rawPhotos.photo1'],
+          rowValues['rawPhotos.photo2'],
+          rowValues['rawPhotos.photo3'],
+        ].filter((u) => u && typeof u === 'string' && u.trim().startsWith('http'));
+
+        if (photoUrls.length > 0) {
+          candidatePayload.photos = photoUrls.map((url, idx) => ({
+            _id: new mongoose.Types.ObjectId(),
+            url: url.trim(),
+            publicId: `imported_${Date.now()}_${idx}`,
+            isPrimary: idx === 0,
+            uploadedAt: new Date(),
+          }));
+
+          candidatePayload.profilePhoto = {
+            url: photoUrls[0].trim(),
+            publicId: `imported_${Date.now()}_0`,
+          };
         }
 
         validStagingRecords.push({
@@ -594,8 +685,8 @@ const commitCandidateImport = async (req, res, next) => {
             user: null,
             approvedAt: null,
             approvedBy: null,
-            photos: [],
-            profilePhoto: { url: null, publicId: null },
+            photos: Array.isArray(record.payload?.photos) && record.payload.photos.length > 0 ? record.payload.photos : [],
+            profilePhoto: record.payload?.profilePhoto?.url ? record.payload.profilePhoto : { url: null, publicId: null },
             importBatchId: batchId,
           };
 
@@ -707,30 +798,83 @@ const downloadCandidateExcelTemplate = async (req, res, next) => {
     const worksheet = workbook.addWorksheet('Candidates');
 
     worksheet.columns = [
+      // 1. Identity & Contact
       { header: 'Candidate Name', key: 'candidateName', width: 22 },
       { header: 'Candidate Phone', key: 'candidatePhone', width: 18 },
       { header: 'Candidate Email', key: 'candidateEmail', width: 26 },
+      { header: 'Alternate Phone', key: 'alternatePhone', width: 18 },
+      { header: 'Contact Person', key: 'contactPerson', width: 18 },
+
+      // 2. Personal & Physical
       { header: 'Gender', key: 'gender', width: 12 },
       { header: 'Date of Birth', key: 'dob', width: 16 },
+      { header: 'Time of Birth', key: 'timeOfBirth', width: 16 },
+      { header: 'Place of Birth', key: 'placeOfBirth', width: 20 },
+      { header: 'Nativity', key: 'nativity', width: 18 },
       { header: 'Height (cm)', key: 'height', width: 14 },
+      { header: 'Weight (kg)', key: 'weight', width: 14 },
       { header: 'Marital Status', key: 'maritalStatus', width: 18 },
       { header: 'Mother Tongue', key: 'motherTongue', width: 16 },
       { header: 'Current Location', key: 'location', width: 20 },
+      { header: 'Blood Group', key: 'bloodGroup', width: 14 },
+      { header: 'Complexion', key: 'complexion', width: 16 },
+      { header: 'Dietary Preference', key: 'diet', width: 18 },
+      { header: 'Physical Status', key: 'physicalStatus', width: 16 },
+
+      // 3. Community & Horoscope
+      { header: 'Religion', key: 'religion', width: 16 },
+      { header: 'Caste', key: 'caste', width: 20 },
+      { header: 'Subcaste', key: 'subcaste', width: 20 },
+      { header: 'Gothram', key: 'gothram', width: 18 },
+      { header: 'Rasi', key: 'rasi', width: 16 },
+      { header: 'Nakshatram', key: 'nakshatram', width: 18 },
+      { header: 'Padam', key: 'padam', width: 12 },
+      { header: 'Lagnam', key: 'lagnam', width: 16 },
+      { header: 'Dosham Status', key: 'dosham', width: 18 },
+      { header: 'Dasa Balance', key: 'dasaBalance', width: 16 },
+
+      // 4. Education & Career
       { header: 'Education Qualification', key: 'education', width: 24 },
       { header: 'Occupation', key: 'occupation', width: 20 },
       { header: 'Company Name', key: 'company', width: 22 },
       { header: 'Work Location', key: 'workLocation', width: 20 },
       { header: 'Annual Income', key: 'income', width: 16 },
+
+      // 5. Family Details
+      { header: 'Father Name', key: 'fatherName', width: 20 },
+      { header: 'Father Status', key: 'fatherAlive', width: 16 },
+      { header: 'Father Occupation', key: 'fatherOccupation', width: 20 },
+      { header: 'Mother Name', key: 'motherName', width: 20 },
+      { header: 'Mother Status', key: 'motherAlive', width: 16 },
+      { header: 'Mother Occupation', key: 'motherOccupation', width: 20 },
+      { header: 'Married Elder Brothers', key: 'marriedElderBrothers', width: 18 },
+      { header: 'Unmarried Elder Brothers', key: 'unmarriedElderBrothers', width: 18 },
+      { header: 'Married Younger Brothers', key: 'marriedYoungerBrothers', width: 18 },
+      { header: 'Unmarried Younger Brothers', key: 'unmarriedYoungerBrothers', width: 18 },
+      { header: 'Married Elder Sisters', key: 'marriedElderSisters', width: 18 },
+      { header: 'Unmarried Elder Sisters', key: 'unmarriedElderSisters', width: 18 },
+      { header: 'Married Younger Sisters', key: 'marriedYoungerSisters', width: 18 },
+      { header: 'Unmarried Younger Sisters', key: 'unmarriedYoungerSisters', width: 18 },
       { header: 'Family Details', key: 'familyInfo', width: 28 },
       { header: 'Parent Details', key: 'parentInfo', width: 28 },
       { header: 'Sibling Details', key: 'siblingInfo', width: 28 },
       { header: 'Family Location', key: 'familyLocation', width: 20 },
+
+      // 6. Partner Preferences
       { header: 'Partner Preferred Min Age', key: 'minAge', width: 24 },
       { header: 'Partner Preferred Max Age', key: 'maxAge', width: 24 },
       { header: 'Partner Preferred Location', key: 'prefLocation', width: 24 },
       { header: 'Partner Education Preference', key: 'prefEdu', width: 26 },
       { header: 'Partner Occupation Preference', key: 'prefOcc', width: 26 },
+      { header: 'Partner Job Requirement', key: 'jobRequirement', width: 20 },
+      { header: 'Partner Caste Preference', key: 'castePreference', width: 22 },
+      { header: 'Horoscope Match Required', key: 'horoscopeRequired', width: 22 },
       { header: 'Other Preferences', key: 'otherPrefs', width: 28 },
+
+      // 7. Photos
+      { header: 'Photo 1 URL', key: 'photo1', width: 32 },
+      { header: 'Photo 2 URL', key: 'photo2', width: 32 },
+      { header: 'Photo 3 URL', key: 'photo3', width: 32 },
     ];
 
     // Style Header Row

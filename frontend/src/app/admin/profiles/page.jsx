@@ -4,14 +4,45 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
+  FileSpreadsheet,
+  Plus,
+  LayoutDashboard,
+  ShieldAlert,
+  Heart,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  User,
+  Users,
+  Phone,
+  Mail,
+  Clock,
+  Eye,
+  Edit,
+  Camera,
+  Play,
+  Pause,
+  Trash2,
+  Check,
+  X,
+  RotateCw,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+} from 'lucide-react';
+import {
   getAdminProfilesApi,
   updateProfileApprovalApi,
   inviteBrokerCandidateApi,
   reinviteBrokerCandidateApi,
+  updateAdminProfileStatusApi,
+  deleteAdminProfileApi,
 } from '@/lib/api';
-import { AdminNav } from '@/components/admin/AdminNav';
 import { AdminPhotoManagerModal } from '@/components/admin/AdminPhotoManagerModal';
 import { AdminBulkImportModal } from '@/components/admin/AdminBulkImportModal';
+import { AdminProfileViewModal } from '@/components/admin/AdminProfileViewModal';
+import { AdminProfileEditModal } from '@/components/admin/AdminProfileEditModal';
 
 // Calculate age from Date of Birth
 function calculateAge(dobString) {
@@ -45,7 +76,39 @@ export default function AdminProfilesPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [actionFeedback, setActionFeedback] = useState({ type: '', text: '' });
   const [processingId, setProcessingId] = useState(null);
-  const isFetchingRef = useRef(false);
+  const requestIdRef = useRef(0);
+
+  // Auto-dismiss feedback toast after 4.5 seconds
+  useEffect(() => {
+    if (!actionFeedback.text) return;
+    const t = setTimeout(() => {
+      setActionFeedback({ type: '', text: '' });
+    }, 4500);
+    return () => clearTimeout(t);
+  }, [actionFeedback.text]);
+
+  // View / Edit / Filter State
+  const [viewProfile, setViewProfile] = useState(null);
+  const [editProfile, setEditProfile] = useState(null);
+  const [filters, setFilters] = useState({ approvalStatus: '', profileStatus: '', source: '', gender: '' });
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
+
+  // Memoized stats calculation for directory overview ribbon
+  const stats = React.useMemo(() => {
+    const total = pagination.totalRecords || profiles.length;
+    let active = 0;
+    let pending = 0;
+    let brides = 0;
+    let grooms = 0;
+    profiles.forEach((p) => {
+      if (p.profileStatus === 'active') active++;
+      if (p.approvalStatus === 'pending_approval') pending++;
+      if (p.personalDetails?.gender === 'Female') brides++;
+      if (p.personalDetails?.gender === 'Male') grooms++;
+    });
+    return { total, active, pending, brides, grooms };
+  }, [profiles, pagination.totalRecords]);
 
   // Photo Management Modal State
   const [selectedPhotoProfile, setSelectedPhotoProfile] = useState(null);
@@ -54,10 +117,9 @@ export default function AdminProfilesPage() {
   // Bulk Excel Import Modal State
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
-  // Fetch Profiles with in-flight request guard
+  // Fetch Profiles with sequence-based race condition protection
   const fetchProfiles = useCallback(async (targetPage, targetLimit, targetSearch) => {
-    if (isFetchingRef.current) return;
-    isFetchingRef.current = true;
+    const currentRequestId = ++requestIdRef.current;
     setLoading(true);
     setErrorMessage('');
 
@@ -66,7 +128,11 @@ export default function AdminProfilesPage() {
         page: targetPage,
         limit: targetLimit,
         search: targetSearch,
+        ...filtersRef.current,
       });
+
+      // Ignore stale responses from earlier requests
+      if (currentRequestId !== requestIdRef.current) return;
 
       if (res.status === 401) {
         router.replace('/login');
@@ -88,10 +154,13 @@ export default function AdminProfilesPage() {
         setErrorMessage(res.message || 'Failed to load matrimonial profiles.');
       }
     } catch (err) {
-      setErrorMessage('Network connection error while fetching matrimonial profiles.');
+      if (currentRequestId === requestIdRef.current) {
+        setErrorMessage('Network connection error while fetching matrimonial profiles.');
+      }
     } finally {
-      setLoading(false);
-      isFetchingRef.current = false;
+      if (currentRequestId === requestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [router]);
 
@@ -118,7 +187,7 @@ export default function AdminProfilesPage() {
   const handleImportCompleted = useCallback((importedCount) => {
     setActionFeedback({
       type: 'success',
-      text: `Successfully imported ${importedCount} broker candidate profiles! All imported profiles are pending approval.`,
+      text: `Successfully imported ${importedCount} candidate profiles! All imported profiles are pending approval.`,
     });
     setPage(1);
     fetchProfiles(1, limit, activeSearch);
@@ -127,7 +196,7 @@ export default function AdminProfilesPage() {
   // Load when page, limit, or activeSearch changes
   useEffect(() => {
     fetchProfiles(page, limit, activeSearch);
-  }, [page, limit, activeSearch, fetchProfiles]);
+  }, [page, limit, activeSearch, filters, fetchProfiles]);
 
   // Search handler
   const handleSearchSubmit = (e) => {
@@ -143,128 +212,215 @@ export default function AdminProfilesPage() {
     setPage(1);
   };
 
+  // Custom Modal Confirmation & Prompt State (Replaces native browser window.confirm & window.prompt)
+  const [actionModal, setActionModal] = useState({
+    open: false,
+    type: '', // 'approval', 'status', 'delete', 'invite', 'reinvite'
+    profileId: null,
+    candidateLabel: '',
+    targetStatus: '',
+    title: '',
+    message: '',
+    confirmText: '',
+    confirmColor: '',
+    inputVal: '',
+  });
+
   // Handle Profile Approval / Rejection Action
-  const handleApprovalAction = async (profileId, candidateLabel, actionStatus) => {
+  const handleApprovalAction = (profileId, candidateLabel, actionStatus) => {
     if (processingId) return;
+    const actionVerb = actionStatus === 'approved' ? 'Approve' : 'Reject';
+    setActionModal({
+      open: true,
+      type: 'approval',
+      profileId,
+      candidateLabel,
+      targetStatus: actionStatus,
+      title: `${actionVerb} Matrimonial Profile`,
+      message:
+        actionStatus === 'approved'
+          ? `Are you sure you want to approve the profile for "${candidateLabel}"? It will become active and visible in the member directory.`
+          : `Are you sure you want to reject the profile for "${candidateLabel}"?`,
+      confirmText: `Yes, ${actionVerb} Profile`,
+      confirmColor: actionStatus === 'approved' ? '#16a34a' : '#dc2626',
+      inputVal: '',
+    });
+  };
 
-    const actionVerb = actionStatus === 'approved' ? 'approve' : 'reject';
-    const isConfirmed = window.confirm(
-      `Are you sure you want to ${actionVerb.toUpperCase()} the matrimonial profile for "${candidateLabel}"?`
-    );
+  const setFilter = (key, value) => {
+    setFilters((f) => ({ ...f, [key]: value }));
+    setPage(1);
+  };
 
-    if (!isConfirmed) return;
+  const handleToggleStatus = (p, label) => {
+    if (processingId) return;
+    const next = p.profileStatus === 'inactive' ? 'active' : 'inactive';
+    const actionLabel = next === 'active' ? 'Activate' : 'Deactivate';
+    setActionModal({
+      open: true,
+      type: 'status',
+      profileId: p._id,
+      candidateLabel: label,
+      targetStatus: next,
+      title: `${actionLabel} Profile`,
+      message: `Are you sure you want to ${actionLabel.toLowerCase()} the profile for "${label}"?`,
+      confirmText: `Yes, ${actionLabel}`,
+      confirmColor: next === 'active' ? '#16a34a' : '#d97706',
+      inputVal: '',
+    });
+  };
 
-    setProcessingId(profileId);
-    setActionFeedback({ type: '', text: '' });
+  const handleDeleteProfile = (p, label) => {
+    if (processingId) return;
+    setActionModal({
+      open: true,
+      type: 'delete',
+      profileId: p._id,
+      candidateLabel: label,
+      targetStatus: '',
+      title: 'Delete Matrimonial Profile',
+      message: `Permanently DELETE the profile for "${label}"? This action cannot be undone.`,
+      confirmText: 'Yes, Delete Permanently',
+      confirmColor: '#dc2626',
+      inputVal: '',
+    });
+  };
 
-    try {
-      const res = await updateProfileApprovalApi(profileId, actionStatus);
-
-      if (res.success) {
-        setActionFeedback({
-          type: 'success',
-          text: `Successfully ${actionStatus === 'approved' ? 'approved' : 'rejected'} profile for "${candidateLabel}".`,
-        });
-        // Refresh directory listing to reflect updated status and audit fields
-        fetchProfiles(page, limit, activeSearch);
-      } else {
-        setActionFeedback({
-          type: 'error',
-          text: res.message || `Failed to ${actionVerb} profile.`,
-        });
-      }
-    } catch (err) {
-      setActionFeedback({
-        type: 'error',
-        text: `Network error while attempting to ${actionVerb} profile.`,
-      });
-    } finally {
-      setProcessingId(null);
-    }
+  const handleProfileSaved = (updated) => {
+    setEditProfile(null);
+    setViewProfile(null);
+    setActionFeedback({ type: 'success', text: 'Profile updated.' });
+    if (updated) setProfiles((prev) => prev.map((x) => (x._id === updated._id ? updated : x)));
   };
 
   // Handle Login Invitation for Approved Broker Candidate
-  const handleInviteCandidate = async (profileId, candidateName, existingEmail) => {
+  const handleInviteCandidate = (profileId, candidateName, existingEmail) => {
     if (processingId) return;
-
-    let targetEmail = existingEmail;
-    if (!targetEmail) {
-      const inputEmail = window.prompt(
-        `Please enter candidate email address to send login invitation for "${candidateName}":`
-      );
-      if (!inputEmail || !inputEmail.trim()) {
-        return; // User cancelled
-      }
-      targetEmail = inputEmail.trim();
-    } else {
-      const confirmSend = window.confirm(
-        `Send password setup invitation email to "${candidateName}" at ${targetEmail}?`
-      );
-      if (!confirmSend) return;
-    }
-
-    setProcessingId(profileId);
-    setActionFeedback({ type: '', text: '' });
-
-    try {
-      const res = await inviteBrokerCandidateApi(profileId, targetEmail);
-
-      if (res.success) {
-        setActionFeedback({
-          type: res.warning ? 'error' : 'success',
-          text: res.message,
-        });
-        fetchProfiles(page, limit, activeSearch);
-      } else {
-        setActionFeedback({
-          type: 'error',
-          text: res.message || 'Failed to send login invitation.',
-        });
-      }
-    } catch (err) {
-      setActionFeedback({
-        type: 'error',
-        text: 'Network error while attempting to send login invitation.',
-      });
-    } finally {
-      setProcessingId(null);
-    }
+    setActionModal({
+      open: true,
+      type: 'invite',
+      profileId,
+      candidateLabel: candidateName,
+      targetStatus: '',
+      title: 'Send Candidate Login Invite',
+      message: `Send an activation email inviting "${candidateName}" to log in and manage their profile.`,
+      confirmText: 'Send Invitation Email',
+      confirmColor: '#0284c7',
+      inputVal: existingEmail || '',
+    });
   };
 
   // Handle Resending Login Invitation
-  const handleReinviteCandidate = async (profileId, candidateName, email) => {
+  const handleReinviteCandidate = (profileId, candidateName, currentEmail) => {
     if (processingId) return;
+    setActionModal({
+      open: true,
+      type: 'reinvite',
+      profileId,
+      candidateLabel: candidateName,
+      targetStatus: '',
+      title: 'Resend Candidate Login Invite',
+      message: `Rotate token and resend invitation email to "${candidateName}".`,
+      confirmText: 'Resend Invitation Email',
+      confirmColor: '#0284c7',
+      inputVal: currentEmail || '',
+    });
+  };
 
-    const confirmResend = window.confirm(
-      `Rotate setup token and resend invitation email to "${candidateName}" (${email})?`
-    );
-    if (!confirmResend) return;
+  // Execute Action from Custom Modal
+  const handleConfirmActionModal = async () => {
+    const { type, profileId, candidateLabel, targetStatus, inputVal } = actionModal;
+    if (!profileId || processingId) return;
 
-    setProcessingId(profileId);
-    setActionFeedback({ type: '', text: '' });
-
-    try {
-      const res = await reinviteBrokerCandidateApi(profileId);
-
-      if (res.success) {
-        setActionFeedback({
-          type: res.warning ? 'error' : 'success',
-          text: res.message,
-        });
-        fetchProfiles(page, limit, activeSearch);
-      } else {
-        setActionFeedback({
-          type: 'error',
-          text: res.message || 'Failed to resend invitation.',
-        });
+    if (type === 'approval') {
+      const actionVerb = targetStatus === 'approved' ? 'approve' : 'reject';
+      setProcessingId(profileId);
+      setActionFeedback({ type: '', text: '' });
+      try {
+        const res = await updateProfileApprovalApi(profileId, targetStatus);
+        if (res.success) {
+          setActionFeedback({
+            type: 'success',
+            text: `Successfully ${targetStatus === 'approved' ? 'approved' : 'rejected'} profile for "${candidateLabel}".`,
+          });
+          setActionModal({ open: false, type: '', profileId: null });
+          fetchProfiles(page, limit, activeSearch);
+        } else {
+          setActionFeedback({ type: 'error', text: res.message || `Failed to ${actionVerb} profile.` });
+        }
+      } catch (err) {
+        setActionFeedback({ type: 'error', text: `Network error while attempting to ${actionVerb} profile.` });
+      } finally {
+        setProcessingId(null);
       }
-    } catch (err) {
-      setActionFeedback({
-        type: 'error',
-        text: 'Network error while attempting to resend invitation.',
-      });
-    } finally {
-      setProcessingId(null);
+    } else if (type === 'status') {
+      setProcessingId(profileId);
+      try {
+        const res = await updateAdminProfileStatusApi(profileId, targetStatus);
+        setActionFeedback({ type: res.success ? 'success' : 'error', text: res.message || 'Done.' });
+        if (res.success) {
+          setActionModal({ open: false, type: '', profileId: null });
+          fetchProfiles(page, limit, activeSearch);
+        }
+      } catch (err) {
+        setActionFeedback({ type: 'error', text: 'Network error updating profile status.' });
+      } finally {
+        setProcessingId(null);
+      }
+    } else if (type === 'delete') {
+      setProcessingId(profileId);
+      try {
+        const res = await deleteAdminProfileApi(profileId);
+        setActionFeedback({ type: res.success ? 'success' : 'error', text: res.message || 'Done.' });
+        if (res.success) {
+          setActionModal({ open: false, type: '', profileId: null });
+          fetchProfiles(page, limit, activeSearch);
+        }
+      } catch (err) {
+        setActionFeedback({ type: 'error', text: 'Network error deleting profile.' });
+      } finally {
+        setProcessingId(null);
+      }
+    } else if (type === 'invite' || type === 'reinvite') {
+      const targetEmail = (inputVal || '').trim();
+      if (!targetEmail) {
+        setActionFeedback({ type: 'error', text: 'Please enter a valid email address.' });
+        return;
+      }
+      setProcessingId(profileId);
+      setActionFeedback({ type: '', text: '' });
+      try {
+        const res =
+          type === 'reinvite'
+            ? await reinviteBrokerCandidateApi(profileId, targetEmail)
+            : await inviteBrokerCandidateApi(profileId, targetEmail);
+
+        if (res.success) {
+          setActionFeedback({ type: res.warning ? 'warning' : 'success', text: res.message });
+          setProfiles((prev) =>
+            prev.map((item) => {
+              if (item._id === profileId) {
+                return {
+                  ...item,
+                  candidateEmail: targetEmail,
+                  user: item.user
+                    ? { ...item.user, email: targetEmail }
+                    : { email: targetEmail, name: candidateLabel, accountStatus: 'invited' },
+                };
+              }
+              return item;
+            })
+          );
+          setActionModal({ open: false, type: '', profileId: null });
+          fetchProfiles(page, limit, activeSearch);
+        } else {
+          setActionFeedback({ type: 'error', text: res.message || 'Failed to send login invitation.' });
+        }
+      } catch (err) {
+        setActionFeedback({ type: 'error', text: 'Network error while attempting to send login invitation.' });
+      } finally {
+        setProcessingId(null);
+      }
     }
   };
 
@@ -274,8 +430,8 @@ export default function AdminProfilesPage() {
       <main className="admin-page">
         <div className="admin-container">
           <div className="admin-state-box" style={{ maxWidth: '580px', margin: '4rem auto' }}>
-            <span className="admin-state-icon" role="img" aria-label="Access Denied">
-              🚫
+            <span className="admin-state-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <ShieldAlert size={48} color="var(--danger)" />
             </span>
             <h1 className="admin-state-title" style={{ color: 'var(--danger)' }}>
               Access Denied
@@ -323,51 +479,112 @@ export default function AdminProfilesPage() {
               }}
               title="Bulk import candidates from Excel spreadsheet"
             >
-              <span>📥</span> Bulk Import Excel
+              <FileSpreadsheet size={16} /> Bulk Import Excel
             </button>
             <Link
               href="/admin/profiles/new"
               className="btn-primary"
               style={{ fontSize: '0.85rem', padding: '0.5rem 1.15rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             >
-              <span>+</span> Add Broker Profile
+              <Plus size={16} /> Add Profile
             </Link>
-            <Link href="/admin" className="btn-secondary" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
-              ← Dashboard
+            <Link href="/admin" className="btn-secondary" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <LayoutDashboard size={14} /> Dashboard
             </Link>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <AdminNav />
 
-        {/* Action Feedback Banner */}
+        {/* Summary Overview Ribbon */}
+        <div className="adm-summary-ribbon">
+          <div className="adm-summary-card">
+            <div className="adm-summary-icon">
+              <Users size={20} />
+            </div>
+            <div className="adm-summary-data">
+              <span>Total Directory</span>
+              <strong>{stats.total}</strong>
+            </div>
+          </div>
+          <div className="adm-summary-card">
+            <div className="adm-summary-icon green">
+              <ShieldCheck size={20} />
+            </div>
+            <div className="adm-summary-data">
+              <span>Active Profiles</span>
+              <strong>{stats.active}</strong>
+            </div>
+          </div>
+          <div className="adm-summary-card">
+            <div className="adm-summary-icon amber">
+              <Clock size={20} />
+            </div>
+            <div className="adm-summary-data">
+              <span>Pending Review</span>
+              <strong>{stats.pending}</strong>
+            </div>
+          </div>
+          <div className="adm-summary-card">
+            <div className="adm-summary-icon rose">
+              <Heart size={20} />
+            </div>
+            <div className="adm-summary-data">
+              <span>Brides / Grooms</span>
+              <strong>{stats.brides} / {stats.grooms}</strong>
+            </div>
+          </div>
+        </div>
+
+        {/* Top-Pinned Globally Visible Floating Toast */}
         {actionFeedback.text && (
           <div
             style={{
-              padding: '0.85rem 1.25rem',
-              borderRadius: 'var(--radius-md)',
-              marginBottom: '1.25rem',
-              backgroundColor: actionFeedback.type === 'error' ? '#fef2f2' : '#f0fdf4',
-              color: actionFeedback.type === 'error' ? 'var(--danger)' : '#166534',
-              border: `1px solid ${actionFeedback.type === 'error' ? '#fecaca' : '#bbf7d0'}`,
+              position: 'fixed',
+              top: '24px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 999999,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              fontSize: '0.9rem',
+              gap: '0.75rem',
+              padding: '0.75rem 1.4rem',
+              borderRadius: '999px',
+              backgroundColor: actionFeedback.type === 'error' ? '#991b1b' : actionFeedback.type === 'warning' ? '#92400e' : '#14532d',
+              color: '#ffffff',
+              boxShadow: '0 12px 36px rgba(0,0,0,0.3)',
+              fontSize: '0.92rem',
+              fontWeight: 500,
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              animation: 'fadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>{actionFeedback.type === 'error' ? '⚠️' : '✅'}</span>
-              <span>{actionFeedback.text}</span>
-            </div>
+            {actionFeedback.type === 'error' ? (
+              <AlertCircle size={18} color="#fca5a5" />
+            ) : actionFeedback.type === 'warning' ? (
+              <AlertCircle size={18} color="#fcd34d" />
+            ) : (
+              <CheckCircle2 size={18} color="#86efac" />
+            )}
+            <span>{actionFeedback.text}</span>
             <button
               type="button"
               onClick={() => setActionFeedback({ type: '', text: '' })}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: 'inherit' }}
-              aria-label="Dismiss feedback"
+              style={{
+                background: 'rgba(255,255,255,0.15)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '24px',
+                height: '24px',
+                cursor: 'pointer',
+                display: 'grid',
+                placeItems: 'center',
+                color: '#ffffff',
+                marginLeft: '0.25rem',
+              }}
+              aria-label="Close notification"
             >
-              ✕
+              <X size={14} />
             </button>
           </div>
         )}
@@ -420,6 +637,31 @@ export default function AdminProfilesPage() {
           </div>
         </div>
 
+        {/* Status filters */}
+        <div className="adm-filters">
+          {[['', 'All Status'], ['pending_approval', 'Pending'], ['approved', 'Approved'], ['rejected', 'Rejected']].map(([v, l]) => (
+            <button key={v} type="button" className={`adm-chip ${filters.approvalStatus === v ? 'on' : ''}`} onClick={() => setFilter('approvalStatus', v)}>
+              {l}
+            </button>
+          ))}
+          <span style={{ display: 'inline-block', height: '18px', width: '1px', background: 'var(--a-line)', margin: '0 0.25rem' }} />
+          {[['', 'All Genders'], ['Female', 'Brides (F)'], ['Male', 'Grooms (M)']].map(([v, l]) => (
+            <button key={v} type="button" className={`adm-chip ${filters.gender === v ? 'on' : ''}`} onClick={() => setFilter('gender', v)}>
+              {l}
+            </button>
+          ))}
+          <select value={filters.profileStatus} onChange={(e) => setFilter('profileStatus', e.target.value)} aria-label="Activity filter">
+            <option value="">Any activity</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <select value={filters.source} onChange={(e) => setFilter('source', e.target.value)} aria-label="Origin filter">
+            <option value="">Any origin</option>
+            <option value="direct">Direct sign-up</option>
+            <option value="broker">Assisted Entry</option>
+          </select>
+        </div>
+
         {/* Active Filter Pill */}
         {activeSearch && (
           <div style={{ marginBottom: '1rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
@@ -435,8 +677,8 @@ export default function AdminProfilesPage() {
           </div>
         ) : errorMessage ? (
           <div className="admin-state-box">
-            <span className="admin-state-icon" role="img" aria-label="Error">
-              ⚠️
+            <span className="admin-state-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <AlertCircle size={48} color="var(--danger)" />
             </span>
             <h2 className="admin-state-title">Failed to Load Profiles</h2>
             <p className="admin-state-desc">{errorMessage}</p>
@@ -450,8 +692,8 @@ export default function AdminProfilesPage() {
           </div>
         ) : profiles.length === 0 ? (
           <div className="admin-state-box">
-            <span className="admin-state-icon" role="img" aria-label="Empty">
-              💍
+            <span className="admin-state-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <Heart size={48} color="var(--primary)" />
             </span>
             <h2 className="admin-state-title">No Profiles Found</h2>
             <p className="admin-state-desc">
@@ -464,8 +706,8 @@ export default function AdminProfilesPage() {
                 Reset Search Filter
               </button>
             ) : (
-              <Link href="/admin/profiles/new" className="btn-primary" style={{ padding: '0.65rem 1.25rem' }}>
-                + Create First Broker Profile
+              <Link href="/admin/profiles/new" className="btn-primary" style={{ padding: '0.65rem 1.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Plus size={16} /> Create First Profile
               </Link>
             )}
           </div>
@@ -473,16 +715,13 @@ export default function AdminProfilesPage() {
           <>
             {/* Table */}
             <div className="admin-table-container">
-              <table className="admin-table">
+              <table className="admin-table" style={{ width: '100%', tableLayout: 'auto' }}>
                 <thead>
                   <tr>
-                    <th>Candidate</th>
-                    <th>Origin &amp; Account</th>
-                    <th>Status</th>
-                    <th>Photos</th>
-                    <th>Personal Details</th>
-                    <th>Education &amp; Profession</th>
-                    <th>Actions</th>
+                    <th style={{ width: '38%' }}>Candidate Profile</th>
+                    <th style={{ width: '26%' }}>Origin &amp; Account</th>
+                    <th style={{ width: '22%' }}>Status &amp; Verification</th>
+                    <th style={{ width: '14%', textAlign: 'right' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -494,6 +733,8 @@ export default function AdminProfilesPage() {
                     const photoUrl = p.profilePhoto?.url;
                     const isPendingApproval = p.approvalStatus === 'pending_approval';
                     const isProcessingThis = processingId === p._id;
+                    const candidateCode = p.profileId || (p._id ? `TM-${p._id.slice(-6).toUpperCase()}` : 'TM-PROFILE');
+                    const phoneDisplay = p.candidatePhone || p.contactDetails?.phone;
 
                     const formattedCreated = p.createdAt
                       ? new Date(p.createdAt).toLocaleDateString(undefined, {
@@ -510,318 +751,174 @@ export default function AdminProfilesPage() {
                         ? 1
                         : 0;
 
+                    const isFemale = p.personalDetails?.gender === 'Female';
+                    const isMale = p.personalDetails?.gender === 'Male';
+
                     return (
                       <tr key={p._id}>
-                        {/* Candidate Avatar & Basic Info */}
+                        {/* 1. Candidate Avatar & Primary Info */}
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <div className="adm-profile-cell">
                             <div
-                              className="profile-thumb-avatar"
+                              className="adm-profile-avatar"
                               onClick={() => {
                                 setSelectedPhotoProfile(p);
                                 setIsPhotoModalOpen(true);
                               }}
-                              style={{ cursor: 'pointer' }}
-                              title="Click to manage photos"
+                              title="Click to view or manage candidate photos"
                             >
                               {photoUrl ? (
                                 /* eslint-disable-next-line @next/next/no-img-element */
                                 <img
                                   src={photoUrl}
-                                  alt="Candidate photo"
-                                  className="profile-thumb-img"
+                                  alt={candidateDisplayName}
                                 />
                               ) : (
-                                <span>{p.personalDetails?.gender === 'Female' ? '👩' : '👨'}</span>
+                                <span>{candidateDisplayName.charAt(0).toUpperCase()}</span>
                               )}
                             </div>
-                            <div>
-                              <strong style={{ color: 'var(--text-main)', display: 'block' }}>
+                            <div className="adm-profile-info">
+                              <Link
+                                href={`/admin/profiles/${p._id}`}
+                                className="adm-profile-name"
+                                title="Click to view candidate details"
+                              >
                                 {candidateDisplayName}
-                              </strong>
-                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                {p.personalDetails?.gender || 'Gender unstated'}
-                                {age ? ` • ${age} yrs` : ''}
-                              </span>
-                              {p.candidatePhone && (
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
-                                  📞 {p.candidatePhone}
+                              </Link>
+                              <div className="adm-profile-meta">
+                                <span className={`adm-tag-gender ${isFemale ? 'female' : isMale ? 'male' : ''}`}>
+                                  {isFemale ? 'Bride' : isMale ? 'Groom' : (p.personalDetails?.gender || 'Profile')}
+                                  {age ? ` • ${age} yrs` : ''}
+                                </span>
+                                <span className="adm-tag-id">#{candidateCode}</span>
+                              </div>
+                              {phoneDisplay && (
+                                <span className="adm-profile-phone">
+                                  <Phone size={11} /> {phoneDisplay}
                                 </span>
                               )}
                             </div>
                           </div>
                         </td>
 
-                        {/* Origin & Linked User Account */}
+                        {/* 2. Origin & Linked User Account */}
                         <td>
-                          <div style={{ marginBottom: '0.4rem' }}>
+                          <div style={{ marginBottom: '0.35rem' }}>
                             {isBroker ? (
                               <span
                                 className="badge"
-                                style={{ backgroundColor: '#fef3c7', color: '#92400e', fontSize: '0.7rem' }}
+                                style={{ backgroundColor: '#fef3c7', color: '#92400e', fontSize: '0.68rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600 }}
                               >
-                                🤝 Broker Profile
+                                <Users size={11} /> Assisted Profile
                               </span>
                             ) : (
                               <span
                                 className="badge"
-                                style={{ backgroundColor: '#e0f2fe', color: '#0369a1', fontSize: '0.7rem' }}
+                                style={{ backgroundColor: '#e0f2fe', color: '#0369a1', fontSize: '0.68rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600 }}
                               >
-                                👤 Direct Member
+                                <User size={11} /> Direct Member
                               </span>
                             )}
                           </div>
 
                           {u ? (
                             <div>
-                              <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{u.name}</div>
-                              <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                {u.email}
+                              <div style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--a-ink)' }}>{u.name}</div>
+                              <span style={{ fontFamily: 'monospace', fontSize: '0.73rem', color: 'var(--a-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                <Mail size={11} /> {u.email}
                               </span>
                             </div>
                           ) : p.candidateEmail ? (
-                            <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                              ✉️ {p.candidateEmail}
+                            <span style={{ fontFamily: 'monospace', fontSize: '0.73rem', color: 'var(--a-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                              <Mail size={11} /> {p.candidateEmail}
                             </span>
                           ) : (
-                            <span style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.8rem' }}>
+                            <span style={{ color: 'var(--a-muted)', fontStyle: 'italic', fontSize: '0.75rem' }}>
                               No login account
                             </span>
                           )}
+
+                          <span style={{ fontSize: '0.7rem', color: 'var(--a-muted)', display: 'block', marginTop: '0.25rem' }}>
+                            Added: {formattedCreated}
+                          </span>
                         </td>
 
-                        {/* Approval & Activity Status */}
+                        {/* 3. Status & Verification */}
                         <td>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', alignItems: 'flex-start' }}>
                             <div>
                               {p.approvalStatus === 'approved' && (
-                                <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>
-                                  ✓ Approved
+                                <span className="badge badge-success" style={{ fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                  <Check size={11} /> Approved
                                 </span>
                               )}
                               {p.approvalStatus === 'pending_approval' && (
-                                <span className="badge badge-warning" style={{ fontSize: '0.7rem' }}>
-                                  ⏳ Pending
+                                <span className="badge badge-warning" style={{ fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                  <Clock size={11} /> Pending Review
                                 </span>
                               )}
                               {p.approvalStatus === 'rejected' && (
                                 <span
                                   className="badge"
-                                  style={{ backgroundColor: '#fee2e2', color: '#991b1b', fontSize: '0.7rem' }}
+                                  style={{ backgroundColor: '#fee2e2', color: '#991b1b', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                                 >
-                                  ✕ Rejected
+                                  <X size={11} /> Rejected
                                 </span>
                               )}
                             </div>
 
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                              State: <strong>{p.profileStatus || 'active'}</strong>
-                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleStatus(p, candidateDisplayName)}
+                              disabled={isProcessingThis}
+                              className={`adm-act-btn ${p.profileStatus === 'inactive' ? 'success' : ''}`}
+                              style={{
+                                fontSize: '0.72rem',
+                                padding: '0.22rem 0.55rem',
+                                borderRadius: '6px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                color: p.profileStatus === 'inactive' ? '#16a34a' : '#b45309',
+                                borderColor: p.profileStatus === 'inactive' ? '#86efac' : '#fed7aa',
+                                backgroundColor: p.profileStatus === 'inactive' ? '#f0fdf4' : '#fffbeb',
+                              }}
+                              title={`Click to ${p.profileStatus === 'inactive' ? 'activate' : 'deactivate'} profile`}
+                            >
+                              {p.profileStatus === 'inactive' ? (
+                                <><Play size={11} /> Activate</>
+                              ) : (
+                                <><Pause size={11} /> Deactivate</>
+                              )}
+                            </button>
 
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                              Added: {formattedCreated}
-                            </span>
+                            {u?.accountStatus === 'invited' && (
+                              <span className="badge badge-warning" style={{ fontSize: '0.65rem', width: 'fit-content' }}>
+                                Invite Pending
+                              </span>
+                            )}
                           </div>
                         </td>
 
-                        {/* Photos Gallery Action & Count */}
+                        {/* 4. Actions: Only Keep View Button */}
                         <td>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-start' }}>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedPhotoProfile(p);
-                                setIsPhotoModalOpen(true);
-                              }}
-                              className="btn-secondary"
+                          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Link
+                              href={`/admin/profiles/${p._id}`}
+                              className="adm-act-btn primary"
                               style={{
-                                padding: '0.35rem 0.65rem',
+                                textDecoration: 'none',
+                                padding: '0.42rem 0.95rem',
                                 fontSize: '0.78rem',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '0.35rem',
-                                backgroundColor: 'var(--bg-primary, #FFF8F2)',
-                                border: '1px solid var(--border-color, #EBDADF)',
-                                borderRadius: '6px',
-                                color: 'var(--text-main, #49343B)',
-                                cursor: 'pointer',
                               }}
-                              title="Manage candidate photos (up to 3)"
+                              title="View full candidate details, edit options & invite management"
                             >
-                              <span>📸</span>
-                              <span>
-                                {photoCount} / 3 Photos
-                              </span>
-                            </button>
-                            <span
-                              style={{
-                                fontSize: '0.68rem',
-                                color: photoCount === 3 ? '#166534' : 'var(--text-muted)',
-                                paddingLeft: '0.2rem',
-                              }}
-                            >
-                              {photoCount === 0 && 'No photo'}
-                              {photoCount === 1 && '1 photo (Primary)'}
-                              {photoCount === 2 && '2 photos'}
-                              {photoCount === 3 && 'Full gallery'}
-                            </span>
+                              <Eye size={13} /> View
+                            </Link>
                           </div>
-                        </td>
-
-                        {/* Personal Details */}
-                        <td>
-                          <div style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
-                            {p.personalDetails?.maritalStatus && (
-                              <div>
-                                <span style={{ color: 'var(--text-muted)' }}>Status: </span>
-                                {p.personalDetails.maritalStatus}
-                              </div>
-                            )}
-                            {p.personalDetails?.location && (
-                              <div>
-                                <span style={{ color: 'var(--text-muted)' }}>Location: </span>
-                                {p.personalDetails.location}
-                              </div>
-                            )}
-                            {p.personalDetails?.motherTongue && (
-                              <div>
-                                <span style={{ color: 'var(--text-muted)' }}>Language: </span>
-                                {p.personalDetails.motherTongue}
-                              </div>
-                            )}
-                            {p.personalDetails?.height && (
-                              <div>
-                                <span style={{ color: 'var(--text-muted)' }}>Height: </span>
-                                {p.personalDetails.height} cm
-                              </div>
-                            )}
-                            {!p.personalDetails?.maritalStatus &&
-                              !p.personalDetails?.location &&
-                              !p.personalDetails?.motherTongue && (
-                                <span style={{ color: 'var(--text-muted)' }}>No details entered</span>
-                              )}
-                          </div>
-                        </td>
-
-                        {/* Education & Profession */}
-                        <td>
-                          <div style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
-                            {p.educationAndProfession?.occupation && (
-                              <div>
-                                <strong>{p.educationAndProfession.occupation}</strong>
-                              </div>
-                            )}
-                            {p.educationAndProfession?.educationalQualification && (
-                              <div style={{ color: 'var(--text-muted)' }}>
-                                {p.educationAndProfession.educationalQualification}
-                              </div>
-                            )}
-                            {p.educationAndProfession?.company && (
-                              <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                                at {p.educationAndProfession.company}
-                              </div>
-                            )}
-                            {p.educationAndProfession?.income && (
-                              <div style={{ fontSize: '0.8rem', color: '#166534', fontWeight: 600 }}>
-                                Income: {p.educationAndProfession.income}
-                              </div>
-                            )}
-                            {!p.educationAndProfession?.occupation &&
-                              !p.educationAndProfession?.educationalQualification && (
-                                <span style={{ color: 'var(--text-muted)' }}>No career details entered</span>
-                              )}
-                          </div>
-                        </td>
-
-                        {/* Actions Column */}
-                        <td>
-                          {isBroker && isPendingApproval ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '100px' }}>
-                              <button
-                                type="button"
-                                onClick={() => handleApprovalAction(p._id, candidateDisplayName, 'approved')}
-                                disabled={isProcessingThis}
-                                className="btn-search"
-                                style={{
-                                  padding: '0.35rem 0.65rem',
-                                  fontSize: '0.78rem',
-                                  backgroundColor: '#16a34a',
-                                  textAlign: 'center',
-                                }}
-                              >
-                                {isProcessingThis ? '...' : '✓ Approve'}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleApprovalAction(p._id, candidateDisplayName, 'rejected')}
-                                disabled={isProcessingThis}
-                                className="btn-danger-outline"
-                                style={{
-                                  padding: '0.35rem 0.65rem',
-                                  fontSize: '0.78rem',
-                                  textAlign: 'center',
-                                  justifyContent: 'center',
-                                }}
-                              >
-                                {isProcessingThis ? '...' : '✕ Reject'}
-                              </button>
-                            </div>
-                          ) : isBroker && p.approvalStatus === 'approved' && (!u || u.accountStatus === 'invited') ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '110px' }}>
-                              {!u ? (
-                                <button
-                                  type="button"
-                                  onClick={() => handleInviteCandidate(p._id, candidateDisplayName, p.candidateEmail)}
-                                  disabled={isProcessingThis}
-                                  className="btn-search"
-                                  style={{
-                                    padding: '0.35rem 0.65rem',
-                                    fontSize: '0.78rem',
-                                    backgroundColor: '#0284c7',
-                                    textAlign: 'center',
-                                  }}
-                                  title="Send login invitation email to candidate"
-                                >
-                                  {isProcessingThis ? '...' : '✉️ Send Invite'}
-                                </button>
-                              ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                                  <span
-                                    className="badge badge-warning"
-                                    style={{ fontSize: '0.65rem', padding: '0.2rem 0.4rem', textAlign: 'center' }}
-                                  >
-                                    Invited
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleReinviteCandidate(p._id, candidateDisplayName, u.email || p.candidateEmail)}
-                                    disabled={isProcessingThis}
-                                    className="btn-reset"
-                                    style={{
-                                      padding: '0.3rem 0.5rem',
-                                      fontSize: '0.75rem',
-                                      textAlign: 'center',
-                                    }}
-                                    title="Rotate token and resend invitation email"
-                                  >
-                                    {isProcessingThis ? '...' : '🔄 Resend'}
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          ) : isBroker && p.approvalStatus === 'approved' && u && u.accountStatus === 'active' ? (
-                            <span style={{ fontSize: '0.8rem', color: '#166534', fontWeight: 600 }}>
-                              ✓ Account Active
-                            </span>
-                          ) : isBroker ? (
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                              Decision: {p.approvalStatus}
-                            </span>
-                          ) : (
-                            <span style={{ fontSize: '0.8rem', color: '#166534', fontWeight: 500 }}>
-                              Pre-approved (Direct)
-                            </span>
-                          )}
                         </td>
                       </tr>
                     );
@@ -846,11 +943,12 @@ export default function AdminProfilesPage() {
                 <button
                   type="button"
                   onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={page <= 1 || loading}
+                  disabled={page <= 1}
                   className="btn-page"
                   aria-label="Previous Page"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                 >
-                  ← Previous
+                  <ChevronLeft size={14} /> Previous
                 </button>
                 <span style={{ padding: '0 0.5rem', fontWeight: 600 }}>
                   {page} / {pagination.totalPages || 1}
@@ -858,11 +956,12 @@ export default function AdminProfilesPage() {
                 <button
                   type="button"
                   onClick={() => setPage((prev) => Math.min(prev + 1, pagination.totalPages))}
-                  disabled={page >= pagination.totalPages || loading}
+                  disabled={page >= pagination.totalPages}
                   className="btn-page"
                   aria-label="Next Page"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                 >
-                  Next →
+                  Next <ChevronRight size={14} />
                 </button>
               </div>
             </div>
@@ -881,12 +980,100 @@ export default function AdminProfilesPage() {
         onPhotosUpdated={handlePhotosUpdated}
       />
 
+      <AdminProfileViewModal
+        profile={viewProfile}
+        onClose={() => setViewProfile(null)}
+        onEdit={(p) => {
+          setViewProfile(null);
+          setEditProfile(p);
+        }}
+      />
+      {editProfile && (
+        <AdminProfileEditModal profile={editProfile} onClose={() => setEditProfile(null)} onSaved={handleProfileSaved} />
+      )}
+
       {/* Admin Bulk Excel Candidate Import Modal */}
       <AdminBulkImportModal
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImportCompleted={handleImportCompleted}
       />
+
+      {/* Custom Confirmation / Prompt Modal (Replaces browser window.confirm / window.prompt) */}
+      {actionModal.open && (
+        <div className="adm-modal-center" onClick={() => !processingId && setActionModal({ open: false, type: '', profileId: null })}>
+          <div className="adm-dialog-card" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-dialog-header">
+              <h3>
+                <ShieldCheck size={18} color="var(--a-brand)" /> {actionModal.title}
+              </h3>
+              <button
+                type="button"
+                className="adm-x"
+                disabled={Boolean(processingId)}
+                onClick={() => setActionModal({ open: false, type: '', profileId: null })}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="adm-dialog-body">
+              <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--a-ink)', lineHeight: 1.5 }}>
+                {actionModal.message}
+              </p>
+              {(actionModal.type === 'invite' || actionModal.type === 'reinvite') && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--a-ink)', marginBottom: '0.35rem' }}>
+                    Recipient Email Address:
+                  </label>
+                  <input
+                    type="email"
+                    value={actionModal.inputVal}
+                    onChange={(e) => setActionModal((prev) => ({ ...prev, inputVal: e.target.value }))}
+                    placeholder="candidate@example.com"
+                    style={{
+                      width: '100%',
+                      padding: '0.6rem 0.85rem',
+                      borderRadius: '8px',
+                      border: '1px solid var(--a-line)',
+                      fontSize: '0.9rem',
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+            <div className="adm-dialog-footer">
+              <button
+                type="button"
+                className="btn-secondary"
+                disabled={Boolean(processingId)}
+                onClick={() => setActionModal({ open: false, type: '', profileId: null })}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(processingId)}
+                onClick={handleConfirmActionModal}
+                style={{
+                  background: actionModal.confirmColor || 'var(--a-brand)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '999px',
+                  padding: '0.6rem 1.3rem',
+                  fontWeight: 600,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                {processingId ? 'Processing...' : actionModal.confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

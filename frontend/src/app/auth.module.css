@@ -1,0 +1,643 @@
+/* ==========================================================================
+   AUTHENTICATION SUITE — EDITORIAL LUXURY DESIGN
+   ========================================================================== */
+
+.page {
+  --ivory: #fffaf5;
+  --ivory-2: #f8ede3;
+  --plum: #2b1a21;
+  --plum-2: #3a252c;
+  --ink: #3f2b32;
+  --muted: #75606a;
+  --rose: #b85c78;
+  --rose-deep: #7d3147;
+  --rose-hover: #692640;
+  --rose-light: #fdf2f4;
+  --rose-blush: #fbf0f2;
+  --gold: #b08d4c;
+  --gold-bright: #e0bd77;
+  --gold-light: #faf4e8;
+  --line: #ebdcd2;
+  --line-strong: #d9c5b6;
+  --shadow-sm: 0 4px 14px rgba(43, 26, 33, 0.04);
+  --shadow-md: 0 12px 32px rgba(43, 26, 33, 0.08);
+  --shadow-lg: 0 24px 60px -12px rgba(43, 26, 33, 0.18);
+  --serif: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --sans: var(--font-inter), -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --ease: cubic-bezier(0.22, 0.8, 0.28, 1);
+
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--ivory);
+  min-height: calc(100vh - 106px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.25rem;
+  position: relative;
+  overflow-y: auto;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page * {
+  box-sizing: border-box;
+}
+
+.page :where(h1, h2, h3, h4) {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--plum);
+}
+
+.page :where(p, ul) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page button {
+  font-family: inherit;
+}
+
+.page :focus-visible {
+  outline: 3px solid var(--gold-bright);
+  outline-offset: 2px;
+}
+
+/* Background ambient light fusions */
+.bgGlowTop {
+  position: absolute;
+  top: -150px;
+  right: -150px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(184, 92, 120, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.bgGlowBottom {
+  position: absolute;
+  bottom: -150px;
+  left: -150px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(224, 189, 119, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ------------------------------ Split Auth Frame ------------------------------ */
+.authContainer {
+  width: 100%;
+  max-width: 880px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* Single column variant for smaller cards (setup/forgot password) */
+.authContainerNarrow {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  padding: 1.75rem 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ------------------------------ Left Side Showcase ------------------------------ */
+.showcaseSide {
+  background: radial-gradient(380px 280px at 100% 0%, rgba(184, 92, 120, 0.45), transparent 70%),
+              linear-gradient(160deg, var(--plum-2), var(--plum));
+  color: #ffffff;
+  padding: 1.6rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.showcaseSide::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -70px;
+  bottom: -70px;
+  border-radius: 50%;
+  border: 1px solid rgba(224, 189, 119, 0.25);
+  box-shadow: 0 0 0 20px rgba(224, 189, 119, 0.05);
+  pointer-events: none;
+}
+
+.brandBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.22rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(224, 189, 119, 0.15);
+  border: 1px solid rgba(224, 189, 119, 0.35);
+  color: var(--gold-bright);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+  width: fit-content;
+}
+
+.showcaseSide h2 {
+  font-size: 1.45rem;
+  color: #ffffff;
+  line-height: 1.25;
+  margin-bottom: 0.35rem;
+}
+
+.showcaseSide h2 em {
+  font-style: italic;
+  color: var(--gold-bright);
+  font-weight: 400;
+}
+
+.showcaseDesc {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 0;
+}
+
+.perksList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 0.85rem;
+}
+
+.perkItem {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.perkIconBox {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(224, 189, 119, 0.18);
+  color: var(--gold-bright);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(224, 189, 119, 0.3);
+}
+
+.perkItem strong {
+  display: block;
+  font-size: 0.84rem;
+  color: #ffffff;
+}
+
+.perkItem span {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ------------------------------ Right Side Form Area ------------------------------ */
+.formSide {
+  padding: 1.6rem 2.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.formHeader {
+  margin-bottom: 0.75rem;
+}
+
+.kicker {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.15rem;
+}
+
+.formTitle {
+  font-size: 1.5rem;
+  color: var(--plum);
+  line-height: 1.2;
+  margin-bottom: 0.2rem;
+}
+
+.formSubtitle {
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+/* ------------------------------ Form Controls ------------------------------ */
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* 2-column row for password & confirm password */
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--plum);
+}
+
+.reqMark {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.forgotLink {
+  font-size: 0.78rem;
+  color: var(--rose-deep);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.forgotLink:hover {
+  color: var(--rose-hover);
+  text-decoration: underline;
+}
+
+.input {
+  width: 100%;
+  padding: 0.52rem 0.8rem;
+  font-size: 0.88rem;
+  font-family: var(--sans);
+  border: 1.5px solid var(--line);
+  border-radius: 9px;
+  background-color: #ffffff;
+  color: var(--ink);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(224, 189, 119, 0.25);
+}
+
+.inputError {
+  border-color: #ef4444;
+  background-color: #fffafb;
+}
+
+.inputError:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordInput {
+  padding-right: 2.5rem;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 0.4rem;
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 6px;
+  transition: color 0.2s;
+}
+
+.passwordToggle:hover {
+  color: var(--rose-deep);
+}
+
+.errorText {
+  color: #dc2626;
+  font-size: 0.74rem;
+  font-weight: 500;
+  margin-top: 0.15rem;
+}
+
+/* ------------------------------ Alerts & Banners ------------------------------ */
+.alert {
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow: var(--shadow-sm);
+}
+
+.alertSuccess {
+  background-color: #f0fdf4;
+  border: 1.5px solid #86efac;
+  color: #14532d;
+}
+
+.alertDanger {
+  background-color: #fef2f2;
+  border: 1.5px solid #fca5a5;
+  color: #991b1b;
+}
+
+/* ------------------------------ Buttons ------------------------------ */
+.btnPrimary {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.62rem 1.3rem;
+  border-radius: 999px;
+  font: 600 0.88rem var(--sans);
+  color: #ffffff;
+  border: 0;
+  background: linear-gradient(135deg, var(--rose-deep) 0%, #993a55 55%, var(--gold) 100%);
+  box-shadow: 0 6px 16px -4px rgba(125, 49, 71, 0.65);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s, filter 0.2s;
+  margin-top: 0.25rem;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  filter: brightness(1.08);
+  box-shadow: 0 10px 22px -4px rgba(125, 49, 71, 0.75);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btnOutline {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.62rem 1.3rem;
+  border-radius: 999px;
+  font: 600 0.88rem var(--sans);
+  color: var(--rose-deep);
+  background: #ffffff;
+  border: 1.5px solid var(--rose-deep);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+.btnOutline:hover:not(:disabled) {
+  background: var(--rose-deep);
+  color: #ffffff;
+  transform: translateY(-1.5px);
+}
+
+.btnOutlineDanger {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.58rem 1.2rem;
+  border-radius: 999px;
+  font: 600 0.84rem var(--sans);
+  color: #991b1b;
+  background: transparent;
+  border: 1.5px solid #fca5a5;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btnOutlineDanger:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+/* ------------------------------ Footer Switch & Return Links ------------------------------ */
+.footerLinks {
+  margin-top: 0.65rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.footerLinks a {
+  color: var(--rose-deep);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footerLinks a:hover {
+  color: var(--rose-hover);
+  text-decoration: underline;
+}
+
+.returnHome {
+  margin-top: 0.35rem;
+  text-align: center;
+}
+
+.returnHomeLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.returnHomeLink:hover {
+  color: var(--plum);
+}
+
+.agreementText {
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.35;
+}
+
+/* ------------------------------ Authenticated Overview Card ------------------------------ */
+.authConfirmedCard {
+  text-align: center;
+}
+
+.avatarBadge {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--rose-light), var(--gold-light));
+  color: var(--rose-deep);
+  border: 2px solid var(--gold-bright);
+  font-family: var(--serif);
+  font-size: 1.9rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 8px 20px rgba(125, 49, 71, 0.15);
+}
+
+.authConfirmedCard h2 {
+  font-size: 1.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.authConfirmedCard p {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-bottom: 1.8rem;
+}
+
+.userInfoBox {
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1.8rem;
+  text-align: left;
+}
+
+.userInfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px dotted var(--line);
+  font-size: 0.9rem;
+}
+
+.userInfoRow:last-child {
+  border-bottom: none;
+}
+
+.userInfoLabel {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.userInfoVal {
+  font-weight: 600;
+  color: var(--plum);
+}
+
+/* ------------------------------ Success Confirmation Card ------------------------------ */
+.successCard {
+  text-align: center;
+}
+
+.successIconCircle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #ecfdf5;
+  border: 2px solid #86efac;
+  color: #15803d;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 8px 22px rgba(16, 185, 129, 0.18);
+}
+
+.successCard h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.successCard p {
+  font-size: 0.96rem;
+  color: var(--muted);
+  margin-bottom: 1.75rem;
+}
+
+/* ------------------------------ Responsive Queries ------------------------------ */
+@media (max-width: 860px) {
+  .authContainer {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+  }
+  .showcaseSide {
+    display: none;
+  }
+  .formSide {
+    padding: 1.5rem 1.75rem;
+  }
+}
+
+@media (max-width: 540px) {
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+  .page {
+    padding: 0.75rem;
+  }
+  .formSide {
+    padding: 1.25rem 1.25rem;
+  }
+}

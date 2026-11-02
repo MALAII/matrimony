@@ -2,6 +2,17 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
+  Camera,
+  Star,
+  RotateCw,
+  Trash2,
+  X,
+  AlertCircle,
+  CheckCircle2,
+  Phone,
+  Info,
+} from 'lucide-react';
+import {
   getAdminCandidatePhotosApi,
   addAdminCandidatePhotoApi,
   replaceAdminCandidatePhotoApi,
@@ -321,9 +332,12 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                   fontSize: '1.2rem',
                   fontWeight: 700,
                   color: 'var(--text-main, #49343B)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
                 }}
               >
-                📸 Candidate Photo Gallery
+                <Camera size={20} color="var(--primary, #B85C78)" /> Candidate Photo Gallery
               </h2>
               <span
                 style={{
@@ -344,10 +358,18 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                 margin: '0.25rem 0 0 0',
                 fontSize: '0.85rem',
                 color: 'var(--text-muted, #6E565E)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                flexWrap: 'wrap',
               }}
             >
-              Candidate: <strong>{candidateDisplayName}</strong>
-              {profile?.candidatePhone ? ` • 📞 ${profile.candidatePhone}` : ''}
+              <span>Candidate: <strong>{candidateDisplayName}</strong></span>
+              {profile?.candidatePhone && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                  • <Phone size={12} /> {profile.candidatePhone}
+                </span>
+              )}
             </p>
           </div>
           <button
@@ -358,15 +380,16 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
               background: 'transparent',
               border: 'none',
               cursor: actionLoading ? 'not-allowed' : 'pointer',
-              fontSize: '1.4rem',
               color: 'var(--text-muted, #6E565E)',
-              padding: '0.25rem 0.5rem',
+              padding: '0.25rem',
               borderRadius: '6px',
-              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
             aria-label="Close photo manager"
           >
-            ✕
+            <X size={20} />
           </button>
         </div>
 
@@ -385,7 +408,11 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>{feedback.type === 'error' ? '⚠️' : '✅'}</span>
+              {feedback.type === 'error' ? (
+                <AlertCircle size={16} color="var(--danger)" />
+              ) : (
+                <CheckCircle2 size={16} color="#16a34a" />
+              )}
               <span>{feedback.message}</span>
             </div>
             <button
@@ -396,10 +423,12 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                 border: 'none',
                 cursor: 'pointer',
                 color: 'inherit',
-                fontSize: '0.9rem',
+                display: 'flex',
+                alignItems: 'center',
               }}
+              aria-label="Dismiss feedback"
             >
-              ✕
+              <X size={16} />
             </button>
           </div>
         )}
@@ -501,7 +530,7 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                               gap: '0.25rem',
                             }}
                           >
-                            ★ Primary
+                            <Star size={11} fill="currentColor" /> Primary
                           </div>
                         )}
 
@@ -580,9 +609,13 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                                 backgroundColor: 'var(--accent-light, #FDF6ED)',
                                 color: 'var(--accent, #A78345)',
                                 cursor: actionLoading ? 'not-allowed' : 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.25rem',
                               }}
                             >
-                              ★ Set as Primary
+                              <Star size={11} /> Set as Primary
                             </button>
                           )}
 
@@ -602,10 +635,14 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                                 backgroundColor: '#ffffff',
                                 color: 'var(--text-main, #49343B)',
                                 cursor: actionLoading ? 'not-allowed' : 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.25rem',
                               }}
                               title="Replace with another image"
                             >
-                              🔄 Replace
+                              <RotateCw size={11} /> Replace
                             </button>
                             <input
                               type="file"
@@ -631,10 +668,13 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                                   backgroundColor: '#fef2f2',
                                   color: '#dc2626',
                                   cursor: actionLoading ? 'not-allowed' : 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
                                 }}
                                 title="Delete this photo"
                               >
-                                🗑️
+                                <Trash2 size={13} />
                               </button>
                             ) : (
                               <div
@@ -673,9 +713,13 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                                     backgroundColor: '#f3f4f6',
                                     color: '#4b5563',
                                     cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
                                   }}
+                                  aria-label="Cancel delete"
                                 >
-                                  ✕
+                                  <X size={12} />
                                 </button>
                               </div>
                             )}
@@ -794,8 +838,8 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                   lineHeight: 1.5,
                 }}
               >
-                <div style={{ fontWeight: 600, color: 'var(--text-main, #49343B)', marginBottom: '0.2rem' }}>
-                  📌 Photo Guidelines &amp; Rules:
+                <div style={{ fontWeight: 600, color: 'var(--text-main, #49343B)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Info size={14} color="var(--primary, #B85C78)" /> Photo Guidelines &amp; Rules:
                 </div>
                 <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
                   <li>Strict maximum of <strong>3 photos</strong> per candidate profile.</li>

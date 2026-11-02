@@ -62,7 +62,7 @@ const createOrder = async (req, res, next) => {
     if (existingActiveSubscription) {
       return res.status(400).json({
         success: false,
-        message: 'You already have an active subscription. Subscription renewal behavior has not yet been finalized.',
+        message: 'You already have an active subscription. You can renew or extend your plan as your current cycle approaches its expiration date.',
       });
     }
 
@@ -75,6 +75,13 @@ const createOrder = async (req, res, next) => {
       notes: {
         userId: userId.toString(),
         planCode: planConfig.code,
+      },
+      payment: {
+        capture: 'automatic',
+        capture_options: {
+          automatic_expiry_period: 12,
+          refund_speed: 'optimum',
+        },
       },
     };
 

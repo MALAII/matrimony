@@ -2,6 +2,16 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
+  FileSpreadsheet,
+  Download,
+  AlertCircle,
+  CheckCircle2,
+  X,
+  Shield,
+  FileText,
+  Check,
+} from 'lucide-react';
+import {
   validateCandidateImportApi,
   commitCandidateImportApi,
   getCandidateImportTemplateUrl,
@@ -168,9 +178,12 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
                 fontSize: '1.2rem',
                 fontWeight: 700,
                 color: 'var(--text-main, #49343B)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
               }}
             >
-              📥 Bulk Candidate Import (Excel)
+              <FileSpreadsheet size={20} color="#0284c7" /> Bulk Candidate Import (Excel)
             </h2>
             <p
               style={{
@@ -190,14 +203,16 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
               background: 'transparent',
               border: 'none',
               cursor: loading || committing ? 'not-allowed' : 'pointer',
-              fontSize: '1.4rem',
               color: 'var(--text-muted, #6E565E)',
-              padding: '0.25rem 0.5rem',
+              padding: '0.25rem',
               borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
             aria-label="Close bulk import modal"
           >
-            ✕
+            <X size={20} />
           </button>
         </div>
 
@@ -216,15 +231,16 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>⚠️</span>
+              <AlertCircle size={16} color="var(--danger)" />
               <span>{errorMessage}</span>
             </div>
             <button
               type="button"
               onClick={() => setErrorMessage('')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', display: 'flex', alignItems: 'center' }}
+              aria-label="Dismiss error"
             >
-              ✕
+              <X size={16} />
             </button>
           </div>
         )}
@@ -260,18 +276,17 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '1.6rem',
                         margin: '0 auto 1rem auto',
                       }}
                     >
-                      📊
+                      <FileSpreadsheet size={26} />
                     </div>
                     {selectedFile ? (
                       <div>
-                        <strong style={{ display: 'block', color: 'var(--text-main, #49343B)', fontSize: '1rem' }}>
-                          📄 {selectedFile.name}
+                        <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-main, #49343B)', fontSize: '1rem' }}>
+                          <FileText size={16} /> {selectedFile.name}
                         </strong>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted, #6E565E)' }}>
+                        <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted, #6E565E)', marginTop: '0.2rem' }}>
                           {(selectedFile.size / 1024).toFixed(1)} KB • Click to choose different file
                         </span>
                       </div>
@@ -329,7 +344,7 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
                         gap: '0.35rem',
                       }}
                     >
-                      <span>📥</span> Download Template
+                      <Download size={14} /> Download Template
                     </a>
                   </div>
 
@@ -345,8 +360,8 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
                       lineHeight: 1.5,
                     }}
                   >
-                    <strong style={{ color: 'var(--text-main, #49343B)', display: 'block', marginBottom: '0.25rem' }}>
-                      🔒 Safety &amp; Business Rules:
+                    <strong style={{ color: 'var(--text-main, #49343B)', display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.25rem' }}>
+                      <Shield size={14} color="var(--primary)" /> Safety &amp; Business Rules:
                     </strong>
                     <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
                       <li><strong>Candidate Phone and Email</strong> are strictly mandatory for all imported rows.</li>
@@ -442,7 +457,7 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
                             backgroundColor: '#fff5f5',
                           }}
                         >
-                          <span>📄</span> Download Error Report (.csv)
+                          <Download size={13} /> Download Error Report (.csv)
                         </a>
                       </div>
 
@@ -501,11 +516,10 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '2rem',
                   margin: '0 auto 1.25rem auto',
                 }}
               >
-                ✓
+                <CheckCircle2 size={36} color="#166534" />
               </div>
               <h3 style={{ fontSize: '1.3rem', color: 'var(--text-main, #49343B)', margin: '0 0 0.5rem 0' }}>
                 Import Completed Successfully!
@@ -595,7 +609,13 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
                       cursor: !validationResult.canCommit || committing ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    {committing ? 'Importing...' : `Import ${stats.validRows} Candidates ✓`}
+                    {committing ? (
+                      'Importing...'
+                    ) : (
+                      <>
+                        <Check size={14} /> Import {stats.validRows} Candidates
+                      </>
+                    )}
                   </button>
                 )}
               </>

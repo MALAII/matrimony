@@ -57,6 +57,68 @@ const subscriptionSchema = new mongoose.Schema(
       ref: 'Payment',
       default: null,
     },
+
+    // 7-day subscription expiry reminder tracking (User notification)
+    expiryReminder7d: {
+      sentAt: {
+        type: Date,
+        default: null,
+      },
+      deliveryStatus: {
+        type: String,
+        enum: ['sent', 'failed', null],
+        default: null,
+      },
+      failureReason: {
+        type: String,
+        default: null,
+      },
+      targetEndDate: {
+        type: Date,
+        default: null,
+      },
+      attemptCount: {
+        type: Number,
+        default: 0,
+      },
+      lastAttemptAt: {
+        type: Date,
+        default: null,
+      },
+    },
+
+    // 7-day subscription expiry reminder tracking (Admin digest inclusion)
+    adminExpiryReminder7d: {
+      sentAt: {
+        type: Date,
+        default: null,
+      },
+      deliveryStatus: {
+        type: String,
+        enum: ['sent', 'failed', null],
+        default: null,
+      },
+      failureReason: {
+        type: String,
+        default: null,
+      },
+      targetEndDate: {
+        type: Date,
+        default: null,
+      },
+      attemptCount: {
+        type: Number,
+        default: 0,
+      },
+      lastAttemptAt: {
+        type: Date,
+        default: null,
+      },
+      lastDigestReportDate: {
+        type: String,
+        default: null,
+      },
+    },
   },
   {
     timestamps: true,

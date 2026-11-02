@@ -15,7 +15,7 @@ router.get('/health', (req, res) => {
     message: 'Matrimony API is running',
     environment: process.env.NODE_ENV || 'development',
     database: getDBStatus(),
-    ...(dbHost && { databaseHost: dbHost }),
+    ...(process.env.NODE_ENV !== 'production' && dbHost && { databaseHost: dbHost }),
     timestamp: new Date().toISOString(),
   });
 });
