@@ -430,24 +430,26 @@ export default function HomeLandingDesign({
       </section>
 
       {/* ------------------------------- FAQ ------------------------------- */}
-      <section className={`${styles.section} ${styles.faqSection}`} aria-labelledby="faq-title">
-        <div className={styles.faqWrap}>
-          <aside className={`${styles.faqIntro} reveal`}>
-            <span className={styles.kicker}>FAQ</span>
-            <h2 id="faq-title">Frequently asked questions</h2>
-            <p>Everything you need to know about registration, credits and memberships.</p>
-            <div className={styles.faqHelp}>
-              <Mail size={18} aria-hidden="true" />
-              <span>Registration is free, so you can explore the platform at your own pace before choosing a plan.</span>
+      <section className={styles.faqSectionWrap} aria-labelledby="faq-title">
+        <div className={`${styles.section} ${styles.faqSection}`}>
+          <div className={styles.faqWrap}>
+            <aside className={`${styles.faqIntro} reveal`}>
+              <span className={styles.kicker}>FAQ</span>
+              <h2 id="faq-title">Frequently asked questions</h2>
+              <p>Everything you need to know about registration, credits and memberships.</p>
+              <div className={styles.faqHelp}>
+                <Mail size={18} aria-hidden="true" />
+                <span>Registration is free, so you can explore the platform at your own pace before choosing a plan.</span>
+              </div>
+            </aside>
+            <div className={styles.faq}>
+              {faqs.map(({ q, a }, i) => (
+                <details key={q} className="reveal" open={i === 0}>
+                  <summary>{q}</summary>
+                  <p>{a}</p>
+                </details>
+              ))}
             </div>
-          </aside>
-          <div className={styles.faq}>
-            {faqs.map(({ q, a }, i) => (
-              <details key={q} className="reveal" open={i === 0}>
-                <summary>{q}</summary>
-                <p>{a}</p>
-              </details>
-            ))}
           </div>
         </div>
       </section>

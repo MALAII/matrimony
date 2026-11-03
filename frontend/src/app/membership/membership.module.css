@@ -3,17 +3,17 @@
    ========================================================================== */
 
 .page {
-  --ivory: #fffaf5;
-  --ivory-2: #f8ede3;
-  --plum: #2b1a21;
-  --plum-2: #3a252c;
-  --ink: #3f2b32;
-  --muted: #75606a;
-  --rose: #b85c78;
-  --rose-deep: #7d3147;
-  --gold: #b08d4c;
-  --gold-bright: #e0bd77;
-  --line: #eadbd0;
+  --ivory: #FFF8E9;
+  --ivory-2: #F7E9D7;
+  --plum: #650D18;
+  --plum-2: #4A0810;
+  --ink: #351B1B;
+  --muted: #6B5555;
+  --rose: #A20D16;
+  --rose-deep: #650D18;
+  --gold: #D99A24;
+  --gold-bright: #F5C369;
+  --line: #E8D3BC;
   --serif: var(--font-playfair), "Playfair Display", Georgia, serif;
   --sans: var(--font-inter), -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --ease: cubic-bezier(0.22, 0.8, 0.28, 1);
@@ -1001,11 +1001,11 @@
 
 /* ------------------------------ Interactive FAQ Section ------------------------------ */
 .faqSection {
-  background: #fff;
-  border: 1px solid var(--line);
+  background: var(--ivory-2);
+  border: 1.5px solid var(--line);
   border-radius: 28px;
   padding: clamp(2.4rem, 4.8vw, 3.5rem);
-  box-shadow: 0 20px 40px -32px rgba(43, 26, 33, 0.4);
+  box-shadow: 0 20px 40px -32px rgba(101, 13, 24, 0.18);
   margin-bottom: 5.5rem;
 }
 
@@ -1034,21 +1034,21 @@
 }
 
 .accordionItem {
-  border: 1px solid var(--line);
+  border: 1.5px solid var(--line);
   border-radius: 18px;
-  background: var(--ivory);
+  background: #FFFFFF;
   overflow: hidden;
   transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
 }
 
 .accordionItem:hover {
-  border-color: #e7cfa6;
+  border-color: var(--gold);
 }
 
 .accordionItemOpen {
-  border-color: var(--gold-bright);
-  background: #fff;
-  box-shadow: 0 14px 26px -14px rgba(43, 26, 33, 0.3);
+  border-color: var(--gold);
+  background: #FFFFFF;
+  box-shadow: 0 14px 26px -14px rgba(101, 13, 24, 0.2);
 }
 
 .accordionTrigger {
