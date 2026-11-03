@@ -114,8 +114,9 @@ const embedSvgChart = (doc, svgString, x, y, width, height, fallbackTitle = 'ர
 /**
  * Draws the official Sri Varaghi Matrimony Logo
  * Embeds the client's official Sri Varaghi Amman logo image from backend/assets/logo.png
+ * Uses precise rounded-rectangle clipping and inner padding so the image canvas never protrudes
  */
-const drawVarahiLogo = (doc, x, y, size = 42) => {
+const drawVarahiLogo = (doc, x, y, width = 56, height = 52) => {
   const customLogoPaths = [
     path.join(__dirname, '..', 'assets', 'logo.png'),
     path.join(__dirname, '..', 'assets', 'varahi_logo.png'),
@@ -126,14 +127,24 @@ const drawVarahiLogo = (doc, x, y, size = 42) => {
 
   if (foundFile) {
     try {
-      const radius = size / 2;
-      const cx = x + radius;
-      const cy = y + radius;
       doc.save();
-      // Pristine white circular medallion base with golden rim
-      doc.circle(cx, cy, radius + 2).fillAndStroke('#FFFFFF', '#D1A85A');
-      doc.image(foundFile, x, y, { fit: [size, size], align: 'center', valign: 'center' });
+      const cornerRadius = 7;
+      // Clip to rounded medallion so no white image canvas can ever protrude outside
+      doc.roundedRect(x, y, width, height, cornerRadius).clip();
+      doc.rect(x, y, width, height).fill('#FFFFFF');
+      const pad = 2;
+      doc.image(foundFile, x + pad, y + pad, {
+        fit: [width - pad * 2, height - pad * 2],
+        align: 'center',
+        valign: 'center',
+      });
       doc.restore();
+
+      // Stroke an elegant antique gold frame around the medallion
+      doc.roundedRect(x, y, width, height, cornerRadius)
+        .lineWidth(1.2)
+        .strokeColor('#D4AF37')
+        .stroke();
       return;
     } catch (_) {
       // Fallback to vector below
@@ -141,9 +152,9 @@ const drawVarahiLogo = (doc, x, y, size = 42) => {
   }
 
   // Fallback Vector Gold Medallion Crest for Sri Varaghi Matrimony
-  const radius = size / 2;
-  const cx = x + radius;
-  const cy = y + radius;
+  const radius = Math.min(width, height) / 2;
+  const cx = x + width / 2;
+  const cy = y + height / 2;
 
   doc.save();
   doc.circle(cx, cy, radius).fillAndStroke('#B08D4C', '#E0BD77');
@@ -165,7 +176,7 @@ const drawVarahiLogo = (doc, x, y, size = 42) => {
  * Draws an elegant Varaghi Matrimonial Watermark centered on the page
  * Uses the official Sri Varaghi Amman logo image at subtle opacity
  */
-const drawVarahiWatermark = (doc, cx, cy, radius = 135, fonts = { available: false }) => {
+const drawVarahiWatermark = (doc, cx, cy, radius = 140, fonts = { available: false }) => {
   const customLogoPaths = [
     path.join(__dirname, '..', 'assets', 'logo.png'),
     path.join(__dirname, '..', 'assets', 'varahi_logo.png'),
@@ -176,8 +187,8 @@ const drawVarahiWatermark = (doc, cx, cy, radius = 135, fonts = { available: fal
   if (foundFile) {
     try {
       doc.save();
-      doc.opacity(0.13); // Ideal opacity for watermark under charts
-      const wmSize = 220;
+      doc.opacity(0.11); // Ideal subtle opacity for watermark under charts and guidelines
+      const wmSize = 250;
       doc.image(foundFile, cx - wmSize / 2, cy - wmSize / 2, {
         fit: [wmSize, wmSize],
         align: 'center',
@@ -342,7 +353,7 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
       // TEMPLATE 2 ONLY: Background Center Watermark
       // -------------------------------------------------------------
       if (template === 'watermark') {
-        drawVarahiWatermark(doc, pageWidth / 2, 450, 135, fontConfig);
+        drawVarahiWatermark(doc, pageWidth / 2, 435, 140, fontConfig);
       }
 
       let curY = margin;
@@ -350,22 +361,22 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
       // -------------------------------------------------------------
       // 1. HEADER SECTION (Varies by Template)
       // -------------------------------------------------------------
+      const headerHeight = 64;
       if (template === 'classic') {
-        // STYLE 1: Royal Plum/Wine Banner with Gold Varahi Logo Crest
-        const bannerHeight = 54;
-        doc.rect(margin, curY, contentWidth, bannerHeight).fill('#7A1E3A');
+        // STYLE 1: Royal Crimson Banner with Gold-Framed Varahi Logo Medallion
+        doc.rect(margin, curY, contentWidth, headerHeight).fill('#7A1E3A');
 
-        // Draw Left Logo
-        drawVarahiLogo(doc, margin + 10, curY + 7, 40);
+        // Draw Left Logo with precise gold-rimmed medallion
+        drawVarahiLogo(doc, margin + 8, curY + 6, 56, 52);
 
         // Header Texts
-        const textX = margin + 58;
-        const textW = contentWidth - 68;
+        const textX = margin + 72;
+        const textW = contentWidth - 80;
 
         // Line 1: Main Tamil Brand
         doc.fillColor('#FFFFFF')
           .font(boldFont)
-          .fontSize(13.5)
+          .fontSize(14)
           .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', textX, curY + 9, {
             width: textW,
             align: 'left',
@@ -385,24 +396,33 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
             characterSpacing: 0.2,
           });
 
-        curY += bannerHeight + 8;
+        // Line 3: Auspicious Tamil Tagline
+        doc.fillColor('#F0D8A8')
+          .font(regFont)
+          .fontSize(7.4)
+          .text('100% நம்பகமான வரன்கள்  •  சுப முகூர்த்த திருமண தகவல் மையம்', textX, curY + 44, {
+            width: textW,
+            align: 'left',
+            lineBreak: false,
+          });
+
+        curY += headerHeight + 8;
       } else {
         // STYLE 2: Watermark Certificate Header with Gold Double Border
-        const headerHeight = 50;
         doc.rect(margin, curY, contentWidth, headerHeight).fillAndStroke('#FFFDF9', '#C4A87C');
         doc.rect(margin + 2, curY + 2, contentWidth - 4, headerHeight - 4).strokeColor('#EAD9BF').lineWidth(0.75).stroke();
 
         // Mini crest emblem on left
-        drawVarahiLogo(doc, margin + 10, curY + 8, 34);
+        drawVarahiLogo(doc, margin + 8, curY + 6, 56, 52);
 
-        const textX = margin + 52;
-        const textW = contentWidth - 60;
+        const textX = margin + 72;
+        const textW = contentWidth - 80;
 
         // Line 1: Main Tamil Brand
         doc.fillColor('#7A1E3A')
           .font(boldFont)
-          .fontSize(13.5)
-          .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', textX, curY + 8, {
+          .fontSize(14)
+          .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', textX, curY + 9, {
             width: textW,
             align: 'left',
             lineBreak: false,
@@ -412,7 +432,7 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
         doc.fillColor('#9D6C10')
           .font(boldFont)
           .fontSize(8.8)
-          .text('VARAGHI MATRIMONY', textX, curY + 27, {
+          .text('VARAGHI MATRIMONY', textX, curY + 28, {
             continued: true,
             characterSpacing: 0.6,
           })
@@ -421,13 +441,23 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
             characterSpacing: 0.2,
           });
 
+        // Line 3: Auspicious Tamil Tagline
+        doc.fillColor('#755A46')
+          .font(regFont)
+          .fontSize(7.4)
+          .text('100% நம்பகமான வரன்கள்  •  சுப முகூர்த்த திருமண தகவல் மையம்', textX, curY + 44, {
+            width: textW,
+            align: 'left',
+            lineBreak: false,
+          });
+
         curY += headerHeight + 8;
       }
 
       // -------------------------------------------------------------
       // 2. Candidate Particulars Box (Two-column card)
       // -------------------------------------------------------------
-      const infoBoxHeight = 78;
+      const infoBoxHeight = 84;
       doc.rect(margin, curY, contentWidth, infoBoxHeight)
         .fillAndStroke(template === 'watermark' ? '#FFFFFF' : '#FFFBF7', '#D1C5B4');
 
@@ -443,9 +473,9 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
       const labelW1 = 105;
       const labelW2 = 115;
       const rowY1 = curY + 20;
-      const rowY2 = curY + 34;
-      const rowY3 = curY + 48;
-      const rowY4 = curY + 62;
+      const rowY2 = curY + 35;
+      const rowY3 = curY + 50;
+      const rowY4 = curY + 65;
 
       doc.fontSize(7.8);
 
@@ -482,7 +512,7 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
       // -------------------------------------------------------------
       const pillGap = 8;
       const pillWidth = (contentWidth - pillGap * 3) / 4;
-      const pillHeight = 38;
+      const pillHeight = 44;
 
       const astroPills = [
         { label: 'ராசி (RASI)', val: rasi },
@@ -496,38 +526,38 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
         doc.rect(px, curY, pillWidth, pillHeight).fillAndStroke(template === 'watermark' ? '#FFFFFF' : '#FBF7F0', '#C4A87C');
         doc.fillColor('#7A1E3A')
           .font(boldFont)
-          .fontSize(7)
-          .text(p.label, px, curY + 4.5, { width: pillWidth, align: 'center' });
+          .fontSize(7.5)
+          .text(p.label, px, curY + 5, { width: pillWidth, align: 'center' });
 
         doc.fillColor('#261C20')
           .font(boldFont)
-          .fontSize(10)
-          .text(p.val, px, curY + 18, { width: pillWidth, align: 'center' });
+          .fontSize(11)
+          .text(p.val, px, curY + 20, { width: pillWidth, align: 'center' });
       });
 
-      curY += pillHeight + 7;
+      curY += pillHeight + 8;
 
       // -------------------------------------------------------------
       // 4. Dosham & Dasa Balance Information Strip
       // -------------------------------------------------------------
-      const summaryStripHeight = 30;
+      const summaryStripHeight = 36;
       doc.rect(margin, curY, contentWidth, summaryStripHeight)
         .fillAndStroke(template === 'watermark' ? '#FFFFFF' : '#FFFDF9', '#E5DACD');
 
-      doc.font(boldFont).fontSize(7.5).fillColor('#7A1E3A')
-        .text('தோஷ விவரம் (Dosham): ', margin + 8, curY + 5, { continued: true })
+      doc.font(boldFont).fontSize(7.6).fillColor('#7A1E3A')
+        .text('தோஷ விவரம் (Dosham): ', margin + 8, curY + 6, { continued: true })
         .font(regFont).fillColor('#332228')
         .text(`${doshamSummary} — ${doshamDesc}`);
 
-      doc.font(boldFont).fontSize(7.5).fillColor('#7A1E3A')
-        .text('பிறப்பு இருப்பு திசை (Dasa Balance): ', margin + 8, curY + 17, { continued: true })
+      doc.font(boldFont).fontSize(7.6).fillColor('#7A1E3A')
+        .text('பிறப்பு இருப்பு திசை (Dasa Balance): ', margin + 8, curY + 19, { continued: true })
         .font(regFont).fillColor('#332228')
         .text(dasaText);
 
-      curY += summaryStripHeight + 10;
+      curY += summaryStripHeight + 9;
 
       // -------------------------------------------------------------
-      // 5. South Indian Square Charts (Side by Side)
+      // 5. South Indian Square Charts (Enlarged & Centered)
       // -------------------------------------------------------------
       doc.font(boldFont).fontSize(9.5).fillColor('#7A1E3A')
         .text('தென்னிந்திய முறை ஜாதக கட்டங்கள் (SOUTH INDIAN HOROSCOPE CHARTS)', margin, curY, {
@@ -536,9 +566,9 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
           characterSpacing: 0.5,
         });
 
-      curY += 13;
+      curY += 14;
 
-      const chartSize = 232;
+      const chartSize = 246;
       const chartGap = contentWidth - chartSize * 2;
       const chart1X = margin;
       const chart2X = margin + chartSize + chartGap;
@@ -549,25 +579,74 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
       // Render Navamsa (D9) Chart
       embedSvgChart(doc, horoscope.navamsaChartSvg, chart2X, curY, chartSize, chartSize, 'நவாம்ச கட்டம் (D9)', fontConfig);
 
+      curY += chartSize + 9;
+
       // -------------------------------------------------------------
-      // 6. Footer Notes & Varahi Attribution (Fixed at bottom within 1 page)
+      // 6. Astrological Matching Guidelines & Panchangam Notes Card
       // -------------------------------------------------------------
-      const footerY = 772;
-      doc.moveTo(margin, footerY - 8).lineTo(margin + contentWidth, footerY - 8).strokeColor('#C4A87C').lineWidth(0.75).stroke();
+      const notesBoxHeight = 56;
+      doc.rect(margin, curY, contentWidth, notesBoxHeight)
+        .fillAndStroke(template === 'watermark' ? '#FFFFFF' : '#FFFDF9', '#D1C5B4');
+      doc.rect(margin, curY, contentWidth, 15).fill('#F3EAE1');
+      doc.fillColor('#5C1D2E')
+        .font(boldFont)
+        .fontSize(7.5)
+        .text('ஜாதகக் குறிப்பு & பொருத்த வழிகாட்டுதல் (ASTROLOGICAL GUIDELINES & MATCHING NOTES)', margin + 10, curY + 3.5);
+
+      doc.font(regFont).fontSize(7.2).fillColor('#3B2C35');
+      doc.text('• திருக்கணித பஞ்சாங்க முறைப்படி கிரக பாதசாரங்கள், தசா இருப்பு மற்றும் லக்ன நிலைகள் துல்லியமாக கணிக்கப்பட்டுள்ளன.', margin + 10, curY + 18);
+      doc.text('• திருமண பொருத்தத்திற்கு தினப் பொருத்தம், கணப் பொருத்தம், ராசி, யோனி, ரஜ்ஜு உள்ளிட்ட 10 பொருத்தங்களை ஒப்பிட்டுப் பார்க்கவும்.', margin + 10, curY + 30);
+      doc.text('• செவ்வாய் / சனி பார்வை நிலைகள் மற்றும் தசா-புக்தி சமநிலையை அனுபவமிக்க குடும்ப ஜோதிடரிடம் சரிபார்த்துக் கொள்ள பரிந்துரைக்கப்படுகிறது.', margin + 10, curY + 42);
+
+      curY += notesBoxHeight + 8;
+
+      // -------------------------------------------------------------
+      // 7. Broker Official Endorsement & Verification Section
+      // -------------------------------------------------------------
+      const authBoxHeight = 66;
+      doc.rect(margin, curY, contentWidth, authBoxHeight)
+        .fillAndStroke(template === 'watermark' ? '#FFFFFF' : '#FFFBF7', '#D1C5B4');
+      doc.rect(margin, curY, contentWidth, 15).fill('#F3EAE1');
+      doc.fillColor('#5C1D2E')
+        .font(boldFont)
+        .fontSize(7.5)
+        .text('அலுவலகச் சான்றொப்பம் & அங்கீகாரம் (OFFICIAL VERIFICATION & ENDORSEMENT)', margin + 10, curY + 3.5);
+
+      const authCol1 = margin + 12;
+      const authCol2 = margin + contentWidth / 2 + 10;
+
+      // Left Column: Broker Endorsement
+      doc.font(boldFont).fontSize(7.6).fillColor('#7A1E3A')
+        .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', authCol1, curY + 20);
+      doc.font(regFont).fontSize(7.2).fillColor('#5A464E')
+        .text('அங்கீகரிக்கப்பட்ட வரன் ஜாதகக் குறிப்பு அறிக்கை', authCol1, curY + 32);
+      doc.font(boldFont).fontSize(7.2).fillColor('#3B2C35')
+        .text('பதிவாளர் கையொப்பம் (Authorized Signatory): ________________________', authCol1, curY + 47);
+
+      // Right Column: Official Docket Authentication
+      doc.font(boldFont).fontSize(7.4).fillColor('#3B2C35')
+        .text('பதிவு எண் (Dossier ID): ', authCol2, curY + 20, { continued: true })
+        .font(boldFont).fillColor('#B08D4C').text(displayProfileId);
+      doc.font(boldFont).fontSize(7.4).fillColor('#3B2C35')
+        .text('வெளியிட்ட தேதி (Issued Date): ', authCol2, curY + 32, { continued: true })
+        .font(regFont).fillColor('#3B2C35').text(generatedDate);
+      doc.font(boldFont).fontSize(7.4).fillColor('#3B2C35')
+        .text('சரிபார்ப்பு நிலை (Status): ', authCol2, curY + 44, { continued: true })
+        .font(boldFont).fillColor('#1E6B38').text('சரிபார்க்கப்பட்டது (Verified Record)');
+
+      curY += authBoxHeight + 8;
+
+      // -------------------------------------------------------------
+      // 8. Footer Notes & Varahi Attribution (Fixed at bottom within 1 page)
+      // -------------------------------------------------------------
+      const footerY = curY + 2;
+      doc.moveTo(margin, footerY - 4).lineTo(margin + contentWidth, footerY - 4).strokeColor('#C4A87C').lineWidth(0.75).stroke();
 
       doc.font(regFont).fontSize(6.8).fillColor('#6B5960')
         .text(
-          `ஸ்ரீ வாராஹி திருமண தகவல் மையம் • Confidential Matrimonial Document • Generated: ${generatedDate} • ${attribution}`,
+          `ஸ்ரீ வாராஹி திருமண தகவல் மையம் • மங்கல வாழ்க்கை மலர ஸ்ரீ வாராஹி அம்மன் துணை • ${attribution}`,
           margin,
-          footerY - 4,
-          { width: contentWidth, align: 'center', lineBreak: false }
-        );
-
-      doc.font(regFont).fontSize(6).fillColor('#9C8990')
-        .text(
-          'This document is strictly intended for matrimonial compatibility evaluation. Unapproved replication or commercial circulation is prohibited.',
-          margin,
-          footerY + 7,
+          footerY,
           { width: contentWidth, align: 'center', lineBreak: false }
         );
 
