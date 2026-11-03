@@ -724,35 +724,39 @@ export default function CandidateDetailPage() {
                 </div>
               ) : isActiveAccess ? (
                 <>
-                  {/* Blurry Protected State Before Unlocking */}
-                  <div className={s.blurredPhoneWrapper} aria-label="Protected contact number">
-                    <div className={s.blurredPhoneDisplay} aria-hidden="true">
-                      <Phone size={18} />
-                      <span>+91 98401 •••••</span>
-                    </div>
-                    <div className={s.blurredPhoneOverlay}>
-                      <span className={s.blurredLockBadge}>
-                        <Lock size={13} /> Protected Contact Number
+                  {/* Sleek Golden Blurred Phone Contact Card */}
+                  <div className={s.unifiedGoldenContactCard}>
+                    <div className={s.goldenBlurHead}>
+                      <span className={s.goldenBlurLabel}>
+                        <Lock size={13} /> Direct Contact Phone
                       </span>
+                      <span className={s.goldenBlurCreditCost}>1 Credit</span>
+                    </div>
+
+                    <div className={s.goldenPhoneInteractiveRow}>
+                      <div className={s.goldenRealBlurDigits} title="Locked direct phone number">
+                        <Phone size={15} className={s.goldenPhoneIcon} />
+                        <span className={s.blurryNumberDigits}>+91 98401 78423</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleUnlockContact}
+                        disabled={isUnlocking || creditsExhausted}
+                        className={s.btnGoldenUnlockPill}
+                      >
+                        <KeyRound size={14} />
+                        {isUnlocking
+                          ? 'Unlocking...'
+                          : isAlreadyUnlocked
+                          ? 'View Phone (Free)'
+                          : creditsExhausted
+                          ? 'Credits Exhausted'
+                          : 'Reveal Phone'}
+                      </button>
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={handleUnlockContact}
-                    disabled={isUnlocking || creditsExhausted}
-                    className={s.btnUnlockContact}
-                  >
-                    <KeyRound size={17} />
-                    {isUnlocking
-                      ? 'Unlocking Contact...'
-                      : isAlreadyUnlocked
-                      ? 'View Phone Number (Free Re-Access)'
-                      : creditsExhausted
-                      ? 'Monthly Credits Exhausted'
-                      : 'Unlock Contact Number (1 Credit)'}
-                  </button>
-                  {unlockError && <p style={{ color: '#dc2626', fontSize: '0.82rem', margin: '0.5rem 0 0' }}>{unlockError}</p>}
+                  {unlockError && <p style={{ color: '#dc2626', fontSize: '0.82rem', margin: '0.4rem 0 0' }}>{unlockError}</p>}
                 </>
               ) : (
                 <div style={{ background: '#FFF8E9', padding: '0.85rem', borderRadius: 12, border: '1px solid #E8D3BC', fontSize: '0.82rem', color: '#650D18' }}>
@@ -762,16 +766,8 @@ export default function CandidateDetailPage() {
               )}
 
               <p className={s.privacyShieldNote}>
-                <ShieldCheck size={15} /> Golden Privacy Shield: Candidate contact numbers are protected and never revealed to crawlers.
+                <ShieldCheck size={14} /> 100% Privacy Protected &bull; Verified Family Contact
               </p>
-
-              {/* Official Office Advisory Notice */}
-              <div className={s.clientNoticeBox}>
-                <p className={s.clientNoticeTamil}>
-                  &ldquo;மணமக்கள் பற்றிய தகவல்களை நீங்களே நன்கு விசாரித்து முடிவுக்கு வரவும். எமது நிறுவனத்தின் சேவை தகவல் தருவதற்காக மட்டுமே.&rdquo;
-                </p>
-                <span className={s.clientNoticeAuth}>— நிர்வாகம், ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
-              </div>
             </div>
           </aside>
 

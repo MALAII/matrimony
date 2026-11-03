@@ -200,12 +200,6 @@ export default function HomeLandingDesign({
             <h1 id="home-title">
               A Trusted Matrimony for <em>Meaningful Relationships</em>
             </h1>
-            <img
-              src="/images/varaghi/gold-divider.svg"
-              alt=""
-              className={styles.goldDivider}
-              aria-hidden="true"
-            />
             <p>
               Rooted in South Indian cultural values and sacred traditions. Connecting compatible brides
               and grooms with authentic biodata, verified family backgrounds, and complete contact privacy.

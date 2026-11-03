@@ -66,11 +66,10 @@
 /* ------------------------------ hero ------------------------------ */
 .heroWrap {
   position: relative;
-  background-color: var(--cream);
-  background-image: url('/images/varaghi/ivory-background.jpg');
-  background-repeat: repeat;
+  background: radial-gradient(circle at 65% 45%, rgba(255, 250, 240, 0.6) 0%, rgba(247, 233, 215, 0.85) 100%),
+              url('/images/varaghi/ivory-background.jpg') center/cover no-repeat;
   overflow: hidden;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 2px solid var(--gold, #D99A24);
 }
 
 .hero {

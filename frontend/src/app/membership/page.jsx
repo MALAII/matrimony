@@ -370,12 +370,6 @@ export default function MembershipPage() {
               <Sparkles size={13} /> ஸ்ரீ வாராஹி திருமண தகவல் மையம் &bull; Membership &amp; Privileges
             </div>
             <h1>Membership &amp; Credits Dashboard</h1>
-            <img
-              src="/images/varaghi/gold-divider.svg"
-              alt=""
-              className={styles.goldDivider}
-              aria-hidden="true"
-            />
             <p className={styles.heroDesc}>
               Review your active matrimonial subscription term, monthly contact unlocking credits, and transparent quarterly/half-yearly membership tiers.
             </p>

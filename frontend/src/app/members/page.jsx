@@ -700,12 +700,6 @@ export default function MemberDirectoryPage() {
             </nav>
             <span className={styles.kicker} style={{ marginTop: '0.4rem' }}>ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
             <h1>உண்மையான வரன்கள் — Browse Matches</h1>
-            <img
-              src="/images/varaghi/gold-divider.svg"
-              alt=""
-              className={styles.goldDivider}
-              aria-hidden="true"
-            />
             <p>தமிழ்நாட்டில் மிகவும் நம்பகரமான திருமணத்தகவல் சேவை. மதம், ஜாதி, எல்லை கடந்து இணைக்கும் உண்மையான உறவுகள்.</p>
           </div>
 
@@ -1007,7 +1001,7 @@ export default function MemberDirectoryPage() {
                               >
                                 <div className={styles.goldenPhoneDigitsRow} aria-hidden="true">
                                   <Phone size={14} className={styles.goldenPhoneIcon} />
-                                  <span className={styles.goldenPhoneBlurDigits}>+91 98401 •••••</span>
+                                  <span className={styles.goldenPhoneBlurDigits}>+91 98401 28549</span>
                                 </div>
                                 <div className={styles.goldenPhoneActionPill}>
                                   <KeyRound size={13} aria-hidden="true" />
