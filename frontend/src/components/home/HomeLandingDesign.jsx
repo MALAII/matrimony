@@ -19,6 +19,7 @@ import {
   KeyRound,
   Lock,
   Phone,
+  PhoneCall,
   ScrollText,
   ShieldCheck,
   Sparkles,
@@ -27,6 +28,29 @@ import {
 import styles from "./home-landing-design.module.css";
 
 const languages = ["தமிழ்", "తెలుగు", "ಕನ್ನಡ", "മലയാളം"];
+
+const bottomFeatures = [
+  {
+    Icon: ShieldCheck,
+    title: "Verified Profiles",
+    text: "Curated matrimonial profiles verified with genuine family details and biodata.",
+  },
+  {
+    Icon: Lock,
+    title: "Privacy First",
+    text: "Contact numbers remain masked in every view and revealed only with your consent.",
+  },
+  {
+    Icon: HeartHandshake,
+    title: "Traditional Values",
+    text: "Rooted in Tamil, Telugu, Kannada and Malayalam cultural customs and horoscope respect.",
+  },
+  {
+    Icon: PhoneCall,
+    title: "Dedicated Support",
+    text: "Attentive administrative assistance to guide families through matches smoothly.",
+  },
+];
 
 const facts = [
   { Icon: Languages, value: "4", label: "South Indian languages" },
@@ -127,7 +151,7 @@ function Heading({ id, kicker, children }) {
 }
 
 export default function HomeLandingDesign({
-  heroImage = "/images/hero-wedding-panorama.png",
+  heroImage = "/images/varaghi/south-indian-wedding-couple.jpg",
 }) {
   const ref = useRef(null);
   useReveal(ref);
@@ -135,53 +159,120 @@ export default function HomeLandingDesign({
   return (
     <div className={styles.page} ref={ref}>
       {/* ------------------------------ HERO ------------------------------ */}
-      <section className={styles.hero} aria-labelledby="home-title">
-        <div className={styles.heroText}>
-          <span className={styles.kicker}>ஸ்ரீ வாராஹி திருமண தகவல் மையம் • SRI VARAGHI MATRIMONY</span>
-          <h1 id="home-title">
-            சுப முகூர்த்த வரன்கள். <em>மங்கல வாழ்க்கை மலர.</em>
-          </h1>
-          <p>
-            அனைத்து சமூகத்தினருக்கும் நம்பிக்கையான வரன் தேடல் தளம். பாரம்பரிய வரன் ஜாதகம், முழு பயோடேட்டா மற்றும் 100% பாதுகாப்பான தொடர்பு எண்கள்.
-          </p>
-          <div className={styles.actions}>
-            <Link href="/register" className={styles.btnPrimary}>
-              இலவச வரன் பதிவு (Register Free) <ArrowRight size={17} aria-hidden="true" />
-            </Link>
-            <Link href="/members" className={styles.btnLink}>
-              வரன்கள் பார்க்க (Browse Profiles)
-            </Link>
-          </div>
-          <div className={styles.served}>
-            <span>Serving families in</span>
-            <ul className={styles.langs} aria-label="Languages served">
-              {languages.map((l) => (
-                <li key={l}>{l}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
+      <div className={styles.heroWrap}>
+        {/* Decorative Background Assets */}
+        <img
+          src="/images/varaghi/floral-left.png"
+          alt=""
+          className={styles.floralLeft}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/mandala-watermark.png"
+          alt=""
+          className={styles.mandalaWatermark}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/lotus-left.png"
+          alt=""
+          className={styles.lotusLeft}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/lotus-right.png"
+          alt=""
+          className={styles.lotusRight}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/gold-corner.png"
+          alt=""
+          className={styles.goldCornerTopRight}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/gold-corner.png"
+          alt=""
+          className={styles.goldCornerTopLeft}
+          aria-hidden="true"
+        />
 
-        <div className={styles.heroArt}>
-          <div className={styles.arch}>
-            <Image
-              src={heroImage}
-              alt="A traditional South Indian wedding"
-              fill
-              priority
-              sizes="(max-width: 900px) 80vw, 460px"
-              className={styles.archImg}
+        <section className={styles.hero} aria-labelledby="home-title">
+          <div className={styles.heroText}>
+            <span className={styles.heroTrustBadge}>
+              <ShieldCheck size={14} aria-hidden="true" />
+              A TRUSTED MATRIMONY FOR MEANINGFUL RELATIONSHIPS
+            </span>
+            <h1 id="home-title">
+              A Trusted Matrimony for <em>Meaningful Relationships</em>
+            </h1>
+            <img
+              src="/images/varaghi/gold-divider.png"
+              alt=""
+              className={styles.goldDivider}
+              aria-hidden="true"
             />
+            <p>
+              Rooted in South Indian cultural values and sacred traditions. Connecting compatible brides
+              and grooms with authentic biodata, verified family backgrounds, and complete contact privacy.
+            </p>
+            <div className={styles.actions}>
+              <Link href="/register" className={styles.btnPrimary}>
+                Create Free Profile <ArrowRight size={17} aria-hidden="true" />
+              </Link>
+              <Link href="/members" className={styles.btnOutline}>
+                Browse Profiles
+              </Link>
+            </div>
+            <div className={styles.served}>
+              <span>Serving families in</span>
+              <ul className={styles.langs} aria-label="Languages served">
+                {languages.map((l) => (
+                  <li key={l}>{l}</li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <svg className={styles.ring} viewBox="0 0 200 200" aria-hidden="true">
-            <defs>
-              <path id="ringPath" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
-            </defs>
-            <text>
-              <textPath href="#ringPath" textLength="480" lengthAdjust="spacing">SRI VARAGHI MATRIMONY • TRUST • TRADITION • PRIVACY •</textPath>
-            </text>
-            <circle cx="100" cy="100" r="4" />
-          </svg>
+
+          <div className={styles.heroArt}>
+            <div className={styles.arch}>
+              <Image
+                src={heroImage}
+                alt="Traditional South Indian wedding bride and groom"
+                fill
+                priority
+                sizes="(max-width: 900px) 80vw, 420px"
+                className={styles.archImg}
+              />
+            </div>
+            <svg className={styles.ring} viewBox="0 0 200 200" aria-hidden="true">
+              <defs>
+                <path id="ringPath" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
+              </defs>
+              <text>
+                <textPath href="#ringPath" textLength="480" lengthAdjust="spacing">VARAGHI MATRIMONY • TRUST • TRADITION • PRIVACY •</textPath>
+              </text>
+              <circle cx="100" cy="100" r="4" />
+            </svg>
+          </div>
+        </section>
+      </div>
+
+      {/* ----------------------- BOTTOM FEATURE STRIP ----------------------- */}
+      <section className={styles.featureStrip} aria-label="Key Platform Guarantees">
+        <div className={styles.featureGrid}>
+          {bottomFeatures.map(({ Icon, title, text }) => (
+            <div key={title} className={styles.featureItem}>
+              <div className={styles.featureIconWrap}>
+                <Icon size={24} aria-hidden="true" />
+              </div>
+              <div className={styles.featureText}>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -386,7 +477,7 @@ export default function HomeLandingDesign({
             </ul>
           </div>
           <div className={styles.ctaPhoto} aria-hidden="true">
-            <Image src={heroImage} alt="" fill sizes="(max-width: 900px) 100vw, 480px" className={styles.ctaImg} />
+            <Image src={heroImage} alt="Auspicious South Indian wedding couple" fill sizes="(max-width: 900px) 100vw, 480px" className={styles.ctaImg} />
           </div>
         </div>
       </section>

@@ -8,5 +8,5 @@ export const metadata = {
 };
 
 export default function HomePage() {
-  return <HomeLandingDesign heroImage="/images/hero-wedding-panorama.png" />;
+  return <HomeLandingDesign heroImage="/images/varaghi/south-indian-wedding-couple.jpg" />;
 }

@@ -69,9 +69,15 @@ export const Header = () => {
       <div className="header-topbar">
         <div className="container header-topbar-inner">
           <span>
-            <ShieldCheck size={14} aria-hidden="true" /> ஸ்ரீ வாராஹி திருமண தகவல் மையம் • 100% நம்பகமான வரன்கள் &middot; Contact numbers private
+            <ShieldCheck size={14} aria-hidden="true" /> 100% Verified Profiles &bull; Contact Numbers Kept Strictly Private
           </span>
-          <span className="header-topbar-langs">சுப முகூர்த்த வரன்கள் &middot; Tamil &middot; Telugu &middot; Kannada</span>
+          <span className="header-topbar-langs" aria-label="Languages">
+            <span style={{ color: 'var(--accent, #D99A24)', fontWeight: 600 }}>Languages:</span>{' '}
+            <span style={{ cursor: 'pointer' }} title="Tamil">தமிழ்</span> &middot;{' '}
+            <span style={{ cursor: 'pointer' }} title="Telugu">తెలుగు</span> &middot;{' '}
+            <span style={{ cursor: 'pointer' }} title="Kannada">ಕನ್ನಡ</span> &middot;{' '}
+            <span style={{ cursor: 'pointer' }} title="Malayalam">മലയാളം</span>
+          </span>
         </div>
       </div>
       <div className="container header-inner">
@@ -124,6 +130,27 @@ export const Header = () => {
             onClick={closeMobileMenu}
           >
             Membership Plans
+          </Link>
+          <Link
+            href="/#how-it-works"
+            className="nav-link"
+            onClick={closeMobileMenu}
+          >
+            How It Works
+          </Link>
+          <Link
+            href="/about"
+            className={`nav-link ${pathname === '/about' ? 'nav-link-active' : ''}`}
+            onClick={closeMobileMenu}
+          >
+            About Us
+          </Link>
+          <Link
+            href="/contact"
+            className={`nav-link ${pathname === '/contact' ? 'nav-link-active' : ''}`}
+            onClick={closeMobileMenu}
+          >
+            Contact
           </Link>
 
           <div className="nav-auth-actions" aria-busy={authLoading}>

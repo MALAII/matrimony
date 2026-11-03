@@ -10,57 +10,57 @@
    - Option C: Swap the active variables below
    ========================================================================== */
 
-/* --- ACTIVE THEME: Sri Varaghi Matrimony — Sacred Temple Crimson, Prabhavali Gold & Silk Ivory --- */
+/* --- ACTIVE THEME: Sri Varaghi Matrimony — Approved Brand Palette --- */
 :root {
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-serif: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", Cambria, serif;
 
-  /* Official Sri Varaghi Matrimony Palette (derived from the sacred logo) */
-  --primary: #a81b32;          /* Sacred Temple Crimson / Kumkum Red for primary CTAs */
-  --primary-hover: #881328;    /* Deep Auspicious Crimson / Active Hover */
-  --primary-light: #fdf2f4;    /* Delicate Kumkum Blush / Tinted card backgrounds */
-  --primary-subtle: #c43850;   /* Muted Temple Rose */
-  --primary-dark: #2a0810;     /* Deep Royal Maroon for gradients & header topbars */
-  --primary-shadow: rgba(168, 27, 50, 0.28);
+  /* Official Varaghi Matrimony Palette (Approved Design) */
+  --primary: #A20D16;          /* Primary Red */
+  --primary-hover: #830A11;    /* Deep Hover Red */
+  --primary-light: #FFF8E9;    /* Warm Cream Tint */
+  --primary-subtle: #C2333D;   /* Muted Temple Red */
+  --primary-dark: #650D18;     /* Deep Maroon for topbars & headers */
+  --primary-shadow: rgba(162, 13, 22, 0.25);
 
-  --accent: #c69214;           /* Sacred Prabhavali Temple Gold */
-  --accent-hover: #a3750d;     /* Deep Antique Temple Gold */
-  --accent-light: #fef9ee;     /* Warm Gold highlight tint */
-  --accent-border: #f0c354;    /* Brilliant Gold border */
+  --accent: #D99A24;           /* Antique Gold */
+  --accent-hover: #B8801B;     /* Deep Antique Gold */
+  --accent-light: #FFF8E9;     /* Cream highlight tint */
+  --accent-border: #D99A24;    /* Antique Gold border */
 
-  --bg-primary: #fffdf8;       /* Silk Ivory / Wedding Mandapam Canvas */
-  --bg-surface: #ffffff;       /* Crisp White surface */
-  --bg-surface-warm: #faf3e8;  /* Auspicious Sandalwood/Cream Secondary Surface */
-  --bg-section-alt: #f7eee0;   /* Alternating section tone */
+  --bg-primary: #FFF8E9;       /* Warm Cream base */
+  --bg-surface: #FFFFFF;       /* Crisp White surface */
+  --bg-surface-warm: #F7E9D7;  /* Section background cream */
+  --bg-section-alt: #F7E9D7;   /* Alternating section tone */
 
-  --heading-color: #2a0810;    /* Deep Royal Maroon (Headings) */
-  --text-main: #33151c;        /* Rich Maroon-Charcoal body text */
-  --text-muted: #705259;       /* Soft Muted Maroon for descriptions */
-  --text-light: #8e7379;       /* Light Muted for metadata & labels */
+  --heading-color: #650D18;    /* Deep Maroon Headings */
+  --text-main: #351B1B;        /* Text */
+  --text-muted: #6B4A4A;       /* Soft Muted text */
+  --text-light: #8E6C6C;       /* Light Muted for metadata & labels */
 
-  --border-color: #ede2d3;     /* Warm Sandalwood hairline border */
-  --border-gold: #f0c354;      /* Temple Gold accent border */
+  --border-color: #E8D7C3;     /* Warm Cream border */
+  --border-gold: #D99A24;      /* Antique Gold accent border */
 
-  --footer-bg-start: #2a0810;  /* Deep Royal Maroon footer gradient start */
-  --footer-bg-mid: #1e050b;    /* Rich Maroon footer gradient mid */
-  --footer-bg-end: #140307;    /* Deepest Maroon footer gradient end */
-  --footer-text-muted: #d9c5cc;
-  --footer-card-bg: linear-gradient(150deg, rgba(168, 27, 50, 0.45) 0%, rgba(42, 8, 16, 0.85) 100%);
+  --footer-bg-start: #650D18;  /* Deep Maroon footer gradient start */
+  --footer-bg-mid: #4A0811;    /* Rich Maroon footer gradient mid */
+  --footer-bg-end: #32050B;    /* Deepest Maroon footer gradient end */
+  --footer-text-muted: #E8D5B7;
+  --footer-card-bg: linear-gradient(150deg, rgba(162, 13, 22, 0.45) 0%, rgba(101, 13, 24, 0.85) 100%);
 
-  --section-dark-start: #2a0810;
-  --section-dark-end: #1a0409;
+  --section-dark-start: #650D18;
+  --section-dark-end: #4A0811;
 
   --success: #15803d;
-  --danger: #b91c1c;
+  --danger: #A20D16;
 
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  --shadow-sm: 0 1px 3px 0 rgba(42, 8, 16, 0.05);
-  --shadow-md: 0 4px 14px -2px rgba(42, 8, 16, 0.08), 0 2px 4px -2px rgba(42, 8, 16, 0.04);
-  --shadow-lg: 0 16px 36px -6px rgba(42, 8, 16, 0.12), 0 4px 10px -4px rgba(42, 8, 16, 0.06);
+  --shadow-sm: 0 1px 3px 0 rgba(101, 13, 24, 0.05);
+  --shadow-md: 0 4px 14px -2px rgba(101, 13, 24, 0.08), 0 2px 4px -2px rgba(101, 13, 24, 0.04);
+  --shadow-lg: 0 16px 36px -6px rgba(101, 13, 24, 0.12), 0 4px 10px -4px rgba(101, 13, 24, 0.06);
 }
 
 /* ==========================================================================
