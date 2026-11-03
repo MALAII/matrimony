@@ -82,15 +82,21 @@ export const Header = () => {
       </div>
       <div className="container header-inner">
         {/* Brand Logo & Identity */}
-        <Link href="/" className="brand-logo" onClick={closeMobileMenu} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+        <Link href="/" className="brand-logo" onClick={closeMobileMenu}>
           <img
             src="/logo.png"
             alt="Varaghi Matrimony"
-            style={{ width: '48px', height: '48px', objectFit: 'contain' }}
+            className="brand-logo-img"
           />
           <div className="brand-text-wrap">
-            <span className="brand-name" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--heading-color)' }}>Varaghi Matrimony</span>
-            <span className="brand-tagline" style={{ fontSize: '0.74rem', color: 'var(--primary)', fontWeight: 600 }}>ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
+            <span className="brand-name">VARAGHI MATRIMONY</span>
+            <img
+              src="/images/varaghi/gold-divider.png"
+              alt=""
+              aria-hidden="true"
+              className="brand-divider"
+            />
+            <span className="brand-tagline">ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
           </div>
         </Link>
 
