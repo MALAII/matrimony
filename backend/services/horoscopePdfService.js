@@ -506,6 +506,22 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
       doc.font(boldFont).fontSize(7.4).fillColor('#A20D16')
         .text('அங்கீகார முத்திரை (Official Seal): [ ஸ்ரீ வாராஹி சுப முத்திரை ]', authCol2, curY + 64);
 
+      // Embed the official Varaghi bottom emblem right beside the seal text
+      const emblemPaths = [
+        path.join(__dirname, '..', 'assets', 'varaghi-bottom-emblem.png'),
+        path.join(__dirname, '..', 'assets', 'motifs', 'varaghi-bottom-emblem.png'),
+      ];
+      const foundEmblem = emblemPaths.find((p) => fs.existsSync(p));
+      if (foundEmblem) {
+        try {
+          doc.image(foundEmblem, authCol2 + 208, curY + 54, {
+            fit: [22, 18],
+            align: 'center',
+            valign: 'center',
+          });
+        } catch (_) {}
+      }
+
       curY += authBoxHeight + 8;
 
       // -------------------------------------------------------------

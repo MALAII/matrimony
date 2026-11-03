@@ -144,6 +144,13 @@ function useReveal(ref) {
 function Heading({ id, kicker, children }) {
   return (
     <header className={`${styles.heading} reveal`}>
+      <div className={styles.headingMotif} aria-hidden="true">
+        <img
+          src="/images/varaghi/motifs/varaghi-bottom-emblem.png"
+          alt=""
+          className={styles.headingEmblem}
+        />
+      </div>
       <span className={styles.kicker}>{kicker}</span>
       <h2 id={id}>{children}</h2>
     </header>
@@ -261,6 +268,13 @@ export default function HomeLandingDesign({
 
       {/* ----------------------- BOTTOM FEATURE STRIP ----------------------- */}
       <section className={styles.featureStrip} aria-label="Key Platform Guarantees">
+        <div className={styles.featureStripEmblem} aria-hidden="true">
+          <img
+            src="/images/varaghi/motifs/varaghi-bottom-emblem.png"
+            alt=""
+            className={styles.featureEmblemImg}
+          />
+        </div>
         <div className={styles.featureGrid}>
           {bottomFeatures.map(({ Icon, title, text }) => (
             <div key={title} className={styles.featureItem}>
@@ -322,7 +336,19 @@ export default function HomeLandingDesign({
       </section>
 
       {/* --------------------------- HOW IT WORKS --------------------------- */}
-      <section id="how-it-works" className={styles.section} aria-labelledby="how-title">
+      <section id="how-it-works" className={`${styles.section} ${styles.lotusDecoWrap}`} aria-labelledby="how-title">
+        <img
+          src="/images/varaghi/motifs/lotus-ornament.svg"
+          alt=""
+          className={styles.lotusDecoLeft}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/motifs/lotus-ornament.svg"
+          alt=""
+          className={styles.lotusDecoRight}
+          aria-hidden="true"
+        />
         <Heading id="how-title" kicker="How it works">
           Find your match in 4 easy steps
         </Heading>
@@ -431,6 +457,18 @@ export default function HomeLandingDesign({
 
       {/* ------------------------------- FAQ ------------------------------- */}
       <section className={styles.faqSectionWrap} aria-labelledby="faq-title">
+        <img
+          src="/images/varaghi/motifs/lotus-ornament.svg"
+          alt=""
+          className={styles.faqLotusLeft}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/motifs/lotus-ornament.svg"
+          alt=""
+          className={styles.faqLotusRight}
+          aria-hidden="true"
+        />
         <div className={`${styles.section} ${styles.faqSection}`}>
           <div className={styles.faqWrap}>
             <aside className={`${styles.faqIntro} reveal`}>
@@ -458,6 +496,13 @@ export default function HomeLandingDesign({
       <section className={styles.ctaWrap} aria-labelledby="cta-title">
         <div className={`${styles.cta} reveal`}>
           <div className={styles.ctaText}>
+            <div className={styles.ctaEmblemWrap} aria-hidden="true">
+              <img
+                src="/images/varaghi/motifs/varaghi-bottom-emblem.png"
+                alt=""
+                className={styles.ctaEmblem}
+              />
+            </div>
             <span className={styles.whyKicker}>Get started today</span>
             <h2 id="cta-title">Begin your story with a trusted match.</h2>
             <p>

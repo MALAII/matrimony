@@ -167,6 +167,30 @@
   align-items: flex-start;
   gap: 1rem;
 }
+.featureStripEmblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 2.2rem;
+}
+.featureStripEmblem::before,
+.featureStripEmblem::after {
+  content: "";
+  display: block;
+  width: 90px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+.featureStripEmblem::after {
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+.featureEmblemImg {
+  width: 38px;
+  height: 30px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.45));
+}
 .featureIconWrap {
   flex-shrink: 0;
   width: 48px;
@@ -195,7 +219,59 @@
 /* ----------------------------- sections ----------------------------- */
 .section { max-width: 1100px; margin: 0 auto; padding: clamp(4rem, 8vw, 6.5rem) 1.5rem; scroll-margin-top: 70px; }
 .heading { text-align: center; margin-bottom: 3.5rem; }
+.headingMotif {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  margin-bottom: 0.9rem;
+}
+.headingMotif::before,
+.headingMotif::after {
+  content: "";
+  display: block;
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+.headingMotif::after {
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+.headingEmblem {
+  width: 32px;
+  height: 26px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 5px rgba(101, 13, 24, 0.15));
+}
 .heading h2 { margin-top: 0.8rem; font-size: clamp(2rem, 4vw, 3rem); color: var(--maroon); }
+
+/* lotus background decorations */
+.lotusDecoWrap {
+  position: relative;
+  overflow: hidden;
+}
+.lotusDecoLeft {
+  position: absolute;
+  left: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(160px, 22vw, 260px);
+  height: auto;
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 0;
+}
+.lotusDecoRight {
+  position: absolute;
+  right: -40px;
+  top: 50%;
+  transform: translateY(-50%) scaleX(-1);
+  width: clamp(160px, 22vw, 260px);
+  height: auto;
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 0;
+}
 
 /* steps */
 .steps { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; }
@@ -263,6 +339,25 @@
   border: 1px solid rgba(217, 154, 36, 0.3);
 }
 .ctaText { padding: clamp(2.2rem, 5vw, 4.2rem); }
+.ctaEmblemWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+.ctaEmblemWrap::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 1.5px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+.ctaEmblem {
+  width: 34px;
+  height: 27px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45));
+}
 .cta h2 { margin: 1rem 0 1.1rem; font-size: clamp(2rem, 3.8vw, 3rem); line-height: 1.12; color: #fff; }
 .ctaText > p { max-width: 30rem; font-size: 1.03rem; line-height: 1.7; color: rgba(255, 255, 255, 0.82); }
 .ctaActions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 2rem; }
@@ -317,8 +412,31 @@
 
 /* faq */
 .faqSectionWrap {
+  position: relative;
+  overflow: hidden;
   background-color: var(--cream-soft);
   border-block: 1px solid var(--line);
+}
+.faqLotusLeft {
+  position: absolute;
+  left: -40px;
+  top: 40px;
+  width: clamp(160px, 20vw, 250px);
+  height: auto;
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: 0;
+}
+.faqLotusRight {
+  position: absolute;
+  right: -40px;
+  bottom: 40px;
+  width: clamp(160px, 20vw, 250px);
+  height: auto;
+  opacity: 0.14;
+  transform: scaleX(-1);
+  pointer-events: none;
+  z-index: 0;
 }
 .faqSection {
   padding-top: clamp(4rem, 7vw, 6rem);
