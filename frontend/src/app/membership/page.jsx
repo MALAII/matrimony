@@ -359,7 +359,7 @@ export default function MembershipPage() {
                 <ShieldCheck size={14} /> Phone Privacy Shield
               </span>
               <span className={styles.heroTrustPill}>
-                <Zap size={14} /> Zero Repeat Deductions
+                <Zap size={14} /> Zero Repeat Deductions (மீண்டும் கிரெடிட் இல்லை)
               </span>
               <span className={styles.heroTrustPill}>
                 <Clock size={14} /> 7-Day Browsing Grace Period

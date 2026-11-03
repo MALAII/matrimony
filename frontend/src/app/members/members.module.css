@@ -486,16 +486,21 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.38rem 0.8rem;
-  border: 1px solid #ebd0d8;
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: #fbf0f4;
+  background: var(--ivory);
+  border: 1px solid var(--line);
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--rose-deep);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
-.chips button:hover { background: #f6dfe7; }
+.chips button:hover {
+  background: var(--ivory-2);
+  border-color: var(--gold);
+  color: var(--rose);
+}
 .chips button.clearAll {
   border-color: transparent;
   background: none;
@@ -627,8 +632,8 @@
   font-size: 0.74rem;
   font-weight: 600;
   color: var(--rose-deep);
-  background: #fbf0f4;
-  border: 1px solid #ebd0d8;
+  background: var(--ivory);
+  border: 1px solid var(--line);
 }
 
 .prefs {
@@ -724,6 +729,49 @@
   border-radius: 12px;
   background: #eefbf3;
   border: 1px solid #bfe8ce;
+  animation: revealFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes revealFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.blurredPhoneCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--ivory);
+  border: 1px dashed var(--line);
+  padding: 0.55rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.blurredPhoneNum {
+  filter: blur(4.5px);
+  opacity: 0.5;
+  font-family: monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.blurredPhoneLock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--rose-deep);
+  background: #ffffff;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 6px rgba(101, 13, 24, 0.06);
 }
 .phoneBox a {
   display: inline-flex;
@@ -802,7 +850,7 @@
   height: 76px;
   border-radius: 50%;
   color: var(--rose-deep);
-  background: #fbf0f4;
+  background: var(--ivory);
 }
 .empty h2 { font-size: 1.55rem; }
 .empty p { max-width: 28rem; line-height: 1.65; color: var(--muted); }
@@ -865,7 +913,7 @@
   border-radius: 50%;
   color: #fff;
   background: linear-gradient(145deg, var(--rose), var(--rose-deep));
-  box-shadow: 0 0 0 8px #fbf0f4, 0 18px 30px -14px rgba(162, 13, 22, 0.7);
+  box-shadow: 0 0 0 8px var(--ivory), 0 18px 30px -14px rgba(162, 13, 22, 0.7);
   margin-bottom: 0.6rem;
 }
 .gate h1 { font-size: clamp(1.9rem, 4vw, 2.7rem); line-height: 1.15; }

@@ -210,10 +210,36 @@
   margin-bottom: 0.3rem;
   letter-spacing: 0;
 }
+.featureTamilSub {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--gold);
+  font-weight: 600;
+  margin-top: -0.15rem;
+  margin-bottom: 0.35rem;
+  letter-spacing: 0.02em;
+}
 .featureText p {
   font-size: 0.84rem;
   line-height: 1.5;
   color: #E8D5B7;
+}
+
+.communityRibbon {
+  background: var(--cream);
+  border-bottom: 1px solid var(--line-gold);
+  padding: 0.75rem 1.25rem;
+  text-align: center;
+}
+.communityRibbonText {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+.communityRibbonText strong {
+  color: var(--maroon);
+  margin-right: 0.35rem;
 }
 
 /* ----------------------------- sections ----------------------------- */

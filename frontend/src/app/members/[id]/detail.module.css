@@ -151,8 +151,8 @@
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--rose-deep, #650D18);
-  background: #fdf2f4;
-  border: 1px solid #f9d5dc;
+  background: var(--ivory, #FFF8E9);
+  border: 1px solid var(--line, #E8D3BC);
   padding: 0.2rem 0.6rem;
   border-radius: 6px;
   letter-spacing: 0.04em;
@@ -363,7 +363,7 @@
 
 .thumbBtnActive {
   border-color: var(--rose-deep, #650D18);
-  box-shadow: 0 0 0 2px rgba(125, 49, 71, 0.3);
+  box-shadow: 0 0 0 2px rgba(162, 13, 22, 0.3);
   opacity: 1;
 }
 
@@ -419,6 +419,99 @@
   line-height: 1.35;
 }
 
+/* Blurred Protected Phone State */
+@keyframes revealFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.blurredPhoneWrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--ivory, #FFF8E9);
+  border: 1.5px dashed var(--line, #E8D3BC);
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.blurredPhoneDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  filter: blur(5px);
+  opacity: 0.45;
+  pointer-events: none;
+  font-family: var(--font-mono, monospace), -apple-system, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ink, #351B1B);
+  letter-spacing: 0.12em;
+}
+
+.blurredPhoneOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 248, 233, 0.4);
+  backdrop-filter: blur(1.5px);
+}
+
+.blurredLockBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.95rem;
+  background: #ffffff;
+  border: 1px solid var(--gold, #D99A24);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--plum, #650D18);
+  box-shadow: 0 4px 14px rgba(101, 13, 24, 0.08);
+}
+
+.unlockedCreditNote {
+  font-size: 0.76rem;
+  color: #15803d;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: -0.25rem;
+}
+
+.clientNoticeBox {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--ivory, #FFF8E9);
+  border: 1px solid var(--line, #E8D3BC);
+  border-radius: 12px;
+}
+
+.clientNoticeTamil {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--ink, #351B1B);
+  font-style: italic;
+  margin: 0;
+}
+
+.clientNoticeAuth {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--plum, #650D18);
+  margin-top: 0.35rem;
+  text-align: right;
+}
+
 /* Unlocked Phone Box */
 .unlockedPhoneBox {
   background: #f0fdf4;
@@ -428,6 +521,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  animation: revealFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .phoneRow {
@@ -512,7 +606,7 @@
   background: linear-gradient(135deg, var(--rose-deep, #650D18) 0%, #A20D16 100%);
   border: none;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(125, 49, 71, 0.45);
+  box-shadow: 0 6px 18px rgba(162, 13, 22, 0.45);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -523,7 +617,7 @@
 .btnUnlockContact:hover:not(:disabled) {
   transform: translateY(-2px);
   filter: brightness(1.06);
-  box-shadow: 0 8px 24px rgba(125, 49, 71, 0.6);
+  box-shadow: 0 8px 24px rgba(162, 13, 22, 0.6);
 }
 
 .btnUnlockContact:disabled {

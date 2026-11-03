@@ -328,7 +328,7 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
                         Need the official Excel template?
                       </div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted, #6E565E)' }}>
-                        Includes all 24 supported column headers with sample candidate rows.
+                        Includes all 24 supported column headers with pre-formatted candidate rows.
                       </div>
                     </div>
                     <a

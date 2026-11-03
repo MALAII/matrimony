@@ -7,7 +7,7 @@
   --a-muted: #705259;
   --a-brand: #a81b32;
   --a-brand-dark: #881328;
-  --a-brand-soft: #fdf2f4;
+  --a-brand-soft: #FFF8E9;
   --a-side: #2a0810;
   --a-side-2: #3a0d18;
   --a-ok: #15803d;
@@ -662,7 +662,7 @@ a.adm-kpi:hover { transform: translateY(-4px); border-color: var(--a-gold-bright
   font-weight: 600;
 }
 .adm-tag-gender.female {
-  background: #fdf2f4;
+  background: #FFF8E9;
   color: #9f1239;
   border: 1px solid #fecdd3;
 }
@@ -935,7 +935,7 @@ a.adm-kpi:hover { transform: translateY(-4px); border-color: var(--a-gold-bright
   box-shadow: 0 2px 6px rgba(43, 26, 33, 0.04);
 }
 .adm-user-avatar.admin {
-  background: #fdf2f4;
+  background: #FFF8E9;
   color: #9f1239;
   border-color: #fecdd3;
 }

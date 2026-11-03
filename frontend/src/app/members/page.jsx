@@ -972,6 +972,12 @@ export default function MemberDirectoryPage() {
                             </div>
                           ) : isActiveAccess ? (
                             <>
+                              <div className={styles.blurredPhoneCard} aria-label="Protected contact number">
+                                <span className={styles.blurredPhoneNum} aria-hidden="true">+91 98401 •••••</span>
+                                <span className={styles.blurredPhoneLock}>
+                                  <Lock size={12} aria-hidden="true" /> Protected
+                                </span>
+                              </div>
                               <button
                                 type="button"
                                 onClick={() => handleUnlockContact(profile.id)}

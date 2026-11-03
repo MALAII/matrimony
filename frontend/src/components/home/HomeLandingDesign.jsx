@@ -33,21 +33,25 @@ const bottomFeatures = [
   {
     Icon: ShieldCheck,
     title: "Verified Profiles",
+    tamilTitle: "100% சரிபார்க்கப்பட்ட வரன்கள்",
     text: "Curated matrimonial profiles verified with genuine family details and biodata.",
   },
   {
     Icon: Lock,
     title: "Privacy First",
+    tamilTitle: "பாதுகாப்பான தொலைபேசி எண்கள்",
     text: "Contact numbers remain masked in every view and revealed only with your consent.",
   },
   {
     Icon: HeartHandshake,
     title: "Traditional Values",
+    tamilTitle: "பாரம்பரிய கலாச்சார முறை",
     text: "Rooted in Tamil, Telugu, Kannada and Malayalam cultural customs and horoscope respect.",
   },
   {
     Icon: PhoneCall,
     title: "Dedicated Support",
+    tamilTitle: "நேரடி அலுவலக வழிகாட்டுதல்",
     text: "Attentive administrative assistance to guide families through matches smoothly.",
   },
 ];
@@ -209,7 +213,7 @@ export default function HomeLandingDesign({
           <div className={styles.heroText}>
             <span className={styles.heroTrustBadge}>
               <ShieldCheck size={14} aria-hidden="true" />
-              A TRUSTED MATRIMONY FOR MEANINGFUL RELATIONSHIPS
+              தமிழர்களின் நீண்ட நாள் தேடலுக்கு ஓர் நிரந்தர தீர்வு &bull; TRUSTED MATRIMONY
             </span>
             <h1 id="home-title">
               A Trusted Matrimony for <em>Meaningful Relationships</em>
@@ -276,19 +280,29 @@ export default function HomeLandingDesign({
           />
         </div>
         <div className={styles.featureGrid}>
-          {bottomFeatures.map(({ Icon, title, text }) => (
+          {bottomFeatures.map(({ Icon, title, tamilTitle, text }) => (
             <div key={title} className={styles.featureItem}>
               <div className={styles.featureIconWrap}>
                 <Icon size={24} aria-hidden="true" />
               </div>
               <div className={styles.featureText}>
                 <h3>{title}</h3>
+                {tamilTitle && <span className={styles.featureTamilSub}>{tamilTitle}</span>}
                 <p>{text}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
+
+      {/* ----------------------- COMMUNITY RIBBON ----------------------- */}
+      <div className={styles.communityRibbon} aria-label="Communities Served">
+        <div className="container">
+          <p className={styles.communityRibbonText}>
+            <strong>அனைத்து சமூக வரன்களும் ஒரே தளத்தில்:</strong> வன்னியர் &bull; முதலியார் &bull; நாடார் &bull; நாயுடு &bull; பிள்ளை &bull; பிராமணர் &bull; யாதவர் &bull; செட்டியார் &bull; விஸ்வகர்மா &bull; மற்றும் அனைத்து தென்னிந்திய சமூகங்களும்
+          </p>
+        </div>
+      </div>
 
       {/* ------------------------------ FACTS ------------------------------ */}
       <section className={styles.facts} aria-label="At a glance">

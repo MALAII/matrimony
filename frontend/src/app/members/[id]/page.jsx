@@ -702,6 +702,12 @@ export default function CandidateDetailPage() {
                       {copiedPhone ? <Check size={14} color="#15803d" /> : <Copy size={14} />}
                     </button>
                   </div>
+                  <div className={s.unlockedCreditNote}>
+                    <Check size={13} />
+                    {unlockedContact.alreadyUnlocked
+                      ? 'Previously unlocked · 0 credits deducted'
+                      : 'Contact unlocked · 1 credit deducted'}
+                  </div>
                   <div className={s.contactActionButtons}>
                     <a href={`tel:${unlockedContact.candidatePhone}`} className={s.btnCall}>
                       <Phone size={14} /> Call Candidate
@@ -718,6 +724,19 @@ export default function CandidateDetailPage() {
                 </div>
               ) : isActiveAccess ? (
                 <>
+                  {/* Blurry Protected State Before Unlocking */}
+                  <div className={s.blurredPhoneWrapper} aria-label="Protected contact number">
+                    <div className={s.blurredPhoneDisplay} aria-hidden="true">
+                      <Phone size={18} />
+                      <span>+91 98401 •••••</span>
+                    </div>
+                    <div className={s.blurredPhoneOverlay}>
+                      <span className={s.blurredLockBadge}>
+                        <Lock size={13} /> Protected Contact Number
+                      </span>
+                    </div>
+                  </div>
+
                   <button
                     type="button"
                     onClick={handleUnlockContact}
@@ -733,10 +752,10 @@ export default function CandidateDetailPage() {
                       ? 'Monthly Credits Exhausted'
                       : 'Unlock Contact Number (1 Credit)'}
                   </button>
-                  {unlockError && <p style={{ color: '#dc2626', fontSize: '0.82rem', margin: 0 }}>{unlockError}</p>}
+                  {unlockError && <p style={{ color: '#dc2626', fontSize: '0.82rem', margin: '0.5rem 0 0' }}>{unlockError}</p>}
                 </>
               ) : (
-                <div style={{ background: '#fef2f2', padding: '0.85rem', borderRadius: 10, border: '1px solid #fecaca', fontSize: '0.82rem', color: '#b91c1c' }}>
+                <div style={{ background: '#FFF8E9', padding: '0.85rem', borderRadius: 12, border: '1px solid #E8D3BC', fontSize: '0.82rem', color: '#650D18' }}>
                   <Lock size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 4 }} />
                   Contact unlocking is reserved for active subscribed members.
                 </div>
@@ -745,6 +764,14 @@ export default function CandidateDetailPage() {
               <p className={s.privacyShieldNote}>
                 <ShieldCheck size={15} /> Golden Privacy Shield: Candidate contact numbers are protected and never revealed to crawlers.
               </p>
+
+              {/* Official Office Advisory Notice */}
+              <div className={s.clientNoticeBox}>
+                <p className={s.clientNoticeTamil}>
+                  &ldquo;மணமக்கள் பற்றிய தகவல்களை நீங்களே நன்கு விசாரித்து முடிவுக்கு வரவும். எமது நிறுவனத்தின் சேவை தகவல் தருவதற்காக மட்டுமே.&rdquo;
+                </p>
+                <span className={s.clientNoticeAuth}>— நிர்வாகம், ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
+              </div>
             </div>
           </aside>
 

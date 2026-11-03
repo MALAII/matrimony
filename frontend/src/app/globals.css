@@ -3120,19 +3120,19 @@ a {
 }
 
 .nav-group { gap: 0.15rem; }
-.nav-link { font-size: 0.9rem; font-weight: 500; color: #4a2830; letter-spacing: 0.005em; padding: 0.5rem 0.8rem; border-radius: 8px; transition: color 0.18s ease, background 0.18s ease; }
-.nav-link:hover { color: #a81b32; background: #fdf2f4; }
-.nav-link::after { bottom: 2px; width: 16px; height: 2px; background: #a81b32; box-shadow: none; }
-.nav-link-active { color: #a81b32 !important; font-weight: 600; }
+.nav-link { font-size: 0.9rem; font-weight: 500; color: #351B1B; letter-spacing: 0.005em; padding: 0.5rem 0.8rem; border-radius: 8px; transition: color 0.18s ease, background 0.18s ease; }
+.nav-link:hover { color: #A20D16; background: rgba(217, 154, 36, 0.12); }
+.nav-link::after { bottom: 2px; width: 16px; height: 2px; background: #A20D16; box-shadow: none; }
+.nav-link-active { color: #A20D16 !important; font-weight: 600; }
 .nav-link-active::after { width: 16px; }
 
 .nav-auth-actions { margin-left: 0.9rem; padding-left: 1.1rem; border-left: 1px solid #ede2d3; gap: 0.5rem; }
-.nav-link-secondary { border: 0; background: transparent; box-shadow: none; backdrop-filter: none; color: #2a0810 !important; font-weight: 600; padding: 0.5rem 0.9rem; border-radius: 8px; }
-.nav-link-secondary:hover { background: #fdf2f4; box-shadow: none; transform: none; color: #a81b32 !important; }
-.nav-link-btn { background: #a81b32; border: 0; border-radius: 10px; font-weight: 600; font-size: 0.9rem; padding: 0.62rem 1.25rem; box-shadow: 0 8px 18px -8px rgba(168, 27, 50, 0.8); }
-.nav-link-btn:hover { background: #881328; box-shadow: 0 12px 22px -8px rgba(168, 27, 50, 0.9); transform: translateY(-1px); }
+.nav-link-secondary { border: 0; background: transparent; box-shadow: none; backdrop-filter: none; color: #351B1B !important; font-weight: 600; padding: 0.5rem 0.9rem; border-radius: 8px; }
+.nav-link-secondary:hover { background: #FFF8E9; box-shadow: none; transform: none; color: #A20D16 !important; }
+.nav-link-btn { background: #A20D16; border: 0; border-radius: 10px; font-weight: 600; font-size: 0.9rem; padding: 0.62rem 1.25rem; box-shadow: 0 8px 18px -8px rgba(162, 13, 22, 0.65); }
+.nav-link-btn:hover { background: #830A11; box-shadow: 0 12px 22px -8px rgba(162, 13, 22, 0.75); transform: translateY(-1px); }
 
-.header-mobile-toggle { border-radius: 10px; border-color: #ede2d3; background: #fff; color: #a81b32; }
+.header-mobile-toggle { border-radius: 10px; border-color: #ede2d3; background: #fff; color: #A20D16; }
 
 @media (max-width: 1024px) {
   .header-topbar .header-topbar-langs { display: none; }
