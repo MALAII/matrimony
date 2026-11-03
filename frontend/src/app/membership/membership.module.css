@@ -128,10 +128,11 @@
 /* ------------------------------ Hero Header ------------------------------ */
 .hero {
   position: relative;
-  background-color: var(--ivory, #FFF8E9);
+  background: linear-gradient(135deg, #4F0910 0%, #6E0F1D 50%, #3B050B 100%);
   overflow: hidden;
   border-bottom: 2px solid var(--gold, #D99A24);
   padding: clamp(2.6rem, 5vw, 4rem) 1.5rem;
+  color: #FFF8E9;
 }
 
 .heroBg {
@@ -140,12 +141,10 @@
   background-image: url("/images/varaghi/ivory-background.jpg");
   background-size: cover;
   background-position: center;
-  opacity: 0.28;
-  mix-blend-mode: multiply;
+  opacity: 0.10;
+  mix-blend-mode: overlay;
   pointer-events: none;
 }
-
-
 
 .mandalaWatermark {
   position: absolute;
@@ -155,7 +154,8 @@
   width: min(550px, 75vw);
   height: auto;
   pointer-events: none;
-  opacity: 0.08;
+  opacity: 0.12;
+  filter: brightness(2) drop-shadow(0 0 12px rgba(217, 154, 36, 0.35));
   z-index: 0;
 }
 
@@ -163,10 +163,10 @@
   position: absolute;
   top: 14px;
   right: 14px;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   pointer-events: none;
-  opacity: 0.75;
+  opacity: 0.85;
   z-index: 1;
 }
 
@@ -174,10 +174,10 @@
   position: absolute;
   top: 14px;
   left: 14px;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   pointer-events: none;
-  opacity: 0.75;
+  opacity: 0.85;
   z-index: 1;
   transform: scaleX(-1);
 }
@@ -205,20 +205,20 @@
   align-items: center;
   gap: 0.45rem;
   font-size: 0.82rem;
-  color: var(--muted, #6B5555);
+  color: rgba(255, 248, 233, 0.75);
   margin-bottom: 0.65rem;
   width: 100%;
 }
 
 .crumbs a {
-  color: var(--plum, #650D18);
+  color: #FFDF73;
   font-weight: 600;
   text-decoration: none;
 }
 
 .crumbs a:hover {
   text-decoration: underline;
-  color: var(--rose, #A20D16);
+  color: #FFECA8;
 }
 
 .kickerPill {
@@ -229,7 +229,7 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gold, #D99A24);
+  color: #FFDF73;
   margin-bottom: 0.5rem;
 }
 
@@ -237,23 +237,24 @@
   font-family: var(--serif);
   font-size: clamp(2.2rem, 4.2vw, 3.2rem);
   font-weight: 800;
-  color: var(--plum, #650D18);
+  color: #FFFFFF;
   line-height: 1.12;
   margin-bottom: 0.3rem;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
 .goldDivider {
   display: block;
-  width: 130px;
+  width: 140px;
   height: auto;
-  margin: 0.4rem 0 0.8rem;
-  opacity: 0.9;
+  margin: 0.5rem 0 0.9rem;
+  opacity: 0.95;
 }
 
 .heroDesc {
   font-size: 1.02rem;
   line-height: 1.65;
-  color: var(--ink, #351B1B);
+  color: rgba(255, 248, 233, 0.9);
   margin-bottom: 1.4rem;
 }
 
@@ -269,12 +270,12 @@
   gap: 0.45rem;
   padding: 0.4rem 0.95rem;
   border-radius: 999px;
-  background: #ffffff;
-  border: 1px solid var(--gold, #D99A24);
-  color: var(--plum, #650D18);
+  background: rgba(30, 4, 8, 0.55);
+  border: 1px solid rgba(217, 154, 36, 0.5);
+  color: #FFDF73;
   font-size: 0.82rem;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(101, 13, 24, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .heroTrustPill svg {
