@@ -253,7 +253,7 @@ export default function MembershipPage() {
         key: keyId,
         amount: amount,
         currency: currency || 'INR',
-        name: 'Vivahaa Matrimony',
+        name: 'Varaghi Matrimony',
         description: `${planName || plan.name} Membership`,
         order_id: orderId,
         prefill: {
@@ -262,7 +262,7 @@ export default function MembershipPage() {
           contact: currentUser?.phone || '',
         },
         theme: {
-          color: '#7d3147',
+          color: '#A20D16',
         },
         modal: {
           ondismiss: function () {
@@ -347,7 +347,7 @@ export default function MembershipPage() {
               <span>Membership Plans</span>
             </nav>
             <div className={styles.kickerPill}>
-              <Sparkles size={13} /> Matrimonial Privileges &amp; Contact Access
+              <Sparkles size={13} /> ஸ்ரீ வாராஹி திருமண தகவல் மையம் &bull; Matrimonial Privileges &amp; Contact Access
             </div>
             <h1>Membership &amp; Credits Dashboard</h1>
             <p className={styles.heroDesc}>
@@ -428,7 +428,7 @@ export default function MembershipPage() {
               ) : checkoutNotice.type === 'error' ? (
                 <AlertCircle size={20} color="#dc2626" />
               ) : checkoutNotice.type === 'loading' ? (
-                <RefreshCw size={18} className="animate-spin" color="#b08d4c" />
+                <RefreshCw size={18} className="animate-spin" color="#D99A24" />
               ) : (
                 <AlertCircle size={20} color="#d97706" />
               )}

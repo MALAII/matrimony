@@ -1863,7 +1863,7 @@ export default function NewBrokerProfilePage() {
                     <div
                       key={slotIdx}
                       style={{
-                        border: isPrimary ? '2px solid var(--primary, #7d3147)' : '1px solid var(--border-color, #d1d5db)',
+                        border: isPrimary ? '2px solid var(--primary, #A20D16)' : '1px solid var(--border-color, #d1d5db)',
                         borderRadius: 12,
                         padding: '1rem',
                         background: '#ffffff',

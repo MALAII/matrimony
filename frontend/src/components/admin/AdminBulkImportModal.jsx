@@ -272,7 +272,7 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
                         height: '52px',
                         borderRadius: '50%',
                         backgroundColor: 'var(--primary-light, #F2DDE3)',
-                        color: 'var(--primary, #B85C78)',
+                        color: 'var(--primary, #A20D16)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -557,8 +557,8 @@ export function AdminBulkImportModal({ isOpen, onClose, onImportCompleted }) {
           }}
         >
           <div>
-            {loading && <span style={{ fontSize: '0.85rem', color: 'var(--primary, #B85C78)' }}>Validating spreadsheet rows...</span>}
-            {committing && <span style={{ fontSize: '0.85rem', color: 'var(--primary, #B85C78)' }}>Executing chunked database import...</span>}
+            {loading && <span style={{ fontSize: '0.85rem', color: 'var(--primary, #A20D16)' }}>Validating spreadsheet rows...</span>}
+            {committing && <span style={{ fontSize: '0.85rem', color: 'var(--primary, #A20D16)' }}>Executing chunked database import...</span>}
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem' }}>

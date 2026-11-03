@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 
-export const CHART_COLORS = ['#B85C78', '#A78345', '#49343B', '#15803d', '#CC6B88', '#8F757E'];
+export const CHART_COLORS = ['#A20D16', '#A78345', '#49343B', '#15803d', '#CC6B88', '#8F757E'];
 
 /** Smooth-ish area/line chart. data: [{label, value}] */
-export function AreaChart({ data, height = 220, color = '#B85C78', format = (v) => v }) {
+export function AreaChart({ data, height = 220, color = '#A20D16', format = (v) => v }) {
   const [hover, setHover] = useState(null);
   const W = 640;
   const pad = { l: 34, r: 12, t: 14, b: 26 };
@@ -166,7 +166,7 @@ export function Donut({ data, size = 150, centerLabel = 'Total' }) {
 }
 
 /** Horizontal bars for ranked categories. data: [{label, value}] */
-export function HBars({ data, color = '#B85C78' }) {
+export function HBars({ data, color = '#A20D16' }) {
   const max = Math.max(1, ...data.map((d) => d.value));
   if (data.length === 0) return <p className="adm-empty">No data yet.</p>;
   return (
@@ -182,7 +182,7 @@ export function HBars({ data, color = '#B85C78' }) {
 }
 
 /** Tiny inline trend line for KPI cards. */
-export function Sparkline({ values, color = '#B85C78' }) {
+export function Sparkline({ values, color = '#A20D16' }) {
   const max = Math.max(1, ...values);
   const W = 90;
   const H = 28;

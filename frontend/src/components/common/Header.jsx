@@ -170,9 +170,9 @@ export const Header = () => {
                     className="nav-link nav-link-btn"
                     onClick={closeMobileMenu}
                     style={{
-                      background: 'linear-gradient(135deg, #2b1a21 0%, #3a1c28 100%)',
-                      border: '1px solid #b08d4c',
-                      color: '#e0bd77',
+                      background: 'linear-gradient(135deg, #650D18 0%, #4A0810 100%)',
+                      border: '1px solid var(--accent, #D99A24)',
+                      color: '#F5C369',
                       padding: '0.45rem 1rem',
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -236,9 +236,9 @@ export const Header = () => {
                         className="user-nav-dropdown-item"
                         role="menuitem"
                         onClick={closeMobileMenu}
-                        style={{ fontWeight: 600, color: 'var(--primary, #7d3147)' }}
+                        style={{ fontWeight: 600, color: 'var(--primary, #A20D16)' }}
                       >
-                        <ShieldCheck size={15} color="#b08d4c" /> Admin Console
+                        <ShieldCheck size={15} color="#D99A24" /> Admin Console
                       </Link>
                     ) : (
                       /* Candidate user menu items */

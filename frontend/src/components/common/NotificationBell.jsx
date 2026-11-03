@@ -43,15 +43,15 @@ function formatTimeAgo(isoDate) {
 function getNotificationIcon(type) {
   switch (type) {
     case 'subscription_expiry_reminder':
-      return <CalendarClock size={16} color="#A78345" />;
+      return <CalendarClock size={16} color="#D99A24" />;
     case 'subscription_expired':
-      return <ShieldAlert size={16} color="#b91c1c" />;
+      return <ShieldAlert size={16} color="#A20D16" />;
     case 'payment_failed':
-      return <AlertCircle size={16} color="#b91c1c" />;
+      return <AlertCircle size={16} color="#A20D16" />;
     case 'admin_subscription_expiry_digest':
-      return <Sparkles size={16} color="#A78345" />;
+      return <Sparkles size={16} color="#D99A24" />;
     default:
-      return <Bell size={16} color="var(--a-muted, #8F757E)" />;
+      return <Bell size={16} color="var(--a-muted, #6B5555)" />;
   }
 }
 
@@ -382,7 +382,7 @@ export function NotificationBell({ feed = 'user' }) {
                     background: 'none',
                     border: 'none',
                     fontSize: '0.75rem',
-                    color: '#7D3147',
+                    color: '#A20D16',
                     fontWeight: 600,
                     cursor: 'pointer',
                     display: 'flex',
@@ -412,7 +412,7 @@ export function NotificationBell({ feed = 'user' }) {
                 type="button"
                 onClick={() => setActiveTab('all')}
                 style={{
-                  background: activeTab === 'all' ? 'var(--a-brand, #7D3147)' : 'transparent',
+                  background: activeTab === 'all' ? 'var(--a-brand, #A20D16)' : 'transparent',
                   color: activeTab === 'all' ? '#ffffff' : 'var(--a-muted, #64748b)',
                   border: 'none',
                   borderRadius: '6px',
@@ -429,7 +429,7 @@ export function NotificationBell({ feed = 'user' }) {
                 type="button"
                 onClick={() => setActiveTab('unread')}
                 style={{
-                  background: activeTab === 'unread' ? 'var(--a-brand, #7D3147)' : 'transparent',
+                  background: activeTab === 'unread' ? 'var(--a-brand, #A20D16)' : 'transparent',
                   color: activeTab === 'unread' ? '#ffffff' : 'var(--a-muted, #64748b)',
                   border: 'none',
                   borderRadius: '6px',
@@ -537,7 +537,7 @@ export function NotificationBell({ feed = 'user' }) {
                     display: 'grid',
                     placeItems: 'center',
                     margin: '0 auto 0.5rem',
-                    color: '#7D3147',
+                    color: '#A20D16',
                   }}
                 >
                   <Bell size={18} />
@@ -634,7 +634,7 @@ export function NotificationBell({ feed = 'user' }) {
                           <span
                             style={{
                               fontSize: '0.7rem',
-                              color: isUnread ? '#7D3147' : '#94a3b8',
+                              color: isUnread ? '#A20D16' : '#94a3b8',
                               fontWeight: isUnread ? 600 : 400,
                               flexShrink: 0,
                             }}
@@ -679,7 +679,7 @@ export function NotificationBell({ feed = 'user' }) {
                               alignItems: 'center',
                               gap: '0.2rem',
                               fontSize: '0.7rem',
-                              color: '#7D3147',
+                              color: '#A20D16',
                               fontWeight: 600,
                             }}
                             title="Mark as read without navigating"
@@ -707,7 +707,7 @@ export function NotificationBell({ feed = 'user' }) {
                         {item.link && (
                           <ArrowRight
                             size={12}
-                            color={isUnread ? '#7D3147' : '#cbd5e1'}
+                            color={isUnread ? '#A20D16' : '#cbd5e1'}
                             style={{ flexShrink: 0 }}
                           />
                         )}

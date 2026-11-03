@@ -3,6 +3,17 @@
    ========================================================================== */
 
 .container {
+  --ivory: #FFF8E9;
+  --ivory-2: #F7E9D7;
+  --plum: #650D18;
+  --plum-2: #4A0810;
+  --ink: #351B1B;
+  --muted: #6B5555;
+  --rose: #A20D16;
+  --rose-deep: #650D18;
+  --gold: #D99A24;
+  --gold-bright: #F5C369;
+  --line: #E8D3BC;
   max-width: 1240px;
   margin: 0 auto;
   padding: 1.5rem 1.5rem 4rem;
@@ -32,13 +43,13 @@
   align-items: center;
   gap: 0.4rem;
   font-weight: 600;
-  color: var(--rose-deep, #7d3147);
+  color: var(--rose-deep, #650D18);
   text-decoration: none;
   transition: color 0.15s;
 }
 
 .crumbs a:hover, .back:hover {
-  color: #9e3d5a;
+  color: #A20D16;
   text-decoration: underline;
 }
 
@@ -65,7 +76,7 @@
   padding: 0.45rem 0.9rem;
   border-radius: 999px;
   font-size: 0.82rem;
-  color: var(--rose-deep, #7d3147);
+  color: var(--rose-deep, #650D18);
   background: #fff;
   border: 1px solid #e7cfa6;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
@@ -93,8 +104,8 @@
 
 .btnTopAction:hover {
   background: #faf4ef;
-  border-color: var(--rose-deep, #7d3147);
-  color: var(--rose-deep, #7d3147);
+  border-color: var(--rose-deep, #650D18);
+  color: var(--rose-deep, #650D18);
 }
 
 /* ------------------------------ Hero Profile Banner ------------------------------ */
@@ -116,7 +127,7 @@
   left: 0;
   right: 0;
   height: 5px;
-  background: linear-gradient(90deg, var(--rose-deep, #7d3147) 0%, var(--gold, #b08d4c) 50%, var(--rose, #b85c78) 100%);
+  background: linear-gradient(90deg, var(--rose-deep, #650D18) 0%, var(--gold, #D99A24) 50%, var(--rose, #A20D16) 100%);
 }
 
 .heroHeaderRow {
@@ -139,7 +150,7 @@
   font-family: var(--sans, monospace);
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--rose-deep, #7d3147);
+  color: var(--rose-deep, #650D18);
   background: #fdf2f4;
   border: 1px solid #f9d5dc;
   padding: 0.2rem 0.6rem;
@@ -170,7 +181,7 @@
   font-family: var(--serif, Georgia, serif);
   font-size: 2.1rem;
   font-weight: 700;
-  color: var(--plum, #2b1a21);
+  color: var(--plum, #650D18);
   line-height: 1.2;
   margin: 0.15rem 0 0.5rem;
 }
@@ -200,14 +211,14 @@
   border-radius: 999px;
   font-size: 0.84rem;
   font-weight: 500;
-  color: var(--plum, #2b1a21);
+  color: var(--plum, #650D18);
   background: #faf5f0;
   border: 1px solid var(--line, #eadbd0);
 }
 
 .metricPill svg {
   flex-shrink: 0;
-  color: var(--rose-deep, #7d3147);
+  color: var(--rose-deep, #650D18);
 }
 
 /* ------------------------------ 2-Column Layout ------------------------------ */
@@ -244,7 +255,7 @@
   aspect-ratio: 3 / 4;
   border-radius: 16px;
   overflow: hidden;
-  background: linear-gradient(145deg, #2b1a21, #5a2638);
+  background: linear-gradient(145deg, #650D18, #4A0810);
   box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
   cursor: pointer;
 }
@@ -351,7 +362,7 @@
 }
 
 .thumbBtnActive {
-  border-color: var(--rose-deep, #7d3147);
+  border-color: var(--rose-deep, #650D18);
   box-shadow: 0 0 0 2px rgba(125, 49, 71, 0.3);
   opacity: 1;
 }
@@ -385,7 +396,7 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--gold, #b08d4c), #cfab64);
+  background: linear-gradient(135deg, var(--gold, #D99A24), #cfab64);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -397,7 +408,7 @@
   font-family: var(--sans, sans-serif);
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--plum, #2b1a21);
+  color: var(--plum, #650D18);
   margin: 0;
 }
 
@@ -498,7 +509,7 @@
   font-size: 0.92rem;
   font-weight: 700;
   color: #ffffff;
-  background: linear-gradient(135deg, var(--rose-deep, #7d3147) 0%, #9e3d5a 100%);
+  background: linear-gradient(135deg, var(--rose-deep, #650D18) 0%, #A20D16 100%);
   border: none;
   cursor: pointer;
   box-shadow: 0 6px 18px rgba(125, 49, 71, 0.45);
@@ -531,7 +542,7 @@
 }
 
 .privacyShieldNote svg {
-  color: var(--gold, #b08d4c);
+  color: var(--gold, #D99A24);
   flex-shrink: 0;
 }
 
@@ -575,9 +586,9 @@
 }
 
 .tabLink:hover {
-  background: var(--rose-deep, #7d3147);
+  background: var(--rose-deep, #650D18);
   color: #ffffff;
-  border-color: var(--rose-deep, #7d3147);
+  border-color: var(--rose-deep, #650D18);
 }
 
 /* Dossier Section Card */
@@ -605,7 +616,7 @@
   border-radius: 12px;
   background: linear-gradient(135deg, #fcecee, #f9e2e6);
   border: 1.5px solid #f3c2cd;
-  color: var(--rose-deep, #7d3147);
+  color: var(--rose-deep, #650D18);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -615,7 +626,7 @@
   font-family: var(--serif, Georgia, serif);
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--plum, #2b1a21);
+  color: var(--plum, #650D18);
   margin: 0;
   line-height: 1.25;
 }
@@ -656,7 +667,7 @@
 .fieldValue {
   font-size: 0.96rem;
   font-weight: 600;
-  color: var(--plum, #2b1a21);
+  color: var(--plum, #650D18);
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
@@ -670,7 +681,7 @@
 /* Narrative / Quote Box */
 .narrativeBox {
   background: #faf6f1;
-  border-left: 3.5px solid var(--gold, #b08d4c);
+  border-left: 3.5px solid var(--gold, #D99A24);
   border-radius: 0 14px 14px 0;
   padding: 1.15rem 1.35rem;
   margin-bottom: 1.25rem;
@@ -694,7 +705,7 @@
 .siblingTitle {
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--rose-deep, #7d3147);
+  color: var(--rose-deep, #650D18);
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -717,7 +728,7 @@
   border-radius: 999px;
   font-size: 0.82rem;
   font-weight: 500;
-  color: var(--plum, #2b1a21);
+  color: var(--plum, #650D18);
 }
 
 /* Horoscope Highlights Card */
@@ -742,14 +753,14 @@
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--gold, #b08d4c);
+  color: var(--gold, #D99A24);
   letter-spacing: 0.06em;
 }
 
 .astroPillValue {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--plum, #2b1a21);
+  color: var(--plum, #650D18);
 }
 
 .doshamCleanBadge {
@@ -784,7 +795,7 @@
 .chartTitle {
   font-size: 0.88rem;
   font-weight: 700;
-  color: var(--plum, #2b1a21);
+  color: var(--plum, #650D18);
   margin: 0 0 0.85rem;
   display: flex;
   align-items: center;
@@ -798,7 +809,7 @@
   width: 100%;
   max-width: 380px;
   aspect-ratio: 1 / 1;
-  border: 2px solid var(--plum, #2b1a21);
+  border: 2px solid var(--plum, #650D18);
   background: #ffffff;
   margin: 0 auto;
 }
@@ -824,7 +835,7 @@
 .chartBoxPlanets {
   font-size: 0.68rem;
   font-weight: 700;
-  color: var(--rose-deep, #7d3147);
+  color: var(--rose-deep, #650D18);
   line-height: 1.2;
   word-break: break-word;
 }
@@ -840,7 +851,7 @@
   font-family: var(--serif, Georgia, serif);
   font-weight: 700;
   font-size: 1.1rem;
-  color: var(--plum, #2b1a21);
+  color: var(--plum, #650D18);
   background: #faf6f1;
 }
 

@@ -453,7 +453,7 @@ export default function AdminDashboardPage() {
               <span style={{ fontSize: '0.74rem', color: 'var(--a-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Gross Captured Revenue
               </span>
-              <b style={{ display: 'block', fontSize: '1.45rem', marginTop: '0.2rem', color: '#7D3147' }}>
+              <b style={{ display: 'block', fontSize: '1.45rem', marginTop: '0.2rem', color: '#A20D16' }}>
                 {revenueLoading ? '...' : rupees(rev.summary?.capturedAmount || 0)}
               </b>
               <small style={{ color: 'var(--a-muted)', fontSize: '0.74rem' }}>
@@ -464,7 +464,7 @@ export default function AdminDashboardPage() {
             {/* 2. Average Order Value (AOV) */}
             <div
               className="adm-card"
-              style={{ padding: '0.9rem 1rem', borderLeft: '4px solid #B85C78', backgroundColor: '#FAF5F7' }}
+              style={{ padding: '0.9rem 1rem', borderLeft: '4px solid #A20D16', backgroundColor: '#FAF5F7' }}
             >
               <span style={{ fontSize: '0.74rem', color: 'var(--a-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Average Order Value (AOV)

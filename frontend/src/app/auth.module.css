@@ -3,25 +3,25 @@
    ========================================================================== */
 
 .page {
-  --ivory: #fffaf5;
-  --ivory-2: #f8ede3;
-  --plum: #2b1a21;
-  --plum-2: #3a252c;
-  --ink: #3f2b32;
-  --muted: #75606a;
-  --rose: #b85c78;
-  --rose-deep: #7d3147;
-  --rose-hover: #692640;
-  --rose-light: #fdf2f4;
-  --rose-blush: #fbf0f2;
-  --gold: #b08d4c;
-  --gold-bright: #e0bd77;
-  --gold-light: #faf4e8;
-  --line: #ebdcd2;
-  --line-strong: #d9c5b6;
-  --shadow-sm: 0 4px 14px rgba(43, 26, 33, 0.04);
-  --shadow-md: 0 12px 32px rgba(43, 26, 33, 0.08);
-  --shadow-lg: 0 24px 60px -12px rgba(43, 26, 33, 0.18);
+  --ivory: #FFF8E9;
+  --ivory-2: #F7E9D7;
+  --plum: #650D18;
+  --plum-2: #4A0810;
+  --ink: #351B1B;
+  --muted: #6B5555;
+  --rose: #A20D16;
+  --rose-deep: #650D18;
+  --rose-hover: #800A11;
+  --rose-light: #FFF5F5;
+  --rose-blush: #FAECEC;
+  --gold: #D99A24;
+  --gold-bright: #F5C369;
+  --gold-light: #FFF8E9;
+  --line: #E8D3BC;
+  --line-strong: #D9C2A7;
+  --shadow-sm: 0 4px 14px rgba(101, 13, 24, 0.04);
+  --shadow-md: 0 12px 32px rgba(101, 13, 24, 0.08);
+  --shadow-lg: 0 24px 60px -12px rgba(101, 13, 24, 0.18);
   --serif: var(--font-playfair), "Playfair Display", Georgia, serif;
   --sans: var(--font-inter), -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --ease: cubic-bezier(0.22, 0.8, 0.28, 1);
@@ -75,7 +75,7 @@
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(184, 92, 120, 0.18) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(162, 13, 22, 0.15) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -86,7 +86,7 @@
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(224, 189, 119, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(217, 154, 36, 0.18) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -120,8 +120,8 @@
 
 /* ------------------------------ Left Side Showcase ------------------------------ */
 .showcaseSide {
-  background: radial-gradient(380px 280px at 100% 0%, rgba(184, 92, 120, 0.45), transparent 70%),
-              linear-gradient(160deg, var(--plum-2), var(--plum));
+  background: radial-gradient(380px 280px at 100% 0%, rgba(217, 154, 36, 0.35), transparent 70%),
+              linear-gradient(160deg, var(--plum), var(--plum-2));
   color: #ffffff;
   padding: 1.6rem 2rem;
   display: flex;

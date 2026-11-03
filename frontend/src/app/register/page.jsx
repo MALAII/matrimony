@@ -167,7 +167,7 @@ export default function RegisterPage() {
         <aside className={styles.showcaseSide}>
           <div>
             <div className={styles.brandBadge}>
-              <Sparkles size={13} /> South Indian Matrimonial Traditions
+              <Sparkles size={13} /> ஸ்ரீ வாராஹி &bull; South Indian Matrimonial Traditions
             </div>
             <h2>
               Begin Your Family&apos;s <em>Sacred Journey</em>

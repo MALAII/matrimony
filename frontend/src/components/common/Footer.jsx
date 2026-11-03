@@ -41,6 +41,9 @@ export const Footer = () => {
           <p className="site-footer-about">
             தென்னிந்திய குடும்பங்களின் நம்பிக்கையான திருமண தகவல் மையம். வரன் ஜாதகம், முழு பயோடேட்டா மற்றும் பாதுகாப்பான வரன் தேடல் தளம்.
           </p>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#f7d794', opacity: 0.9 }}>
+            📍 Ranipet, Tamil Nadu &bull; ✉️ varaghiimatrimony@gmail.com
+          </p>
           <p style={{ marginTop: '0.65rem', fontSize: '0.85rem', color: '#f0c354', fontStyle: 'italic', fontFamily: 'var(--font-serif)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
             <img
               src="/images/varaghi/motifs/varaghi-bottom-emblem.png"
@@ -49,6 +52,9 @@ export const Footer = () => {
               style={{ width: '22px', height: '18px', objectFit: 'contain' }}
             />
             <span>&ldquo;மங்கல வாழ்க்கை மலர ஸ்ரீ வாராஹி அம்மன் அருள் துணை நிற்கட்டும்&rdquo;</span>
+          </p>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.74rem', color: 'rgba(255,248,233,0.7)', lineHeight: 1.5 }}>
+            மணமக்கள் பற்றிய தகவல்களை நீங்களே நன்கு விசாரித்து முடிவுக்கு வரவும். எமது நிறுவனத்தின் சேவை தகவல் தருவதற்காக மட்டுமே.
           </p>
           <div className="site-footer-langs" aria-label="Languages served">
             <span>தமிழ்</span>

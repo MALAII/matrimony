@@ -337,7 +337,7 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                   gap: '0.45rem',
                 }}
               >
-                <Camera size={20} color="var(--primary, #B85C78)" /> Candidate Photo Gallery
+                <Camera size={20} color="var(--primary, #A20D16)" /> Candidate Photo Gallery
               </h2>
               <span
                 style={{
@@ -444,7 +444,7 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                   height: '32px',
                   margin: '0 auto 1rem auto',
                   border: '3px solid #EBDADF',
-                  borderTopColor: 'var(--primary, #B85C78)',
+                  borderTopColor: 'var(--primary, #A20D16)',
                   borderRadius: '50%',
                   animation: 'spin 0.8s linear infinite',
                 }}
@@ -574,7 +574,7 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                                   width: '24px',
                                   height: '24px',
                                   border: '3px solid #EBDADF',
-                                  borderTopColor: 'var(--primary, #B85C78)',
+                                  borderTopColor: 'var(--primary, #A20D16)',
                                   borderRadius: '50%',
                                   animation: 'spin 0.8s linear infinite',
                                 }}
@@ -763,7 +763,7 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                               width: '28px',
                               height: '28px',
                               border: '3px solid #EBDADF',
-                              borderTopColor: 'var(--primary, #B85C78)',
+                              borderTopColor: 'var(--primary, #A20D16)',
                               borderRadius: '50%',
                               animation: 'spin 0.8s linear infinite',
                               margin: '0 auto 0.75rem auto',
@@ -781,7 +781,7 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                               height: '44px',
                               borderRadius: '50%',
                               backgroundColor: 'var(--primary-light, #F2DDE3)',
-                              color: 'var(--primary, #B85C78)',
+                              color: 'var(--primary, #A20D16)',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -839,7 +839,7 @@ export function AdminPhotoManagerModal({ profile, isOpen, onClose, onPhotosUpdat
                 }}
               >
                 <div style={{ fontWeight: 600, color: 'var(--text-main, #49343B)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <Info size={14} color="var(--primary, #B85C78)" /> Photo Guidelines &amp; Rules:
+                  <Info size={14} color="var(--primary, #A20D16)" /> Photo Guidelines &amp; Rules:
                 </div>
                 <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
                   <li>Strict maximum of <strong>3 photos</strong> per candidate profile.</li>

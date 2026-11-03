@@ -4,27 +4,27 @@
    ========================================================================== */
 
 .page {
-  --ivory: #fffaf5;
-  --ivory-2: #f8ede3;
+  --ivory: #FFF8E9;
+  --ivory-2: #F7E9D7;
   --surface: #ffffff;
-  --plum: #2b1a21;
-  --plum-2: #3a252c;
-  --ink: #3f2b32;
-  --muted: #75606a;
-  --muted-light: #9f8c95;
-  --rose: #b85c78;
-  --rose-deep: #7d3147;
-  --rose-hover: #692640;
-  --rose-light: #fdf2f4;
-  --rose-blush: #fbf0f2;
-  --gold: #b08d4c;
-  --gold-bright: #e0bd77;
-  --gold-light: #faf4e8;
-  --line: #ebdcd2;
-  --line-strong: #d9c5b6;
-  --shadow-sm: 0 4px 14px rgba(43, 26, 33, 0.04);
-  --shadow-md: 0 10px 28px rgba(43, 26, 33, 0.07);
-  --shadow-lg: 0 20px 50px -10px rgba(43, 26, 33, 0.12);
+  --plum: #650D18;
+  --plum-2: #4A0810;
+  --ink: #351B1B;
+  --muted: #6B5555;
+  --muted-light: #8E7A7A;
+  --rose: #A20D16;
+  --rose-deep: #650D18;
+  --rose-hover: #800A11;
+  --rose-light: #FFF5F5;
+  --rose-blush: #FAECEC;
+  --gold: #D99A24;
+  --gold-bright: #F5C369;
+  --gold-light: #FFF8E9;
+  --line: #E8D3BC;
+  --line-strong: #D9C2A7;
+  --shadow-sm: 0 4px 14px rgba(101, 13, 24, 0.04);
+  --shadow-md: 0 10px 28px rgba(101, 13, 24, 0.07);
+  --shadow-lg: 0 20px 50px -10px rgba(101, 13, 24, 0.12);
   --serif: var(--font-playfair), "Playfair Display", Georgia, serif;
   --sans: var(--font-inter), -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --ease: cubic-bezier(0.22, 0.8, 0.28, 1);

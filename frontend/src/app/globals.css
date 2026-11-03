@@ -428,7 +428,7 @@ a {
   border: 1px solid #eadbd0;
   border-radius: 999px;
   cursor: pointer;
-  color: #2b1a21;
+  color: var(--text-dark, #351B1B);
   font-family: inherit;
   font-size: 0.88rem;
   font-weight: 600;
@@ -437,16 +437,16 @@ a {
 
 .user-menu-trigger:hover {
   background-color: #fbf1ea;
-  border-color: #e0bd77;
-  box-shadow: 0 4px 12px -2px rgba(43, 26, 33, 0.12);
+  border-color: var(--accent, #D99A24);
+  box-shadow: 0 4px 12px -2px rgba(101, 13, 24, 0.12);
 }
 
 .user-nav-avatar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(145deg, #7d3147 0%, #3a252c 100%);
-  color: #e0bd77;
+  background: linear-gradient(145deg, var(--primary, #A20D16) 0%, var(--primary-dark, #650D18) 100%);
+  color: var(--accent, #D99A24);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -499,7 +499,7 @@ a {
 
 .user-nav-dropdown-item:hover {
   background-color: #fbf1ea;
-  color: #7d3147;
+  color: var(--primary, #A20D16);
 }
 
 .user-nav-dropdown-divider {
