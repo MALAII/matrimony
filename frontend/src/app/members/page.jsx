@@ -671,15 +671,47 @@ export default function MemberDirectoryPage() {
     <div className={styles.page}>
       {/* ------------------------------ Hero Header ------------------------------ */}
       <header className={styles.hero}>
+        <div className={styles.heroBg} aria-hidden="true" />
+        <img
+          src="/images/varaghi/floral-left.png"
+          alt=""
+          className={styles.floralLeft}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/mandala-watermark.png"
+          alt=""
+          className={styles.mandalaWatermark}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/gold-corner.png"
+          alt=""
+          className={styles.goldCornerTopRight}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/gold-corner.png"
+          alt=""
+          className={styles.goldCornerTopLeft}
+          aria-hidden="true"
+        />
+
         <div className={styles.heroInner}>
-          <div>
+          <div className={styles.heroTextWrap}>
             <nav className={styles.crumbs} aria-label="Breadcrumb">
               <Link href="/">Home</Link>
               <ChevronRight size={14} aria-hidden="true" />
               <span>Verified Matches</span>
             </nav>
-            <span className={styles.kicker} style={{ marginTop: '0.4rem', color: 'var(--gold-bright)' }}>ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
+            <span className={styles.kicker} style={{ marginTop: '0.4rem' }}>ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
             <h1>உண்மையான வரன்கள் — Browse Matches</h1>
+            <img
+              src="/images/varaghi/gold-divider.svg"
+              alt=""
+              className={styles.goldDivider}
+              aria-hidden="true"
+            />
             <p>தமிழ்நாட்டில் மிகவும் நம்பகரமான திருமணத்தகவல் சேவை. மதம், ஜாதி, எல்லை கடந்து இணைக்கும் உண்மையான உறவுகள்.</p>
           </div>
 
@@ -972,26 +1004,29 @@ export default function MemberDirectoryPage() {
                             </div>
                           ) : isActiveAccess ? (
                             <>
-                              <div className={styles.blurredPhoneCard} aria-label="Protected contact number">
-                                <span className={styles.blurredPhoneNum} aria-hidden="true">+91 98401 •••••</span>
-                                <span className={styles.blurredPhoneLock}>
-                                  <Lock size={12} aria-hidden="true" /> Protected
-                                </span>
-                              </div>
                               <button
                                 type="button"
                                 onClick={() => handleUnlockContact(profile.id)}
                                 disabled={isUnlocking || creditsExhausted}
-                                className={`${styles.unlockBtn} ${isAlreadyUnlocked ? styles.unlockFree : ''}`}
+                                className={`${styles.goldenUnlockCard} ${isAlreadyUnlocked ? styles.goldenUnlockCardFree : ''}`}
+                                title={isAlreadyUnlocked ? 'Click to reveal candidate contact (Free)' : 'Click to reveal candidate contact (1 Credit)'}
                               >
-                                <KeyRound size={16} aria-hidden="true" />
-                                {isUnlocking
-                                  ? 'Unlocking Contact…'
-                                  : isAlreadyUnlocked
-                                  ? 'View Phone Number (Free)'
-                                  : creditsExhausted
-                                  ? 'No Credits Remaining'
-                                  : 'Unlock Phone · 1 Credit'}
+                                <div className={styles.goldenPhoneDigitsRow} aria-hidden="true">
+                                  <Phone size={14} className={styles.goldenPhoneIcon} />
+                                  <span className={styles.goldenPhoneBlurDigits}>+91 98401 •••••</span>
+                                </div>
+                                <div className={styles.goldenPhoneActionPill}>
+                                  <KeyRound size={13} aria-hidden="true" />
+                                  <span>
+                                    {isUnlocking
+                                      ? 'Revealing…'
+                                      : isAlreadyUnlocked
+                                      ? 'Reveal Phone (Free)'
+                                      : creditsExhausted
+                                      ? 'Credits Exhausted'
+                                      : 'Reveal Phone · 1 Credit'}
+                                  </span>
+                                </div>
                               </button>
                               {unlockError && <p className={styles.unlockError} role="alert">{unlockError}</p>}
                             </>

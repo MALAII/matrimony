@@ -91,7 +91,7 @@ export const Header = () => {
           <div className="brand-text-wrap">
             <span className="brand-name">VARAGHI MATRIMONY</span>
             <img
-              src="/images/varaghi/gold-divider.png"
+              src="/images/varaghi/gold-divider.svg"
               alt=""
               aria-hidden="true"
               className="brand-divider"

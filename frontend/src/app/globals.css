@@ -262,9 +262,8 @@ a {
 .brand-divider {
   display: block;
   width: 100%;
-  height: 13px;
-  object-fit: fill;
-  margin-top: 2px;
+  height: 11px;
+  margin-top: 3px;
   margin-bottom: 2px;
   pointer-events: none;
 }
@@ -3103,9 +3102,8 @@ a {
 .brand-divider {
   display: block;
   width: 100%;
-  height: 13px;
-  object-fit: fill;
-  margin-top: 2px;
+  height: 11px;
+  margin-top: 3px;
   margin-bottom: 2px;
   pointer-events: none;
 }

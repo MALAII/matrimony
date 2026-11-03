@@ -127,14 +127,76 @@
 
 /* ------------------------------ Hero Header ------------------------------ */
 .hero {
-  background: radial-gradient(600px 300px at 100% 0%, rgba(184, 92, 120, 0.45), transparent 70%),
-              linear-gradient(160deg, var(--plum-2), var(--plum));
-  color: #fff;
-  padding: clamp(2.4rem, 4.5vw, 3.6rem) 1.5rem;
-  border-bottom: 1px solid rgba(224, 189, 119, 0.2);
+  position: relative;
+  background-color: var(--ivory, #FFF8E9);
+  overflow: hidden;
+  border-bottom: 2px solid var(--gold, #D99A24);
+  padding: clamp(2.6rem, 5vw, 4rem) 1.5rem;
+}
+
+.heroBg {
+  position: absolute;
+  inset: 0;
+  background-image: url("/images/varaghi/ivory-background.jpg");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.28;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.floralLeft {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: clamp(70px, 9vw, 130px);
+  height: 100%;
+  object-fit: cover;
+  object-position: left center;
+  pointer-events: none;
+  opacity: 0.85;
+  z-index: 1;
+}
+
+.mandalaWatermark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(550px, 75vw);
+  height: auto;
+  pointer-events: none;
+  opacity: 0.08;
+  z-index: 0;
+}
+
+.goldCornerTopRight {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  pointer-events: none;
+  opacity: 0.75;
+  z-index: 1;
+}
+
+.goldCornerTopLeft {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 44px;
+  height: 44px;
+  pointer-events: none;
+  opacity: 0.75;
+  z-index: 1;
+  transform: scaleX(-1);
 }
 
 .heroInner {
+  position: relative;
+  z-index: 2;
   max-width: 1140px;
   margin: 0 auto;
   display: flex;
@@ -145,6 +207,8 @@
 }
 
 .heroContent {
+  position: relative;
+  z-index: 2;
   max-width: 640px;
 }
 
@@ -153,18 +217,20 @@
   align-items: center;
   gap: 0.45rem;
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.65);
-  margin-bottom: 0.85rem;
+  color: var(--muted, #6B5555);
+  margin-bottom: 0.65rem;
   width: 100%;
 }
 
 .crumbs a {
-  color: var(--gold-bright);
+  color: var(--plum, #650D18);
+  font-weight: 600;
   text-decoration: none;
 }
 
 .crumbs a:hover {
   text-decoration: underline;
+  color: var(--rose, #A20D16);
 }
 
 .kickerPill {
@@ -173,23 +239,33 @@
   gap: 0.45rem;
   font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gold-bright);
-  margin-bottom: 0.75rem;
+  color: var(--gold, #D99A24);
+  margin-bottom: 0.5rem;
 }
 
 .hero h1 {
+  font-family: var(--serif);
   font-size: clamp(2.2rem, 4.2vw, 3.2rem);
-  color: #ffffff;
+  font-weight: 800;
+  color: var(--plum, #650D18);
   line-height: 1.12;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.3rem;
+}
+
+.goldDivider {
+  display: block;
+  width: 130px;
+  height: auto;
+  margin: 0.4rem 0 0.8rem;
+  opacity: 0.9;
 }
 
 .heroDesc {
   font-size: 1.02rem;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--ink, #351B1B);
   margin-bottom: 1.4rem;
 }
 
@@ -203,17 +279,18 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.35rem 0.85rem;
+  padding: 0.4rem 0.95rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.88);
+  background: #ffffff;
+  border: 1px solid var(--gold, #D99A24);
+  color: var(--plum, #650D18);
   font-size: 0.82rem;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(101, 13, 24, 0.06);
 }
 
 .heroTrustPill svg {
-  color: var(--gold-bright);
+  color: var(--gold, #D99A24);
 }
 
 /* Hero inline credit preview */
@@ -221,9 +298,11 @@
   width: min(100%, 340px);
   padding: 1.4rem;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.09);
-  border: 1px solid rgba(224, 189, 119, 0.3);
-  backdrop-filter: blur(8px);
+  background: #ffffff;
+  border: 1.5px solid var(--gold, #D99A24);
+  box-shadow: 0 10px 30px rgba(101, 13, 24, 0.08);
+  position: relative;
+  z-index: 2;
 }
 
 .heroCreditsTop {
@@ -231,25 +310,26 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.84rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  font-weight: 700;
+  color: var(--ink, #351B1B);
 }
 
 .heroCreditsTop span {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  color: var(--gold-bright);
+  color: var(--plum, #650D18);
 }
 
 .heroCreditsTop em {
   font-style: normal;
-  font-size: 0.7rem;
-  padding: 0.2rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.22rem 0.65rem;
   border-radius: 999px;
-  background: rgba(224, 189, 119, 0.2);
-  color: var(--gold-bright);
-  font-weight: 600;
+  background: #FFF8E9;
+  color: var(--plum, #650D18);
+  border: 1px solid var(--gold, #D99A24);
 }
 
 .heroCreditsNum {
@@ -263,26 +343,28 @@
   font-family: var(--serif);
   font-size: 2.85rem;
   line-height: 1;
-  color: var(--gold-bright);
+  color: var(--plum, #650D18);
 }
 
 .heroCreditsNum span {
   font-size: 0.86rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  color: var(--muted, #6B5555);
 }
 
 .heroBar {
-  height: 7px;
+  height: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.15);
+  background: #F7E9D7;
   overflow: hidden;
+  border: 1px solid rgba(217, 154, 36, 0.2);
 }
 
 .heroBar i {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--gold-bright), #f3d89c);
+  background: linear-gradient(90deg, #D99A24, #F5C369);
   transition: width 0.6s var(--ease);
 }
 
@@ -290,7 +372,7 @@
   margin-top: 0.8rem;
   font-size: 0.76rem;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--muted, #6B5555);
 }
 
 /* ------------------------------ Layout Container ------------------------------ */

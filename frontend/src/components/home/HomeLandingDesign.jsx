@@ -185,18 +185,6 @@ export default function HomeLandingDesign({
           aria-hidden="true"
         />
         <img
-          src="/images/varaghi/lotus-left.png"
-          alt=""
-          className={styles.lotusLeft}
-          aria-hidden="true"
-        />
-        <img
-          src="/images/varaghi/lotus-right.png"
-          alt=""
-          className={styles.lotusRight}
-          aria-hidden="true"
-        />
-        <img
           src="/images/varaghi/gold-corner.png"
           alt=""
           className={styles.goldCornerTopRight}
@@ -219,7 +207,7 @@ export default function HomeLandingDesign({
               A Trusted Matrimony for <em>Meaningful Relationships</em>
             </h1>
             <img
-              src="/images/varaghi/gold-divider.png"
+              src="/images/varaghi/gold-divider.svg"
               alt=""
               className={styles.goldDivider}
               aria-hidden="true"

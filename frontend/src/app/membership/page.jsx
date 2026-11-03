@@ -339,6 +339,32 @@ export default function MembershipPage() {
     <div className={styles.page}>
       {/* Editorial Luxury Hero */}
       <section className={styles.hero}>
+        <div className={styles.heroBg} aria-hidden="true" />
+        <img
+          src="/images/varaghi/floral-left.png"
+          alt=""
+          className={styles.floralLeft}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/mandala-watermark.png"
+          alt=""
+          className={styles.mandalaWatermark}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/gold-corner.png"
+          alt=""
+          className={styles.goldCornerTopRight}
+          aria-hidden="true"
+        />
+        <img
+          src="/images/varaghi/gold-corner.png"
+          alt=""
+          className={styles.goldCornerTopLeft}
+          aria-hidden="true"
+        />
+
         <div className={styles.heroInner}>
           <div className={styles.heroContent}>
             <nav className={styles.crumbs} aria-label="Breadcrumb">
@@ -347,9 +373,15 @@ export default function MembershipPage() {
               <span>Membership Plans</span>
             </nav>
             <div className={styles.kickerPill}>
-              <Sparkles size={13} /> ஸ்ரீ வாராஹி திருமண தகவல் மையம் &bull; Matrimonial Privileges &amp; Contact Access
+              <Sparkles size={13} /> ஸ்ரீ வாராஹி திருமண தகவல் மையம் &bull; Membership &amp; Privileges
             </div>
             <h1>Membership &amp; Credits Dashboard</h1>
+            <img
+              src="/images/varaghi/gold-divider.svg"
+              alt=""
+              className={styles.goldDivider}
+              aria-hidden="true"
+            />
             <p className={styles.heroDesc}>
               Review your active matrimonial subscription term, monthly contact unlocking credits, and transparent quarterly/half-yearly membership tiers.
             </p>

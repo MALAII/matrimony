@@ -891,7 +891,7 @@ export default function CandidateDetailPage() {
                 <div className={s.dataField}>
                   <span className={s.fieldLabel}>Verification Status</span>
                   <span className={s.fieldValue} style={{ color: '#15803d' }}>
-                    Verified Authenticated Record ✓
+                    100% சரிபார்க்கப்பட்ட வரன் (Verified Profile) ✓
                   </span>
                 </div>
               </div>
