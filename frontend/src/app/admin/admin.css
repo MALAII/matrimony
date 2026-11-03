@@ -1,15 +1,15 @@
 /* Admin console: scoped under .adm so the public site is untouched */
 .adm {
-  --a-bg: #FFF8F2;
+  --a-bg: #FFFDF8;
   --a-card: #ffffff;
-  --a-line: #EBDADF;
-  --a-text: #49343B;
-  --a-muted: #6E565E;
-  --a-brand: #B85C78;
-  --a-brand-dark: #9E4660;
-  --a-brand-soft: #F2DDE3;
-  --a-side: #3A252C;
-  --a-side-2: #4D3239;
+  --a-line: #ede2d3;
+  --a-text: #2a0810;
+  --a-muted: #705259;
+  --a-brand: #a81b32;
+  --a-brand-dark: #881328;
+  --a-brand-soft: #fdf2f4;
+  --a-side: #2a0810;
+  --a-side-2: #3a0d18;
   --a-ok: #15803d;
   --a-warn: #b45309;
   --a-bad: #b91c1c;
