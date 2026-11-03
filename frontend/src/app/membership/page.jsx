@@ -341,12 +341,6 @@ export default function MembershipPage() {
       <section className={styles.hero}>
         <div className={styles.heroBg} aria-hidden="true" />
         <img
-          src="/images/varaghi/floral-left.png"
-          alt=""
-          className={styles.floralLeft}
-          aria-hidden="true"
-        />
-        <img
           src="/images/varaghi/mandala-watermark.png"
           alt=""
           className={styles.mandalaWatermark}

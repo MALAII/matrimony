@@ -173,12 +173,6 @@ export default function HomeLandingDesign({
       <div className={styles.heroWrap}>
         {/* Decorative Background Assets */}
         <img
-          src="/images/varaghi/floral-left.png"
-          alt=""
-          className={styles.floralLeft}
-          aria-hidden="true"
-        />
-        <img
           src="/images/varaghi/mandala-watermark.png"
           alt=""
           className={styles.mandalaWatermark}
