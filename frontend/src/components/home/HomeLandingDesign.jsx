@@ -181,15 +181,15 @@ export default function HomeLandingDesign({
           aria-hidden="true"
         />
         <img
-          src="/images/varaghi/lotus-left.png"
+          src="/images/varaghi/lotus-blooming.png"
           alt=""
-          className={styles.lotusLeft}
+          className={styles.bloomingLotusLeft}
           aria-hidden="true"
         />
         <img
-          src="/images/varaghi/lotus-right.png"
+          src="/images/varaghi/lotus-blooming.png"
           alt=""
-          className={styles.lotusRight}
+          className={styles.bloomingLotusRight}
           aria-hidden="true"
         />
         <img
@@ -253,6 +253,12 @@ export default function HomeLandingDesign({
                 className={styles.archImg}
               />
             </div>
+            <img
+              src="/images/varaghi/lotus-blooming.png"
+              alt=""
+              className={styles.archLotusDeco}
+              aria-hidden="true"
+            />
             <svg className={styles.ring} viewBox="0 0 200 200" aria-hidden="true">
               <defs>
                 <path id="ringPath" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
@@ -525,6 +531,12 @@ export default function HomeLandingDesign({
           </div>
           <div className={styles.ctaPhoto} aria-hidden="true">
             <Image src={heroImage} alt="Auspicious South Indian wedding couple" fill sizes="(max-width: 900px) 100vw, 480px" className={styles.ctaImg} />
+            <img
+              src="/images/varaghi/lotus-blooming.png"
+              alt=""
+              className={styles.ctaLotusDeco}
+              aria-hidden="true"
+            />
           </div>
         </div>
       </section>

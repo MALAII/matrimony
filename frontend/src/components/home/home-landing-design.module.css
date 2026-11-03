@@ -89,13 +89,26 @@
   position: absolute; left: 52%; top: 50%; transform: translate(-50%, -50%);
   width: min(650px, 85vw); height: auto; pointer-events: none; opacity: 0.07; z-index: 0;
 }
-.lotusLeft {
-  position: absolute; left: 16px; bottom: 8px; width: clamp(55px, 6vw, 85px); height: auto;
-  pointer-events: none; opacity: 0.8; z-index: 1;
+.bloomingLotusLeft {
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: clamp(110px, 12vw, 160px);
+  height: auto;
+  pointer-events: none;
+  z-index: 3;
+  filter: drop-shadow(0 -4px 10px rgba(101, 13, 24, 0.2));
 }
-.lotusRight {
-  position: absolute; right: 16px; bottom: 8px; width: clamp(55px, 6vw, 85px); height: auto;
-  pointer-events: none; opacity: 0.8; z-index: 1;
+.bloomingLotusRight {
+  position: absolute;
+  right: 0;
+  bottom: -4px;
+  width: clamp(110px, 12vw, 160px);
+  height: auto;
+  pointer-events: none;
+  z-index: 3;
+  transform: scaleX(-1);
+  filter: drop-shadow(0 -4px 10px rgba(101, 13, 24, 0.2));
 }
 .goldCornerTopRight {
   position: absolute; top: 14px; right: 14px; width: 44px; height: 44px;
@@ -140,6 +153,16 @@
   position: absolute; left: -6%; bottom: 4%; width: 130px; height: 130px; padding: 6px; border-radius: 50%;
   background: var(--maroon); border: 2px solid var(--gold); animation: spin 28s linear infinite;
   box-shadow: 0 10px 24px rgba(101, 13, 24, 0.35);
+}
+.archLotusDeco {
+  position: absolute;
+  right: -14px;
+  bottom: -10px;
+  width: clamp(80px, 9vw, 110px);
+  height: auto;
+  z-index: 4;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 12px rgba(101, 13, 24, 0.35));
 }
 .ring text { font: 700 11px var(--sans); fill: var(--gold); letter-spacing: 0.05em; }
 .ring circle { fill: var(--gold); }
@@ -370,6 +393,16 @@
 .ctaPhoto { position: relative; min-height: 320px; }
 .ctaImg { object-fit: cover; object-position: center 25%; }
 .ctaPhoto::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--maroon) 0%, rgba(101, 13, 24, 0.25) 45%, rgba(101, 13, 24, 0) 100%); }
+.ctaLotusDeco {
+  position: absolute;
+  left: -20px;
+  bottom: 0;
+  width: clamp(90px, 11vw, 130px);
+  height: auto;
+  z-index: 3;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.45));
+}
 
 /* facts ribbon */
 .facts { background: #fff; border-block: 1px solid var(--line); }
