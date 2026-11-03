@@ -75,37 +75,37 @@ const renderBrandedMatrimonyEmail = ({
           
           <!-- Top Utility Banner -->
           <tr>
-            <td style="background-color: #2b1a21; padding: 10px 20px; text-align: center; border-bottom: 1px solid #3d242f;">
-              <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; font-weight: 600; color: #e0bd77; letter-spacing: 1.2px; text-transform: uppercase;">
-                &#128737;&#65039; Contact Privacy &bull; Tamil &middot; Telugu &middot; Kannada &middot; Malayalam
+            <td style="background-color: #2a0810; padding: 10px 20px; text-align: center; border-bottom: 1px solid #45101e;">
+              <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; font-weight: 600; color: #f0c354; letter-spacing: 1.2px; text-transform: uppercase;">
+                ஸ்ரீ வாராஹி திருமண தகவல் மையம் &bull; VARAGHI MATRIMONY
               </span>
             </td>
           </tr>
 
           <!-- Brand Header with Circular Medallion -->
           <tr>
-            <td style="background-color: #2b1a21; padding: 28px 24px 22px 24px; text-align: center;">
+            <td style="background-color: #2a0810; padding: 28px 24px 22px 24px; text-align: center;">
               <!-- Medallion -->
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto;">
                 <tr>
-                  <td align="center" valign="middle" style="width: 50px; height: 50px; background-color: #3f1e29; border: 2px solid #b08d4c; border-radius: 50%; text-align: center; font-size: 20px; line-height: 46px; color: #e0bd77;">
+                  <td align="center" valign="middle" style="width: 50px; height: 50px; background-color: #a81b32; border: 2px solid #f0c354; border-radius: 50%; text-align: center; font-size: 20px; line-height: 46px; color: #fffdf8;">
                     &#10084;
                   </td>
                 </tr>
               </table>
               <!-- Brand Title in Serif -->
               <h1 style="margin: 12px 0 3px 0; font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; font-size: 24px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; line-height: 1.2;">
-                Matrimony Platform
+                Varaghi Matrimony
               </h1>
-              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; color: #b08d4c; font-weight: 700;">
-                South Indian Traditions
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: #f0c354; font-weight: 700;">
+                ஸ்ரீ வாராஹி திருமண தகவல் மையம்
               </div>
             </td>
           </tr>
 
           <!-- Antique Gold Divider Ribbon -->
           <tr>
-            <td style="height: 3px; background-color: #b08d4c; font-size: 0; line-height: 0;">&nbsp;</td>
+            <td style="height: 3px; background-color: #c69214; font-size: 0; line-height: 0;">&nbsp;</td>
           </tr>
 
           <!-- Content Body -->
@@ -136,7 +136,7 @@ const renderBrandedMatrimonyEmail = ({
               ${ctaButton ? `
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 30px auto;">
                 <tr>
-                  <td align="center" style="border-radius: 9999px; background-color: #7d3147; border: 1px solid #b08d4c; box-shadow: 0 4px 14px rgba(125, 49, 71, 0.25);">
+                  <td align="center" style="border-radius: 9999px; background-color: #a81b32; border: 1px solid #f0c354; box-shadow: 0 4px 14px rgba(168, 27, 50, 0.25);">
                     <a href="${ctaButton.url}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 14px 36px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; font-weight: 700; color: #ffffff; text-decoration: none; letter-spacing: 0.4px;">
                       ${escapeHtml(ctaButton.label)} &rarr;
                     </a>
@@ -165,17 +165,17 @@ const renderBrandedMatrimonyEmail = ({
             </td>
           </tr>
 
-          <!-- Deep Royal Plum Footer (matching website footer) -->
+          <!-- Deep Royal Maroon Footer (matching website footer) -->
           <tr>
-            <td style="background-color: #2b1a21; padding: 24px 20px; text-align: center; border-top: 1px solid #3d242f;">
-              <p style="margin: 0 0 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; font-weight: 700; color: #e0bd77; letter-spacing: 1.4px; text-transform: uppercase;">
-                A Dignified Path to Lifelong Alliances
+            <td style="background-color: #2a0810; padding: 24px 20px; text-align: center; border-top: 1px solid #45101e;">
+              <p style="margin: 0 0 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; font-weight: 700; color: #f0c354; letter-spacing: 1.4px; text-transform: uppercase;">
+                மங்கல வாழ்க்கை மலர ஸ்ரீ வாராஹி அம்மன் துணை
               </p>
-              <p style="margin: 0 0 8px 0; font-size: 12px; color: #b8a6af; line-height: 1.5;">
-                Candidate contact details and biodata are safeguarded with administrative verification and strict privacy controls.
+              <p style="margin: 0 0 8px 0; font-size: 12px; color: #d6b8c1; line-height: 1.5;">
+                வரன் விவரங்கள் மற்றும் ஜாதகத் தகவல்கள் பாதுகாப்பாகப் பராமரிக்கப்படுகின்றன.
               </p>
-              <p style="margin: 0; font-size: 11px; color: #87717c; line-height: 1.5;">
-                &copy; ${year} Matrimony Platform &middot; South Indian Matrimonial Traditions &middot; All rights reserved.
+              <p style="margin: 0; font-size: 11px; color: #a17885; line-height: 1.5;">
+                &copy; ${year} Varaghi Matrimony &middot; ஸ்ரீ வாராஹி திருமண தகவல் மையம் &middot; All rights reserved.
               </p>
             </td>
           </tr>
@@ -199,9 +199,9 @@ const getFromAddress = () => {
   }
   const email = process.env.SMTP_FROM || process.env.SMTP_USER;
   if (email) {
-    return `"Matrimony Platform" <${email}>`;
+    return `"Varaghi Matrimony" <${email}>`;
   }
-  return 'no-reply@matrimony.example.com';
+  return 'no-reply@varagimatrimony.com';
 };
 
 /**

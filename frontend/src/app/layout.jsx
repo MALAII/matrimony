@@ -7,9 +7,12 @@ const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfa
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 export const metadata = {
-  title: 'Matrimony Platform | South Indian Matrimonial Traditions & Privacy',
-  description: 'A dignified matrimonial platform honoring South Indian cultural traditions, family values, and candidate contact privacy.',
-  keywords: ['matrimony', 'south indian matrimony', 'tamil matrimony', 'telugu matrimony', 'kannada matrimony', 'malayalam matrimony', 'matchmaking'],
+  title: 'Varaghi Matrimony | ஸ்ரீ வாராஹி திருமண தகவல் மையம்',
+  description: 'Sri Varaghi Matrimony — A dignified matrimonial platform honoring South Indian cultural traditions, family values, and candidate contact privacy.',
+  keywords: ['varaghi matrimony', 'matrimony', 'south indian matrimony', 'tamil matrimony', 'matchmaking'],
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({ children }) {

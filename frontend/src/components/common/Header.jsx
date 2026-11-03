@@ -69,20 +69,22 @@ export const Header = () => {
       <div className="header-topbar">
         <div className="container header-topbar-inner">
           <span>
-            <ShieldCheck size={13} aria-hidden="true" /> Free registration &middot; Contact numbers always private
+            <ShieldCheck size={14} aria-hidden="true" /> ஸ்ரீ வாராஹி திருமண தகவல் மையம் • 100% நம்பகமான வரன்கள் &middot; Contact numbers private
           </span>
-          <span className="header-topbar-langs">Tamil &middot; Telugu &middot; Kannada &middot; Malayalam</span>
+          <span className="header-topbar-langs">சுப முகூர்த்த வரன்கள் &middot; Tamil &middot; Telugu &middot; Kannada</span>
         </div>
       </div>
       <div className="container header-inner">
         {/* Brand Logo & Identity */}
-        <Link href="/" className="brand-logo" onClick={closeMobileMenu}>
-          <span className="brand-emblem" aria-hidden="true">
-            <Heart size={17} fill="currentColor" />
-          </span>
+        <Link href="/" className="brand-logo" onClick={closeMobileMenu} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+          <img
+            src="/logo.png"
+            alt="Varaghi Matrimony"
+            style={{ width: '48px', height: '48px', objectFit: 'contain' }}
+          />
           <div className="brand-text-wrap">
-            <span className="brand-name">Matrimony Platform</span>
-            <span className="brand-tagline">South Indian Traditions</span>
+            <span className="brand-name" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--heading-color)' }}>Varaghi Matrimony</span>
+            <span className="brand-tagline" style={{ fontSize: '0.74rem', color: 'var(--primary)', fontWeight: 600 }}>ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
           </div>
         </Link>
 

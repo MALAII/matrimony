@@ -137,20 +137,19 @@ export default function HomeLandingDesign({
       {/* ------------------------------ HERO ------------------------------ */}
       <section className={styles.hero} aria-labelledby="home-title">
         <div className={styles.heroText}>
-          <span className={styles.kicker}>South Indian matrimony</span>
+          <span className={styles.kicker}>ஸ்ரீ வாராஹி திருமண தகவல் மையம் • SRI VARAGHI MATRIMONY</span>
           <h1 id="home-title">
-            A quieter way to find <em>forever.</em>
+            சுப முகூர்த்த வரன்கள். <em>மங்கல வாழ்க்கை மலர.</em>
           </h1>
           <p>
-            Detailed biodata, family-first search and contact numbers that stay private
-            until you choose to unlock them.
+            அனைத்து சமூகத்தினருக்கும் நம்பிக்கையான வரன் தேடல் தளம். பாரம்பரிய வரன் ஜாதகம், முழு பயோடேட்டா மற்றும் 100% பாதுகாப்பான தொடர்பு எண்கள்.
           </p>
           <div className={styles.actions}>
             <Link href="/register" className={styles.btnPrimary}>
-              Create free profile <ArrowRight size={17} aria-hidden="true" />
+              இலவச வரன் பதிவு (Register Free) <ArrowRight size={17} aria-hidden="true" />
             </Link>
             <Link href="/members" className={styles.btnLink}>
-              Browse members
+              வரன்கள் பார்க்க (Browse Profiles)
             </Link>
           </div>
           <div className={styles.served}>
@@ -179,7 +178,7 @@ export default function HomeLandingDesign({
               <path id="ringPath" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
             </defs>
             <text>
-              <textPath href="#ringPath" textLength="480" lengthAdjust="spacing">TRADITION • TRUST • PRIVACY • TRADITION • TRUST • PRIVACY •</textPath>
+              <textPath href="#ringPath" textLength="480" lengthAdjust="spacing">SRI VARAGHI MATRIMONY • TRUST • TRADITION • PRIVACY •</textPath>
             </text>
             <circle cx="100" cy="100" r="4" />
           </svg>

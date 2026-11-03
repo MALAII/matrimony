@@ -112,50 +112,49 @@ const embedSvgChart = (doc, svgString, x, y, width, height, fallbackTitle = 'ர
  * @returns {Promise<Buffer>} Resolves to the PDF Buffer
  */
 /**
- * Draws the official Sri Varahi Matrimony Logo / Crest
- * If an image file (varahi_logo.png or logo.png) exists in backend/assets, it embeds the custom image.
- * Otherwise, it renders an authentic gold temple medallion vector crest.
+ * Draws the official Sri Varaghi Matrimony Logo
+ * Embeds the client's official Sri Varaghi Amman logo image from backend/assets/logo.png
  */
-const drawVarahiLogo = (doc, x, y, size = 36) => {
+const drawVarahiLogo = (doc, x, y, size = 42) => {
   const customLogoPaths = [
-    path.join(__dirname, '..', 'assets', 'varahi_logo.png'),
-    path.join(__dirname, '..', 'assets', 'varahi_logo.jpg'),
     path.join(__dirname, '..', 'assets', 'logo.png'),
+    path.join(__dirname, '..', 'assets', 'varahi_logo.png'),
     path.join(__dirname, '..', 'assets', 'logo.jpg'),
+    path.join(__dirname, '..', 'assets', 'varahi_logo.jpg'),
   ];
   const foundFile = customLogoPaths.find((p) => fs.existsSync(p));
 
   if (foundFile) {
     try {
-      doc.image(foundFile, x, y, { width: size, height: size });
+      const radius = size / 2;
+      const cx = x + radius;
+      const cy = y + radius;
+      doc.save();
+      // Pristine white circular medallion base with golden rim
+      doc.circle(cx, cy, radius + 2).fillAndStroke('#FFFFFF', '#D1A85A');
+      doc.image(foundFile, x, y, { fit: [size, size], align: 'center', valign: 'center' });
+      doc.restore();
       return;
     } catch (_) {
       // Fallback to vector below
     }
   }
 
-  // Authentic Vector Gold Medallion Crest for Sri Varahi Matrimony
+  // Fallback Vector Gold Medallion Crest for Sri Varaghi Matrimony
   const radius = size / 2;
   const cx = x + radius;
   const cy = y + radius;
 
   doc.save();
-  // Outer gold rim
   doc.circle(cx, cy, radius).fillAndStroke('#B08D4C', '#E0BD77');
-  // Inner ring
   doc.circle(cx, cy, radius - 2).strokeColor('#FFFFFF').lineWidth(0.8).stroke();
   doc.circle(cx, cy, radius - 4).strokeColor('#E0BD77').lineWidth(0.5).stroke();
-  // Center deep wine base
   doc.circle(cx, cy, radius - 5).fill('#7A1E3A');
 
-  // Temple Diya / Kalasam Flame Symbol
   doc.save();
   doc.translate(cx, cy);
-  // Kalasam pot
   doc.polygon([-6, 5], [6, 5], [4, 1], [-4, 1]).fill('#E0BD77');
-  // Kalasam base
   doc.rect(-5, 5, 10, 2).fill('#B08D4C');
-  // Sacred Diya flame
   doc.path('M 0 -8 C 3 -4, 4 -1, 0 1 C -4 -1, -3 -4, 0 -8 Z').fill('#FFF2D4');
   doc.restore();
 
@@ -163,11 +162,36 @@ const drawVarahiLogo = (doc, x, y, size = 36) => {
 };
 
 /**
- * Draws an elegant, clearly visible Varahi Matrimonial Crest Watermark centered on the page
+ * Draws an elegant Varaghi Matrimonial Watermark centered on the page
+ * Uses the official Sri Varaghi Amman logo image at subtle opacity
  */
 const drawVarahiWatermark = (doc, cx, cy, radius = 135, fonts = { available: false }) => {
+  const customLogoPaths = [
+    path.join(__dirname, '..', 'assets', 'logo.png'),
+    path.join(__dirname, '..', 'assets', 'varahi_logo.png'),
+    path.join(__dirname, '..', 'assets', 'logo.jpg'),
+  ];
+  const foundFile = customLogoPaths.find((p) => fs.existsSync(p));
+
+  if (foundFile) {
+    try {
+      doc.save();
+      doc.opacity(0.13); // Ideal opacity for watermark under charts
+      const wmSize = 220;
+      doc.image(foundFile, cx - wmSize / 2, cy - wmSize / 2, {
+        fit: [wmSize, wmSize],
+        align: 'center',
+        valign: 'center',
+      });
+      doc.restore();
+      return;
+    } catch (_) {
+      // Fallback to vector watermark below
+    }
+  }
+
   doc.save();
-  doc.opacity(0.14); // Clearly visible yet delicate watermark behind charts and text
+  doc.opacity(0.14);
 
   // Concentric double decorative rings
   doc.circle(cx, cy, radius).lineWidth(3.5).strokeColor('#B08D4C').stroke();
@@ -184,27 +208,22 @@ const drawVarahiWatermark = (doc, cx, cy, radius = 135, fonts = { available: fal
     doc.moveTo(x1, y1).lineTo(x2, y2).lineWidth(1.2).strokeColor('#B08D4C').stroke();
   }
 
-  // Inner medallion ring
   doc.circle(cx, cy, 75).lineWidth(2).strokeColor('#7A1E3A').stroke();
   doc.circle(cx, cy, 70).lineWidth(1).strokeColor('#B08D4C').stroke();
 
-  // Traditional Sacred Temple Kalasam & Diya
   doc.save();
   doc.translate(cx, cy - 14);
-  // Kalasam pot body
   doc.polygon([-22, 22], [22, 22], [15, 4], [-15, 4]).fill('#B08D4C');
   doc.rect(-18, 22, 36, 6).fill('#7A1E3A');
-  // Sacred Diya coconut & flame
   doc.circle(0, 0, 14).fill('#B08D4C');
   doc.path('M 0 -30 C 14 -16, 14 -4, 0 4 C -14 -4, -14 -16, 0 -30 Z').fill('#7A1E3A');
   doc.restore();
 
-  // Watermark Brand Typography
   const waterFont = fonts.available ? 'Tamil-Bold' : 'Helvetica-Bold';
   doc.fillColor('#7A1E3A')
     .font(waterFont)
     .fontSize(14)
-    .text('SRI VARAHI MATRIMONY', cx - 130, cy + 28, { width: 260, align: 'center', characterSpacing: 1.5 });
+    .text('SRI VARAGHI MATRIMONY', cx - 130, cy + 28, { width: 260, align: 'center', characterSpacing: 1.5 });
 
   doc.font(waterFont)
     .fontSize(11)
@@ -249,7 +268,7 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
 
       const candidateName = (profile.personName || profile.candidateName || 'Candidate').trim();
       const profileId = String(profile._id);
-      const displayProfileId = `VRH-${profileId.slice(-6).toUpperCase()}`;
+      const displayProfileId = `VRG-${profileId.slice(-6).toUpperCase()}`;
 
       const rawGender = profile.gender || profile.personalDetails?.gender || 'Not Specified';
       const gender = rawGender.toLowerCase() === 'male'
@@ -346,24 +365,23 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
         // Line 1: Main Tamil Brand
         doc.fillColor('#FFFFFF')
           .font(boldFont)
-          .fontSize(13)
-          .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', textX, curY + 8, {
+          .fontSize(13.5)
+          .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', textX, curY + 9, {
             width: textW,
             align: 'left',
             lineBreak: false,
           });
 
         // Line 2: English Brand & Dossier Subtitle
-        doc.fillColor('#E5D3B3')
+        doc.fillColor('#F5D77F')
           .font(boldFont)
-          .fontSize(9)
-          .text('SRI VARAHI MATRIMONY  •  ', textX, curY + 26, {
+          .fontSize(8.8)
+          .text('VARAGHI MATRIMONY', textX, curY + 28, {
             continued: true,
-            characterSpacing: 0.8,
+            characterSpacing: 0.6,
           })
-          .font(regFont)
           .fillColor('#FFFFFF')
-          .text('வரன் ஜாதகக் குறிப்பு அறிக்கை (ASTROLOGICAL DOSSIER)', {
+          .text('  •  வரன் ஜாதகக் குறிப்பு அறிக்கை (ASTROLOGICAL DOSSIER)', {
             characterSpacing: 0.2,
           });
 
@@ -383,7 +401,7 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
         // Line 1: Main Tamil Brand
         doc.fillColor('#7A1E3A')
           .font(boldFont)
-          .fontSize(13)
+          .fontSize(13.5)
           .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', textX, curY + 8, {
             width: textW,
             align: 'left',
@@ -391,16 +409,15 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
           });
 
         // Line 2: English Brand & Dossier Subtitle
-        doc.fillColor('#A78345')
+        doc.fillColor('#9D6C10')
           .font(boldFont)
-          .fontSize(9)
-          .text('SRI VARAHI MATRIMONY  •  ', textX, curY + 26, {
+          .fontSize(8.8)
+          .text('VARAGHI MATRIMONY', textX, curY + 27, {
             continued: true,
-            characterSpacing: 0.8,
+            characterSpacing: 0.6,
           })
-          .font(regFont)
           .fillColor('#5C1D2E')
-          .text('வரன் ஜாதகக் குறிப்பு (OFFICIAL ASTROLOGICAL DOSSIER)', {
+          .text('  •  வரன் ஜாதகக் குறிப்பு (OFFICIAL ASTROLOGICAL DOSSIER)', {
             characterSpacing: 0.2,
           });
 

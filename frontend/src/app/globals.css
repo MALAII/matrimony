@@ -10,45 +10,45 @@
    - Option C: Swap the active variables below
    ========================================================================== */
 
-/* --- ACTIVE THEME: Editorial Warm Ivory, Ceremonial Rose & Antique Gold --- */
+/* --- ACTIVE THEME: Sri Varaghi Matrimony — Sacred Temple Crimson, Prabhavali Gold & Silk Ivory --- */
 :root {
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-serif: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", Cambria, serif;
 
-  /* Ceremonial Rose, Plum & Warm Ivory Palette (matches homepage) */
-  --primary: #7d3147;          /* Ceremonial Rose Deep for main actions */
-  --primary-hover: #692640;    /* Deeper Rose / Active Hover */
-  --primary-light: #f8e7ec;    /* Soft Blush / Tinted backgrounds */
-  --primary-subtle: #b85c78;   /* Muted Rose */
-  --primary-dark: #3a252c;     /* Deep Plum for gradients */
-  --primary-shadow: rgba(125, 49, 71, 0.28);
+  /* Official Sri Varaghi Matrimony Palette (derived from the sacred logo) */
+  --primary: #a81b32;          /* Sacred Temple Crimson / Kumkum Red for primary CTAs */
+  --primary-hover: #881328;    /* Deep Auspicious Crimson / Active Hover */
+  --primary-light: #fdf2f4;    /* Delicate Kumkum Blush / Tinted card backgrounds */
+  --primary-subtle: #c43850;   /* Muted Temple Rose */
+  --primary-dark: #2a0810;     /* Deep Royal Maroon for gradients & header topbars */
+  --primary-shadow: rgba(168, 27, 50, 0.28);
 
-  --accent: #b08d4c;           /* Warm Antique Gold */
-  --accent-hover: #98783d;     /* Deep Antique Gold */
-  --accent-light: #fef7ee;     /* Warm Gold highlight tint */
-  --accent-border: #e0bd77;    /* Bright Gold border */
+  --accent: #c69214;           /* Sacred Prabhavali Temple Gold */
+  --accent-hover: #a3750d;     /* Deep Antique Temple Gold */
+  --accent-light: #fef9ee;     /* Warm Gold highlight tint */
+  --accent-border: #f0c354;    /* Brilliant Gold border */
 
-  --bg-primary: #fffaf5;       /* Warm Ivory Canvas */
-  --bg-surface: #ffffff;       /* Clean White surface */
-  --bg-surface-warm: #f8ede3;  /* Warm Ivory Secondary Surface */
-  --bg-section-alt: #f8ede3;   /* Alternating section tone */
+  --bg-primary: #fffdf8;       /* Silk Ivory / Wedding Mandapam Canvas */
+  --bg-surface: #ffffff;       /* Crisp White surface */
+  --bg-surface-warm: #faf3e8;  /* Auspicious Sandalwood/Cream Secondary Surface */
+  --bg-section-alt: #f7eee0;   /* Alternating section tone */
 
-  --heading-color: #2b1a21;    /* Deep Plum (headings) */
-  --text-main: #3f2b32;        /* Plum Ink body text */
-  --text-muted: #75606a;       /* Soft Muted Plum for descriptions */
-  --text-light: #94808a;       /* Light Plum for metadata & labels */
+  --heading-color: #2a0810;    /* Deep Royal Maroon (Headings) */
+  --text-main: #33151c;        /* Rich Maroon-Charcoal body text */
+  --text-muted: #705259;       /* Soft Muted Maroon for descriptions */
+  --text-light: #8e7379;       /* Light Muted for metadata & labels */
 
-  --border-color: #eadbd0;     /* Delicate warm hairline border */
-  --border-gold: #e0bd77;      /* Bright Antique Gold accent border */
+  --border-color: #ede2d3;     /* Warm Sandalwood hairline border */
+  --border-gold: #f0c354;      /* Temple Gold accent border */
 
-  --footer-bg-start: #2b1a21;  /* Deep Plum footer gradient start */
-  --footer-bg-mid: #1f1217;    /* Deep Plum footer gradient mid */
-  --footer-bg-end: #170c10;    /* Deep Plum footer gradient end */
+  --footer-bg-start: #2a0810;  /* Deep Royal Maroon footer gradient start */
+  --footer-bg-mid: #1e050b;    /* Rich Maroon footer gradient mid */
+  --footer-bg-end: #140307;    /* Deepest Maroon footer gradient end */
   --footer-text-muted: #d9c5cc;
-  --footer-card-bg: linear-gradient(150deg, rgba(184, 92, 120, 0.45) 0%, rgba(58, 37, 44, 0.8) 100%);
+  --footer-card-bg: linear-gradient(150deg, rgba(168, 27, 50, 0.45) 0%, rgba(42, 8, 16, 0.85) 100%);
 
-  --section-dark-start: #2b1a21;
-  --section-dark-end: #1f1217;
+  --section-dark-start: #2a0810;
+  --section-dark-end: #1a0409;
 
   --success: #15803d;
   --danger: #b91c1c;
@@ -58,9 +58,9 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  --shadow-sm: 0 1px 3px 0 rgba(43, 26, 33, 0.05);
-  --shadow-md: 0 4px 14px -2px rgba(43, 26, 33, 0.08), 0 2px 4px -2px rgba(43, 26, 33, 0.04);
-  --shadow-lg: 0 16px 36px -6px rgba(43, 26, 33, 0.12), 0 4px 10px -4px rgba(43, 26, 33, 0.06);
+  --shadow-sm: 0 1px 3px 0 rgba(42, 8, 16, 0.05);
+  --shadow-md: 0 4px 14px -2px rgba(42, 8, 16, 0.08), 0 2px 4px -2px rgba(42, 8, 16, 0.04);
+  --shadow-lg: 0 16px 36px -6px rgba(42, 8, 16, 0.12), 0 4px 10px -4px rgba(42, 8, 16, 0.06);
 }
 
 /* ==========================================================================
@@ -3028,15 +3028,15 @@ a {
    PROFESSIONAL NAVBAR (overrides earlier header styles)
    ========================================================================== */
 .header {
-  background-color: rgba(255, 255, 255, 0.92);
-  border-bottom: 1px solid #eadbd0;
-  box-shadow: 0 8px 24px -18px rgba(43, 26, 33, 0.35);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid #ede2d3;
+  box-shadow: 0 8px 24px -18px rgba(42, 8, 16, 0.35);
 }
 .header::before { display: none; }
 
 .header-topbar {
-  background: #2b1a21;
-  color: rgba(255, 255, 255, 0.78);
+  background: #2a0810;
+  color: rgba(255, 255, 255, 0.85);
   font-size: 0.76rem;
   letter-spacing: 0.02em;
 }
@@ -3048,42 +3048,42 @@ a {
   min-height: 34px;
 }
 .header-topbar-inner > span { display: inline-flex; align-items: center; gap: 0.45rem; }
-.header-topbar svg { color: #e0bd77; }
-.header-topbar-langs { font-family: Georgia, serif; font-style: italic; color: #e0bd77; letter-spacing: 0.04em; }
+.header-topbar svg { color: #f0c354; }
+.header-topbar-langs { font-family: var(--font-serif); font-style: italic; color: #f0c354; letter-spacing: 0.04em; }
 
-.header-inner { height: 76px; }
+.header-inner { height: 78px; }
 
 .brand-emblem {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: linear-gradient(145deg, #3a252c, #1f1217);
-  color: #e0bd77;
+  background: linear-gradient(145deg, #a81b32, #2a0810);
+  color: #f0c354;
   border: 0;
-  box-shadow: 0 0 0 2px #e0bd77, 0 0 0 4px #fff, 0 6px 14px -4px rgba(43, 26, 33, 0.5);
+  box-shadow: 0 0 0 2px #f0c354, 0 0 0 4px #fff, 0 6px 14px -4px rgba(42, 8, 16, 0.5);
 }
-.brand-logo:hover .brand-emblem { transform: scale(1.06); box-shadow: 0 0 0 2px #e0bd77, 0 0 0 4px #fff, 0 8px 18px -4px rgba(43, 26, 33, 0.55); }
-.brand-name { color: #2b1a21; font-size: 1.22rem; letter-spacing: -0.01em; }
-.brand-tagline { color: #b08d4c; letter-spacing: 0.2em; font-size: 0.6rem; }
+.brand-logo:hover .brand-emblem { transform: scale(1.06); box-shadow: 0 0 0 2px #f0c354, 0 0 0 4px #fff, 0 8px 18px -4px rgba(42, 8, 16, 0.55); }
+.brand-name { color: #2a0810; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; }
+.brand-tagline { color: #a81b32; letter-spacing: 0.08em; font-size: 0.68rem; font-weight: 600; }
 
 .nav-group { gap: 0.15rem; }
-.nav-link { font-size: 0.9rem; font-weight: 500; color: #4a3640; letter-spacing: 0.005em; padding: 0.5rem 0.8rem; border-radius: 8px; transition: color 0.18s ease, background 0.18s ease; }
-.nav-link:hover { color: #7d3147; background: #fbf1ea; }
-.nav-link::after { bottom: 2px; width: 16px; height: 2px; background: #b85c78; box-shadow: none; }
-.nav-link-active { color: #7d3147 !important; font-weight: 600; }
+.nav-link { font-size: 0.9rem; font-weight: 500; color: #4a2830; letter-spacing: 0.005em; padding: 0.5rem 0.8rem; border-radius: 8px; transition: color 0.18s ease, background 0.18s ease; }
+.nav-link:hover { color: #a81b32; background: #fdf2f4; }
+.nav-link::after { bottom: 2px; width: 16px; height: 2px; background: #a81b32; box-shadow: none; }
+.nav-link-active { color: #a81b32 !important; font-weight: 600; }
 .nav-link-active::after { width: 16px; }
 
-.nav-auth-actions { margin-left: 0.9rem; padding-left: 1.1rem; border-left: 1px solid #eadbd0; gap: 0.5rem; }
-.nav-link-secondary { border: 0; background: transparent; box-shadow: none; backdrop-filter: none; color: #3a252c !important; font-weight: 600; padding: 0.5rem 0.9rem; border-radius: 8px; }
-.nav-link-secondary:hover { background: #fbf1ea; box-shadow: none; transform: none; color: #7d3147 !important; }
-.nav-link-btn { background: #7d3147; border: 0; border-radius: 10px; font-weight: 600; font-size: 0.9rem; padding: 0.62rem 1.25rem; box-shadow: 0 8px 18px -8px rgba(125, 49, 71, 0.8); }
-.nav-link-btn:hover { background: #692640; box-shadow: 0 12px 22px -8px rgba(125, 49, 71, 0.9); transform: translateY(-1px); }
+.nav-auth-actions { margin-left: 0.9rem; padding-left: 1.1rem; border-left: 1px solid #ede2d3; gap: 0.5rem; }
+.nav-link-secondary { border: 0; background: transparent; box-shadow: none; backdrop-filter: none; color: #2a0810 !important; font-weight: 600; padding: 0.5rem 0.9rem; border-radius: 8px; }
+.nav-link-secondary:hover { background: #fdf2f4; box-shadow: none; transform: none; color: #a81b32 !important; }
+.nav-link-btn { background: #a81b32; border: 0; border-radius: 10px; font-weight: 600; font-size: 0.9rem; padding: 0.62rem 1.25rem; box-shadow: 0 8px 18px -8px rgba(168, 27, 50, 0.8); }
+.nav-link-btn:hover { background: #881328; box-shadow: 0 12px 22px -8px rgba(168, 27, 50, 0.9); transform: translateY(-1px); }
 
-.header-mobile-toggle { border-radius: 10px; border-color: #eadbd0; background: #fff; color: #7d3147; }
+.header-mobile-toggle { border-radius: 10px; border-color: #ede2d3; background: #fff; color: #a81b32; }
 
 @media (max-width: 1024px) {
   .header-topbar .header-topbar-langs { display: none; }
-  .nav-group { top: 76px; background: #fff; border-bottom: 1px solid #eadbd0; border-radius: 0 0 16px 16px; }
+  .nav-group { top: 78px; background: #fff; border-bottom: 1px solid #ede2d3; border-radius: 0 0 16px 16px; }
   .nav-auth-actions { border-left: 0; padding-left: 0; }
   .nav-link-btn { justify-content: center; }
   .nav-link { border-radius: 10px; }
@@ -3097,30 +3097,30 @@ a {
 /* ==========================================================================
    FOOTER
    ========================================================================== */
-.site-footer { background: #1f1217; color: rgba(255, 255, 255, 0.72); font-size: 0.93rem; border-top: 3px solid #b08d4c; }
+.site-footer { background: #1a0409; color: rgba(255, 255, 255, 0.75); font-size: 0.93rem; border-top: 3px solid #c69214; }
 .site-footer .container { max-width: 1240px; }
 .site-footer-main { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: clamp(2rem, 4vw, 4rem); padding-top: 4rem; padding-bottom: 3rem; }
 .site-footer-brand { display: inline-flex; align-items: center; gap: 0.75rem; text-decoration: none; }
 .site-footer-brand .brand-name { color: #fff; }
 .site-footer-about { margin-top: 1.2rem; max-width: 26rem; line-height: 1.75; }
 .site-footer-langs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.4rem; }
-.site-footer-langs span { padding: 0.3rem 0.85rem; border-radius: 999px; font-size: 0.78rem; color: #e0bd77; border: 1px solid rgba(224, 189, 119, 0.35); }
+.site-footer-langs span { padding: 0.3rem 0.85rem; border-radius: 999px; font-size: 0.78rem; color: #f0c354; border: 1px solid rgba(240, 195, 84, 0.35); }
 .site-footer h3 { margin: 0 0 1.2rem; font-family: var(--font-sans); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #fff; }
 .site-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
-.site-footer-links a { color: rgba(255, 255, 255, 0.72); text-decoration: none; transition: color 0.2s ease, padding-left 0.2s ease; }
-.site-footer-links a:hover { color: #e0bd77; padding-left: 4px; }
-.site-footer-links a:focus-visible, .site-footer-cta a:focus-visible { outline: 2px solid #e0bd77; outline-offset: 3px; border-radius: 4px; }
+.site-footer-links a { color: rgba(255, 255, 255, 0.75); text-decoration: none; transition: color 0.2s ease, padding-left 0.2s ease; }
+.site-footer-links a:hover { color: #f0c354; padding-left: 4px; }
+.site-footer-links a:focus-visible, .site-footer-cta a:focus-visible { outline: 2px solid #f0c354; outline-offset: 3px; border-radius: 4px; }
 .site-footer-cta p { line-height: 1.7; margin: 0 0 1.2rem; }
-.site-footer-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.4rem; border-radius: 999px; font-weight: 600; font-size: 0.9rem; text-decoration: none; color: #1f1217; background: #e0bd77; transition: transform 0.25s ease, box-shadow 0.25s ease; }
-.site-footer-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -10px rgba(224, 189, 119, 0.7); }
-.site-footer-signin { display: inline-block; margin-top: 1rem; color: rgba(255, 255, 255, 0.8); font-size: 0.88rem; text-decoration: underline; text-underline-offset: 3px; }
-.site-footer-signin:hover { color: #e0bd77; }
+.site-footer-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.4rem; border-radius: 999px; font-weight: 600; font-size: 0.9rem; text-decoration: none; color: #1a0409; background: #f0c354; transition: transform 0.25s ease, box-shadow 0.25s ease; }
+.site-footer-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -10px rgba(240, 195, 84, 0.7); background: #f5cd69; }
+.site-footer-signin { display: inline-block; margin-top: 1rem; color: rgba(255, 255, 255, 0.85); font-size: 0.88rem; text-decoration: underline; text-underline-offset: 3px; }
+.site-footer-signin:hover { color: #f0c354; }
 .site-footer-bottom { border-top: 1px solid rgba(255, 255, 255, 0.1); }
-.site-footer-bottom .container { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-top: 1.3rem; padding-bottom: 1.3rem; font-size: 0.82rem; color: rgba(255, 255, 255, 0.55); }
-.site-footer-bottom strong { color: rgba(255, 255, 255, 0.85); font-weight: 600; }
+.site-footer-bottom .container { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-top: 1.3rem; padding-bottom: 1.3rem; font-size: 0.82rem; color: rgba(255, 255, 255, 0.6); }
+.site-footer-bottom strong { color: rgba(255, 255, 255, 0.9); font-weight: 600; }
 .site-footer-bottom span:last-child { display: inline-flex; align-items: center; gap: 0.4rem; }
-.site-footer-brand .brand-emblem { box-shadow: 0 0 0 2px #e0bd77, 0 0 0 4px #1f1217; }
-.site-footer-bottom svg { color: #e0bd77; }
+.site-footer-brand .brand-emblem { box-shadow: 0 0 0 2px #f0c354, 0 0 0 4px #1a0409; }
+.site-footer-bottom svg { color: #f0c354; }
 
 @media (max-width: 960px) {
   .site-footer-main { grid-template-columns: 1fr 1fr; }

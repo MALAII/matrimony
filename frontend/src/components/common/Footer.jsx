@@ -27,24 +27,28 @@ export const Footer = () => {
     <footer className="site-footer" aria-labelledby="footer-brand">
       <div className="container site-footer-main">
         <div>
-          <Link href="/" className="brand-logo site-footer-brand">
-            <span className="brand-emblem" aria-hidden="true">
-              <Heart size={17} fill="currentColor" />
-            </span>
+          <Link href="/" className="brand-logo site-footer-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+            <img
+              src="/logo.png"
+              alt="Varaghi Matrimony"
+              style={{ width: '44px', height: '44px', objectFit: 'contain' }}
+            />
             <span className="brand-text-wrap">
-              <span id="footer-brand" className="brand-name">Matrimony Platform</span>
-              <span className="brand-tagline">South Indian Traditions</span>
+              <span id="footer-brand" className="brand-name" style={{ fontSize: '1.25rem', fontWeight: 800 }}>Varaghi Matrimony</span>
+              <span className="brand-tagline" style={{ color: '#f0c354', fontSize: '0.74rem' }}>ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
             </span>
           </Link>
           <p className="site-footer-about">
-            A matrimonial platform for South Indian families, with detailed biodata, family-first
-            search and contact numbers that stay private until unlocked.
+            தென்னிந்திய குடும்பங்களின் நம்பிக்கையான திருமண தகவல் மையம். வரன் ஜாதகம், முழு பயோடேட்டா மற்றும் பாதுகாப்பான வரன் தேடல் தளம்.
+          </p>
+          <p style={{ marginTop: '0.65rem', fontSize: '0.85rem', color: '#f0c354', fontStyle: 'italic', fontFamily: 'var(--font-serif)' }}>
+            &ldquo;மங்கல வாழ்க்கை மலர ஸ்ரீ வாராஹி அம்மன் அருள் துணை நிற்கட்டும்&rdquo;
           </p>
           <div className="site-footer-langs" aria-label="Languages served">
-            <span>Tamil</span>
-            <span>Telugu</span>
-            <span>Kannada</span>
-            <span>Malayalam</span>
+            <span>தமிழ்</span>
+            <span>English</span>
+            <span>தெலுங்கு</span>
+            <span>கன்னடம்</span>
           </div>
         </div>
 
@@ -79,8 +83,8 @@ export const Footer = () => {
 
       <div className="site-footer-bottom">
         <div className="container">
-          <span>&copy; {currentYear} <strong>Matrimony Platform</strong>. All rights reserved.</span>
-          <span><Lock size={13} aria-hidden="true" /> Candidate contact numbers are never shown publicly</span>
+          <span>&copy; {currentYear} <strong>Varaghi Matrimony</strong> (ஸ்ரீ வாராஹி திருமண தகவல் மையம்). All rights reserved.</span>
+          <span><Lock size={13} aria-hidden="true" /> வரன் தொலைபேசி எண்கள் எப்போதும் ரகசியமாக வைக்கப்படும்</span>
         </div>
       </div>
     </footer>
