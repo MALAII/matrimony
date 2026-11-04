@@ -805,21 +805,9 @@ export default function MemberDirectoryPage() {
 
           {/* ------------------------------ Results Section ------------------------------ */}
           <section className={styles.results} aria-live="polite">
-            <form className={styles.searchBar} onSubmit={handleApplyFilters} role="search">
-              <Search size={18} aria-hidden="true" />
-              <input
-                type="text"
-                placeholder="Search candidate name, city, caste, or profession..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                maxLength={100}
-                aria-label="Search profiles"
-              />
-              <button type="submit" disabled={loading}>Search</button>
-            </form>
-
-            {/* Top Quick Filters & Filter Trigger */}
-            <div className={styles.topFilterBar}>
+            {/* Unified Compact Search & Filter Control Bar */}
+            <div className={styles.unifiedControlBar}>
+              {/* Left: Quick Gender Tabs */}
               <div className={styles.quickGenderGroup} role="radiogroup" aria-label="Looking For">
                 <button
                   type="button"
@@ -847,11 +835,34 @@ export default function MemberDirectoryPage() {
                 </button>
               </div>
 
-              <button type="button" className={styles.filterTriggerBtn} onClick={() => setDrawerOpen(true)}>
-                <SlidersHorizontal size={15} aria-hidden="true" />
-                <span>All Filters (வடிகட்டிகள்)</span>
-                {activeFilterCount > 0 && <span className={styles.filterBadge}>{activeFilterCount}</span>}
-              </button>
+              {/* Right: Shortened Search Bar & Filter Drawer Trigger Aside Each Other */}
+              <div className={styles.searchAndFilterAside}>
+                <form className={styles.searchBarShort} onSubmit={handleApplyFilters} role="search">
+                  <Search size={15} aria-hidden="true" className={styles.searchIcon} />
+                  <input
+                    type="text"
+                    placeholder="Search name, city, caste, job..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    maxLength={100}
+                    aria-label="Search profiles"
+                  />
+                  <button type="submit" disabled={loading} className={styles.searchSubmitBtn}>
+                    Search
+                  </button>
+                </form>
+
+                <button
+                  type="button"
+                  className={styles.filterTriggerBtn}
+                  onClick={() => setDrawerOpen(true)}
+                  aria-label="Open filter drawer"
+                >
+                  <SlidersHorizontal size={15} aria-hidden="true" />
+                  <span>All Filters (வடிகட்டிகள்)</span>
+                  {activeFilterCount > 0 && <span className={styles.filterBadge}>{activeFilterCount}</span>}
+                </button>
+              </div>
             </div>
 
             <div className={styles.toolbar}>
