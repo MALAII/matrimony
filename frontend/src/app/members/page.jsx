@@ -7,32 +7,43 @@ import {
   AlertCircle,
   ArrowRight,
   BadgeCheck,
+  Bookmark,
   Briefcase,
+  Calendar,
   Camera,
   Check,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Coins,
+  Compass,
   Copy,
   CreditCard,
   Eye,
+  FileText,
   GraduationCap,
+  Handshake,
   Heart,
   Hourglass,
   KeyRound,
+  Landmark,
   Languages,
+  Layers,
   Lock,
   MapPin,
+  Moon,
   Phone,
+  PhoneCall,
   RotateCcw,
   Ruler,
   Search,
+  ShieldCheck,
   SlidersHorizontal,
   Sparkles,
+  Star,
   Users,
   X,
-  Compass,
-  Star,
-  CheckCircle2,
+  ZoomIn,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { getMemberDirectoryApi, unlockMemberContactApi } from '@/lib/api';
@@ -131,6 +142,42 @@ function pageWindow(current, total) {
   return out;
 }
 
+function formatHeightDisplay(heightVal) {
+  if (!heightVal) return '–';
+  const num = Number(heightVal);
+  if (isNaN(num) || num <= 0) return String(heightVal);
+  const totalInches = num / 2.54;
+  const feet = Math.floor(totalInches / 12);
+  const inches = Math.round(totalInches % 12);
+  return `${feet} ft ${inches} in (${num} cm)`;
+}
+
+function IdCopyButton({ value }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* clipboard unavailable */
+    }
+  };
+  return (
+    <button
+      type="button"
+      className={styles.copyIdBtn}
+      onClick={copy}
+      aria-label={`Copy profile ID ${value}`}
+      title="Copy Profile ID"
+    >
+      {copied ? <Check size={14} color="#15803d" /> : <Copy size={14} />}
+    </button>
+  );
+}
+
 function CopyButton({ value }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
@@ -149,34 +196,29 @@ function CopyButton({ value }) {
   );
 }
 
-function Fact({ Icon, children }) {
-  if (!children) return null;
-  return (
-    <li>
-      <Icon size={14} aria-hidden="true" />
-      <span>{children}</span>
-    </li>
-  );
-}
-
 function SkeletonCard() {
   return (
-    <div className={`${styles.matchCard} ${styles.skeleton}`} aria-hidden="true">
-      <div className={styles.skPhotoCol} />
-      <div className={styles.skBioCol}>
-        <div className={styles.skLine} style={{ width: '40%', height: '22px' }} />
-        <div className={styles.skLine} style={{ width: '60%', height: '16px' }} />
-        <div className={styles.skGrid}>
-          <div className={styles.skLine} style={{ width: '90%', height: '14px' }} />
-          <div className={styles.skLine} style={{ width: '85%', height: '14px' }} />
-          <div className={styles.skLine} style={{ width: '90%', height: '14px' }} />
-          <div className={styles.skLine} style={{ width: '80%', height: '14px' }} />
+    <div className={styles.matchCardWrapper}>
+      <div className={`${styles.matchCard} ${styles.skeleton}`} aria-hidden="true">
+        <div className={styles.skPhotoCol} />
+        <div className={styles.skBioCol}>
+          <div className={styles.skLine} style={{ width: '40%', height: '26px' }} />
+          <div className={styles.skLine} style={{ width: '100px', height: '8px' }} />
+          <div className={styles.skGrid}>
+            <div className={styles.skLine} style={{ width: '90%', height: '18px' }} />
+            <div className={styles.skLine} style={{ width: '85%', height: '18px' }} />
+            <div className={styles.skLine} style={{ width: '90%', height: '18px' }} />
+            <div className={styles.skLine} style={{ width: '80%', height: '18px' }} />
+            <div className={styles.skLine} style={{ width: '90%', height: '18px' }} />
+            <div className={styles.skLine} style={{ width: '85%', height: '18px' }} />
+          </div>
+          <div className={styles.skLine} style={{ width: '100%', height: '40px', borderRadius: '10px' }} />
         </div>
-        <div className={styles.skLine} style={{ width: '100%', height: '36px', borderRadius: '8px' }} />
-      </div>
-      <div className={styles.skActionCol}>
-        <div className={styles.skLine} style={{ width: '100%', height: '42px', borderRadius: '10px' }} />
-        <div className={styles.skLine} style={{ width: '100%', height: '42px', borderRadius: '10px' }} />
+        <div className={styles.skActionCol}>
+          <div className={styles.skLine} style={{ width: '100%', height: '42px', borderRadius: '12px' }} />
+          <div className={styles.skLine} style={{ width: '100%', height: '65px', borderRadius: '14px' }} />
+          <div className={styles.skLine} style={{ width: '100%', height: '40px', borderRadius: '12px' }} />
+        </div>
       </div>
     </div>
   );
@@ -191,6 +233,27 @@ export default function MemberDirectoryPage() {
   const [subscriptionAccess, setSubscriptionAccess] = useState(null);
   const [creditSummary, setCreditSummary] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 12, totalRecords: 0, totalPages: 1 });
+
+  // Shortlist & photo lightbox zoom state
+  const [shortlistedMap, setShortlistedMap] = useState({});
+  const [zoomPhotoUrl, setZoomPhotoUrl] = useState(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('varaghi_shortlisted_ids');
+      if (saved) setShortlistedMap(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  const toggleShortlist = (id) => {
+    setShortlistedMap((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      try {
+        localStorage.setItem('varaghi_shortlisted_ids', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // Per-card contact unlock state
   const [unlockingByProfileId, setUnlockingByProfileId] = useState({});
@@ -792,21 +855,24 @@ export default function MemberDirectoryPage() {
                   className={`${styles.quickGenderBtn} ${!activeFilters.gender ? styles.quickGenderActive : ''}`}
                   onClick={() => handleQuickGender('')}
                 >
-                  All Matches
+                  <Sparkles size={14} aria-hidden="true" />
+                  <span>All Matches</span>
                 </button>
                 <button
                   type="button"
                   className={`${styles.quickGenderBtn} ${activeFilters.gender === 'Female' ? styles.quickGenderActive : ''}`}
                   onClick={() => handleQuickGender('Female')}
                 >
-                  👰 Brides (மணமகள்)
+                  <Heart size={14} aria-hidden="true" />
+                  <span>Brides (மணமகள்)</span>
                 </button>
                 <button
                   type="button"
                   className={`${styles.quickGenderBtn} ${activeFilters.gender === 'Male' ? styles.quickGenderActive : ''}`}
                   onClick={() => handleQuickGender('Male')}
                 >
-                  🤵 Grooms (மணமகன்)
+                  <Users size={14} aria-hidden="true" />
+                  <span>Grooms (மணமகன்)</span>
                 </button>
               </div>
 
@@ -924,212 +990,332 @@ export default function MemberDirectoryPage() {
                       typeof creditSummary.creditsRemaining === 'number' &&
                       creditSummary.creditsRemaining <= 0;
 
-                    const community = [
-                      comm.caste,
-                      comm.subcaste,
-                      comm.gothram ? `Gothram: ${comm.gothram}` : null,
-                      !comm.caste ? comm.religion : null,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ');
+                    const candidateRefId =
+                      profile.refId ||
+                      `VM${profile.id ? profile.id.replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase() : '123456'}`;
 
-                    const horoscopeText = [
-                      h.rasi ? `Rasi: ${h.rasi}` : null,
-                      h.nakshatram ? `Star: ${h.nakshatram}` : null,
-                      h.dosham && h.dosham !== 'None' && h.dosham !== 'No Dosham' ? `Dosham: ${h.dosham}` : null,
-                    ].filter(Boolean).join(' · ');
+                    // Formatted row data matching reference image exactly
+                    const ageDisplay = p.age !== null && p.age !== undefined && p.age !== '' ? `${p.age} Years` : '–';
+                    const maritalStatusDisplay = p.maritalStatus || 'Never Married';
+                    const currentCityDisplay = p.location || '–';
+                    const professionDisplay = edu.occupation || '–';
+                    const casteDisplay = comm.caste || '–';
+                    const gothramDisplay = comm.gothram || '–';
+                    const rasiDisplay = h.rasi || '–';
 
-                    const prefText = [
-                      prefAge.min || prefAge.max ? `Age ${prefAge.min || 18}–${prefAge.max || ''} yrs` : null,
-                      pref.preferredLocation ? `Location: ${pref.preferredLocation}` : null,
-                      pref.educationPreference ? `Education: ${pref.educationPreference}` : null,
-                      pref.occupationPreference ? `Job: ${pref.occupationPreference}` : null,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ');
+                    const heightDisplay = formatHeightDisplay(p.height);
+                    const nativePlaceDisplay =
+                      p.nativity || (fam.familyLocation && fam.familyLocation !== p.location ? fam.familyLocation : null) || '–';
+                    const educationDisplay = edu.educationalQualification || '–';
+                    const incomeDisplay = edu.income
+                      ? (String(edu.income).startsWith('₹') ? edu.income : `₹ ${edu.income} per annum`)
+                      : '–';
+                    const subcasteDisplay = comm.subcaste || '–';
+                    const nakshatramDisplay = h.nakshatram || '–';
+                    const doshamDisplay = h.dosham && h.dosham !== 'None' && h.dosham !== 'No Dosham' ? h.dosham : 'No Dosham';
 
-                    const candidateRefId = `VM-${profile.id ? profile.id.slice(-6).toUpperCase() : 'MEMBER'}`;
+                    const partnerExpectationText =
+                      pref.partnerExpectations ||
+                      pref.description ||
+                      pref.notes ||
+                      [
+                        prefAge.min || prefAge.max ? `Age ${prefAge.min || 18}–${prefAge.max || ''} yrs` : null,
+                        pref.preferredLocation ? `Location: ${pref.preferredLocation}` : null,
+                        pref.educationPreference ? `Education: ${pref.educationPreference}` : null,
+                        pref.occupationPreference ? `Job: ${pref.occupationPreference}` : null,
+                        pref.castePreference ? `Caste: ${pref.castePreference}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ') ||
+                      'Looking for a well-educated, professionally settled, family-oriented match with similar values.';
+
+                    const isShortlisted = Boolean(shortlistedMap[profile.id]);
 
                     return (
-                      <article key={profile.id} className={styles.matchCard}>
-                        {/* Column 1: Portrait Photo */}
-                        <div className={styles.matchPhotoCol}>
-                          <Link href={`/members/${profile.id}`} className={styles.matchPhotoFrame} aria-label={`View ${displayName}'s full profile`}>
-                            {profile.profilePhotoUrl ? (
-                              /* eslint-disable-next-line @next/next/no-img-element */
-                              <img src={profile.profilePhotoUrl} alt={`${displayName} portrait`} loading="lazy" />
-                            ) : (
-                              <div className={styles.matchPhotoPlaceholder}>
-                                <span>{initial}</span>
-                              </div>
-                            )}
+                      <div key={profile.id} className={styles.matchCardWrapper}>
+                        <div className={styles.cardGoldMotifWrap} aria-hidden="true">
+                          <img src="/images/varaghi/gold-divider.svg" alt="" className={styles.cardGoldMotif} />
+                        </div>
 
-                            <span className={styles.matchVerifiedPill}>
-                              <CheckCircle2 size={12} aria-hidden="true" /> Verified Profile
-                            </span>
+                        <article className={styles.matchCard}>
+                          {/* Column 1: Portrait Photo */}
+                          <div className={styles.matchPhotoCol}>
+                            <div className={styles.matchPhotoFrame}>
+                              {profile.profilePhotoUrl ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img src={profile.profilePhotoUrl} alt={`${displayName} portrait`} loading="lazy" />
+                              ) : (
+                                <div className={styles.matchPhotoPlaceholder}>
+                                  <span>{initial}</span>
+                                </div>
+                              )}
 
-                            {Array.isArray(profile.photos) && profile.photos.length > 1 && (
+                              <span className={styles.matchVerifiedPill}>
+                                <CheckCircle2 size={13} strokeWidth={2.5} aria-hidden="true" />
+                                <span>Verified</span>
+                              </span>
+
                               <span className={styles.matchPhotoCountPill}>
-                                <Camera size={12} aria-hidden="true" /> {profile.photos.length} Photos
+                                <Camera size={13} aria-hidden="true" />
+                                <span>{Array.isArray(profile.photos) && profile.photos.length > 0 ? `1 / ${profile.photos.length}` : '1 / 1'}</span>
                               </span>
-                            )}
-                          </Link>
 
-                          <Link href={`/members/${profile.id}`} className={styles.quickViewLink}>
-                            <Eye size={13} aria-hidden="true" /> View Full Profile
-                          </Link>
-                        </div>
-
-                        {/* Column 2: Structured Matrimonial Biodata */}
-                        <div className={styles.matchBioCol}>
-                          <div className={styles.matchBioHeader}>
-                            <div className={styles.matchNameRow}>
-                              <Link href={`/members/${profile.id}`} className={styles.matchNameLink}>
-                                <h3>{displayName}</h3>
-                              </Link>
-                              <span className={styles.matchIdTag}>ID: {candidateRefId}</span>
-                              {isAlreadyUnlocked && (
-                                <span className={styles.unlockedTag}><BadgeCheck size={12} aria-hidden="true" /> Unlocked</span>
-                              )}
-                            </div>
-
-                            <div className={styles.matchBasicPills}>
-                              <span className={styles.basicPill}><strong>{p.age !== null && p.age !== undefined ? `${p.age} Yrs` : 'Age N/A'}</strong></span>
-                              <span className={styles.basicPillDot}>•</span>
-                              <span className={styles.basicPill}><strong>{p.height ? `${Math.floor(p.height / 2.54 / 12)}' ${Math.round((p.height / 2.54) % 12)}" (${p.height} cm)` : 'Height N/A'}</strong></span>
-                              <span className={styles.basicPillDot}>•</span>
-                              <span className={styles.basicPill}>{p.maritalStatus || 'Never Married'}</span>
-                              {p.motherTongue && (
-                                <>
-                                  <span className={styles.basicPillDot}>•</span>
-                                  <span className={styles.basicPill}>{p.motherTongue}</span>
-                                </>
+                              {profile.profilePhotoUrl && (
+                                <button
+                                  type="button"
+                                  className={styles.matchPhotoZoomBtn}
+                                  onClick={() => setZoomPhotoUrl(profile.profilePhotoUrl)}
+                                  aria-label={`Zoom ${displayName}'s photo`}
+                                  title="Zoom Photo"
+                                >
+                                  <ZoomIn size={14} aria-hidden="true" />
+                                </button>
                               )}
                             </div>
                           </div>
 
-                          {/* 2-Column Matrimonial Spec Grid */}
-                          <div className={styles.matchSpecGrid}>
-                            <div className={styles.specItem}>
-                              <span className={styles.specLabel}><MapPin size={13} className={styles.specIcon} aria-hidden="true" /> Location &amp; Origin</span>
-                              <span className={styles.specValue}>
-                                {[p.location, p.nativity ? `Native: ${p.nativity}` : (fam.familyLocation && fam.familyLocation !== p.location ? `Native: ${fam.familyLocation}` : null)].filter(Boolean).join(' · ') || 'Location not specified'}
-                              </span>
-                            </div>
-
-                            <div className={styles.specItem}>
-                              <span className={styles.specLabel}><Users size={13} className={styles.specIcon} aria-hidden="true" /> Community &amp; Lineage</span>
-                              <span className={styles.specValue}>
-                                {community || 'Community not specified'}
-                              </span>
-                            </div>
-
-                            <div className={styles.specItem}>
-                              <span className={styles.specLabel}><GraduationCap size={13} className={styles.specIcon} aria-hidden="true" /> Education</span>
-                              <span className={styles.specValue}>
-                                {edu.educationalQualification || 'Education not specified'}
-                              </span>
-                            </div>
-
-                            <div className={styles.specItem}>
-                              <span className={styles.specLabel}><Sparkles size={13} className={styles.specIcon} aria-hidden="true" /> Star &amp; Rasi (ஜாதகம்)</span>
-                              <span className={styles.specValue}>
-                                {horoscopeText || 'Available upon request'}
-                              </span>
-                            </div>
-
-                            <div className={styles.specItem}>
-                              <span className={styles.specLabel}><Briefcase size={13} className={styles.specIcon} aria-hidden="true" /> Profession &amp; Income</span>
-                              <span className={styles.specValue}>
-                                {[
-                                  edu.occupation,
-                                  edu.company ? `at ${edu.company}` : null,
-                                  edu.income ? `(₹ ${edu.income})` : null
-                                ].filter(Boolean).join(' ') || 'Profession not specified'}
-                              </span>
-                            </div>
-
-                            <div className={styles.specItem}>
-                              <span className={styles.specLabel}><Ruler size={13} className={styles.specIcon} aria-hidden="true" /> Lifestyle &amp; Appearance</span>
-                              <span className={styles.specValue}>
-                                {[p.diet, p.complexion].filter(Boolean).join(' · ') || 'Traditional lifestyle'}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Partner Expectations Highlight */}
-                          {prefText && (
-                            <div className={styles.matchExpectations}>
-                              <span className={styles.expectationsLabel}>
-                                <Heart size={13} className={styles.expectationsIcon} aria-hidden="true" /> Expectations:
-                              </span>
-                              <span className={styles.expectationsText}>{prefText}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Column 3: Dedicated Action Column */}
-                        <div className={styles.matchActionCol}>
-                          <Link href={`/members/${profile.id}`} className={styles.btnActionView}>
-                            View Full Biodata <ArrowRight size={14} aria-hidden="true" />
-                          </Link>
-
-                          {unlockedInfo ? (
-                            <div className={styles.waterPhoneBoxRevealed} role="status" aria-live="polite">
-                              <div className={styles.revealedPhoneDigitsCol}>
-                                <a href={`tel:${unlockedInfo.candidatePhone}`} className={styles.revealedPhoneNumberLink}>
-                                  <Phone size={14} aria-hidden="true" />
-                                  <span className={styles.revealingWaterNumber}>{unlockedInfo.candidatePhone}</span>
-                                </a>
-                                <small className={styles.revealedPhoneNote}>
-                                  {unlockedInfo.alreadyUnlocked ? 'Previously unlocked' : 'Contact unlocked · 1 credit'}
-                                </small>
+                          {/* Column 2: Structured 2-Column Key-Value Spec Grid */}
+                          <div className={styles.matchBioCol}>
+                            <div className={styles.cleanHeader}>
+                              <div className={styles.idGroup}>
+                                <span className={styles.candidateId}>{candidateRefId}</span>
+                                <IdCopyButton value={candidateRefId} />
                               </div>
-                              <CopyButton value={unlockedInfo.candidatePhone} />
+                              <div className={styles.statusGroup}>
+                                <span className={styles.recentlyActivePill}>
+                                  <span className={styles.activeDot} />
+                                  <span>Recently Active</span>
+                                </span>
+                              </div>
                             </div>
-                          ) : isActiveAccess ? (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => handleUnlockContact(profile.id)}
-                                disabled={isUnlocking || creditsExhausted}
-                                className={styles.waterPhoneBoxLocked}
-                                title={isAlreadyUnlocked ? 'Click to reveal candidate contact (Free)' : 'Click to reveal candidate contact (1 Credit)'}
-                              >
-                                <div className={styles.waterPhoneDigitsRow} aria-hidden="true">
-                                  <span className={styles.waterBlurredDigits}>+91 98401 28549</span>
+
+                            <div className={styles.headerGoldFlourish} aria-hidden="true">
+                              <img src="/images/varaghi/gold-divider.svg" alt="" />
+                            </div>
+
+                            {/* 2-Column Clean Key-Value Spec Grid matching user reference image */}
+                            <div className={styles.cleanSpecTable}>
+                              {/* Left Column (7 rows) */}
+                              <div className={styles.specCol}>
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <Calendar size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Age</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal}>{ageDisplay}</span>
                                 </div>
 
-                                <div className={styles.waterLockBadge}>
-                                  {isUnlocking ? (
-                                    <span className={styles.lockSpinner} aria-hidden="true" />
-                                  ) : (
-                                    <Lock size={14} aria-hidden="true" />
-                                  )}
-                                  <span>
-                                    {isUnlocking
-                                      ? 'Unlocking…'
-                                      : isAlreadyUnlocked
-                                      ? 'Free'
-                                      : creditsExhausted
-                                      ? 'Exhausted'
-                                      : '1 Credit'}
-                                  </span>
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <Heart size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Marital Status</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal}>{maritalStatusDisplay}</span>
                                 </div>
-                              </button>
-                              {unlockError && <p className={styles.unlockError} role="alert">{unlockError}</p>}
-                            </>
-                          ) : (
-                            <p className={styles.locked}>
-                              <Lock size={13} aria-hidden="true" /> Contact unlocking is paused during grace period.
-                            </p>
-                          )}
 
-                          <div className={styles.trustReassurance}>
-                            <CheckCircle2 size={13} color="#15803d" aria-hidden="true" /> Verified Authentic Biodata
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <MapPin size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Current City</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal} title={currentCityDisplay}>{currentCityDisplay}</span>
+                                </div>
+
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <Briefcase size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Profession</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal} title={professionDisplay}>{professionDisplay}</span>
+                                </div>
+
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <Users size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Caste</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal}>{casteDisplay}</span>
+                                </div>
+
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <Landmark size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Gothram</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal}>{gothramDisplay}</span>
+                                </div>
+
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <Moon size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Rasi</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal}>{rasiDisplay}</span>
+                                </div>
+                              </div>
+
+                              {/* Right Column (7 rows) */}
+                              <div className={styles.specCol}>
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <Ruler size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Height</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal}>{heightDisplay}</span>
+                                </div>
+
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <Compass size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Native Place</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal} title={nativePlaceDisplay}>{nativePlaceDisplay}</span>
+                                </div>
+
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <GraduationCap size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Education</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal} title={educationDisplay}>{educationDisplay}</span>
+                                </div>
+
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <Coins size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Income</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal} title={incomeDisplay}>{incomeDisplay}</span>
+                                </div>
+
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <Layers size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Subcaste</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal}>{subcasteDisplay}</span>
+                                </div>
+
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <Star size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Nakshathiram</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal}>{nakshatramDisplay}</span>
+                                </div>
+
+                                <div className={styles.cleanRow}>
+                                  <div className={styles.cleanKey}>
+                                    <ShieldCheck size={15} className={styles.rowIcon} aria-hidden="true" />
+                                    <span>Dosham</span>
+                                  </div>
+                                  <span className={styles.colon}>:</span>
+                                  <span className={styles.cleanVal}>{doshamDisplay}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Partner Expectation banner */}
+                            <div className={styles.partnerExpectationBox}>
+                              <Handshake size={18} className={styles.expectationIcon} aria-hidden="true" />
+                              <div className={styles.expectationContent}>
+                                <strong className={styles.expectationTitle}>Partner Expectation:</strong>{' '}
+                                <span className={styles.expectationBody}>{partnerExpectationText}</span>
+                              </div>
+                            </div>
                           </div>
+
+                          {/* Column 3: Dedicated Action Column */}
+                          <div className={styles.matchActionCol}>
+                            <Link href={`/members/${profile.id}`} className={styles.btnActionView}>
+                              <FileText size={16} aria-hidden="true" />
+                              <span>View Full Biodata</span>
+                              <ArrowRight size={14} aria-hidden="true" />
+                            </Link>
+
+                            <div className={styles.unlockContactCard}>
+                              <div className={styles.unlockCardHeader}>
+                                <PhoneCall size={15} aria-hidden="true" />
+                                <span>Unlock Contact Number</span>
+                              </div>
+
+                              {unlockedInfo ? (
+                                <div className={styles.waterPhoneBoxRevealed} role="status" aria-live="polite">
+                                  <div className={styles.revealedPhoneDigitsCol}>
+                                    <a href={`tel:${unlockedInfo.candidatePhone}`} className={styles.revealedPhoneNumberLink}>
+                                      <Phone size={14} aria-hidden="true" />
+                                      <span className={styles.revealingWaterNumber}>{unlockedInfo.candidatePhone}</span>
+                                    </a>
+                                    <small className={styles.revealedPhoneNote}>
+                                      {unlockedInfo.alreadyUnlocked ? 'Previously unlocked' : 'Contact unlocked · 1 credit'}
+                                    </small>
+                                  </div>
+                                  <CopyButton value={unlockedInfo.candidatePhone} />
+                                </div>
+                              ) : isActiveAccess ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUnlockContact(profile.id)}
+                                    disabled={isUnlocking || creditsExhausted}
+                                    className={styles.waterPhoneBoxLocked}
+                                    title={isAlreadyUnlocked ? 'Click to reveal candidate contact (Free)' : 'Click to reveal candidate contact (1 Credit)'}
+                                  >
+                                    <div className={styles.waterPhoneDigitsRow} aria-hidden="true">
+                                      <span className={styles.waterBlurredDigits}>+91 98401 28549</span>
+                                    </div>
+
+                                    <div className={styles.waterLockBadge}>
+                                      {isUnlocking ? (
+                                        <span className={styles.lockSpinner} aria-hidden="true" />
+                                      ) : (
+                                        <Lock size={14} aria-hidden="true" />
+                                      )}
+                                    </div>
+                                  </button>
+                                  {unlockError && <p className={styles.unlockError} role="alert">{unlockError}</p>}
+                                </>
+                              ) : (
+                                <p className={styles.locked}>
+                                  <Lock size={13} aria-hidden="true" /> Contact unlocking is paused during grace period.
+                                </p>
+                              )}
+                            </div>
+
+                            <button
+                              type="button"
+                              className={`${styles.btnShortlist} ${isShortlisted ? styles.btnShortlisted : ''}`}
+                              onClick={() => toggleShortlist(profile.id)}
+                              aria-label={isShortlisted ? `Remove ${candidateRefId} from shortlist` : `Add ${candidateRefId} to shortlist`}
+                            >
+                              <Bookmark
+                                size={16}
+                                fill={isShortlisted ? '#8B0D18' : 'none'}
+                                color="#8B0D18"
+                                aria-hidden="true"
+                              />
+                              <span>{isShortlisted ? 'Shortlisted' : 'Shortlist'}</span>
+                            </button>
+                          </div>
+                        </article>
+
+                        <div className={styles.cardGoldMotifWrap} aria-hidden="true">
+                          <img src="/images/varaghi/gold-divider.svg" alt="" className={styles.cardGoldMotif} />
                         </div>
-                      </article>
+                      </div>
                     );
                   })}
                 </div>
@@ -1172,6 +1358,29 @@ export default function MemberDirectoryPage() {
           </section>
         </div>
       </div>
+
+      {/* Enlarged Photo Lightbox Modal */}
+      {zoomPhotoUrl && (
+        <div
+          className={styles.lightboxBackdrop}
+          onClick={() => setZoomPhotoUrl(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Enlarged photo preview"
+        >
+          <div className={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className={styles.lightboxCloseBtn}
+              onClick={() => setZoomPhotoUrl(null)}
+              aria-label="Close preview"
+            >
+              <X size={20} aria-hidden="true" />
+            </button>
+            <img src={zoomPhotoUrl} alt="Enlarged portrait" className={styles.lightboxImg} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
