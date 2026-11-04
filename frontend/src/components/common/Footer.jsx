@@ -26,10 +26,10 @@ const exploreLinks = [
 const accountLinks = [
   { href: '/register', label: 'Register Free Profile' },
   { href: '/login', label: 'Member Sign In' },
-  { href: '/membership', label: 'My Membership' },
   { href: '/profile', label: 'My Profile & Biodata' },
-  { href: '/members', label: 'Find Matches' },
-  { href: '/forgot-password', label: 'Forgot Password' },
+  { href: '/membership', label: 'Membership Plans' },
+  { href: '/members', label: 'Search Matches' },
+  { href: '/#contact', label: 'Help & Support' },
 ];
 
 const trustHighlights = [
