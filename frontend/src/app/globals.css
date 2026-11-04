@@ -3208,14 +3208,14 @@ a {
 
 
 /* ==========================================================================
-   FOOTER (Sacred South Indian Royal Aesthetic)
+   FOOTER (Sacred South Indian Royal Aesthetic & Balanced Grid)
    ========================================================================== */
 .site-footer {
-  background: linear-gradient(180deg, #30060B 0%, #1A0306 100%);
-  color: rgba(255, 248, 233, 0.8);
+  background: linear-gradient(180deg, #240508 0%, #150204 100%);
+  color: rgba(255, 248, 233, 0.85);
   font-size: 0.93rem;
   border-top: 2px solid #D99A24;
-  box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45);
   position: relative;
   overflow: hidden;
 }
@@ -3224,12 +3224,80 @@ a {
   max-width: 1240px;
 }
 
+/* 1. Top Highlights & Trust Bar */
+.site-footer-trust-bar {
+  border-bottom: 1px solid rgba(217, 154, 36, 0.2);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.site-footer-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  padding: 1.75rem 0;
+}
+
+.site-footer-trust-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 248, 233, 0.03);
+  border: 1px solid rgba(217, 154, 36, 0.22);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.site-footer-trust-card:hover {
+  background: rgba(217, 154, 36, 0.08);
+  border-color: rgba(217, 154, 36, 0.45);
+  transform: translateY(-2px);
+}
+
+.site-footer-trust-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(217, 154, 36, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #F5C369;
+}
+
+.site-footer-trust-card-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.site-footer-trust-card-title {
+  margin: 0 0 0.15rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #FFFDF8;
+  letter-spacing: 0.01em;
+}
+
+.site-footer-trust-card-sub {
+  margin: 0;
+  font-size: 0.74rem;
+  color: rgba(255, 248, 233, 0.65);
+}
+
+/* 2. Main 4-Column Navigation */
 .site-footer-main {
   display: grid;
-  grid-template-columns: 1.4fr 0.9fr 0.9fr 1.3fr;
-  gap: clamp(2rem, 3.5vw, 3.5rem);
-  padding-top: 3.5rem;
-  padding-bottom: 3rem;
+  grid-template-columns: 1.4fr 1fr 1fr 1.35fr;
+  gap: clamp(1.8rem, 3vw, 3rem);
+  padding-top: 3rem;
+  padding-bottom: 2.75rem;
+  align-items: start;
+}
+
+.site-footer-col {
+  display: flex;
+  flex-direction: column;
 }
 
 .site-footer-brand {
@@ -3253,7 +3321,7 @@ a {
 
 .site-footer-brand-name {
   font-family: var(--font-playfair), "Playfair Display", Georgia, serif;
-  font-size: 1.38rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: #FFFDF8;
   letter-spacing: 0.02em;
@@ -3267,25 +3335,25 @@ a {
 }
 
 .site-footer-about {
-  margin-top: 1.1rem;
-  max-width: 27rem;
-  font-size: 0.88rem;
-  line-height: 1.68;
+  margin-top: 1rem;
+  max-width: 26rem;
+  font-size: 0.86rem;
+  line-height: 1.65;
   color: rgba(255, 248, 233, 0.78);
 }
 
 .site-footer-contact-list {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  margin-top: 1rem;
+  gap: 0.5rem;
+  margin-top: 1.1rem;
   font-size: 0.84rem;
 }
 
 .site-footer-contact-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.55rem;
   color: #F8E5BF;
 }
 
@@ -3305,56 +3373,11 @@ a {
   flex-shrink: 0;
 }
 
-.site-footer-blessing {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  margin-top: 0.9rem;
-  font-size: 0.82rem;
-  font-style: italic;
-  font-family: var(--font-playfair), Georgia, serif;
-  color: #F5C369;
-  line-height: 1.45;
-}
-
-.site-footer-blessing-icon {
-  color: #FFDF73;
-  flex-shrink: 0;
-}
-
-.site-footer-langs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-top: 1.2rem;
-}
-
-.site-footer-lang-pill {
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #F5C369;
-  background: rgba(217, 154, 36, 0.1);
-  border: 1px solid rgba(217, 154, 36, 0.35);
-  transition: all 0.2s ease;
-}
-
-.site-footer-lang-pill:hover {
-  background: rgba(217, 154, 36, 0.2);
-  color: #FFFDF8;
-}
-
-.site-footer-col {
-  display: flex;
-  flex-direction: column;
-}
-
 .site-footer-col-title {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  margin: 0 0 1.2rem;
+  gap: 0.45rem;
+  margin: 0 0 1.25rem;
   font-family: var(--font-sans, sans-serif);
   font-size: 0.82rem;
   font-weight: 800;
@@ -3364,7 +3387,7 @@ a {
 }
 
 .site-footer-title-bar {
-  width: 28px;
+  width: 26px;
   height: 2px;
   background: #D99A24;
   border-radius: 2px;
@@ -3380,7 +3403,7 @@ a {
 
 .site-footer-links a {
   color: rgba(255, 248, 233, 0.75);
-  font-size: 0.9rem;
+  font-size: 0.89rem;
   text-decoration: none;
   transition: all 0.2s ease;
   display: inline-flex;
@@ -3392,19 +3415,40 @@ a {
   transform: translateX(4px);
 }
 
-/* CTA Card */
+/* 3. CTA Action Card */
 .site-footer-cta-card {
   background: rgba(255, 248, 233, 0.04);
-  border: 1.5px solid rgba(217, 154, 36, 0.32);
-  border-radius: 18px;
-  padding: 1.4rem 1.3rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  border: 1.5px solid rgba(217, 154, 36, 0.35);
+  border-radius: 16px;
+  padding: 1.35rem 1.25rem;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(4px);
 }
 
+.site-footer-cta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #F5C369;
+  background: rgba(217, 154, 36, 0.15);
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+}
+
+.site-footer-cta-title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #FFFDF8;
+}
+
 .site-footer-cta-desc {
-  font-size: 0.84rem;
-  line-height: 1.6;
+  font-size: 0.82rem;
+  line-height: 1.58;
   color: rgba(255, 248, 233, 0.75);
   margin-bottom: 1.1rem;
 }
@@ -3415,10 +3459,10 @@ a {
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.75rem 1.2rem;
+  padding: 0.75rem 1.15rem;
   border-radius: 12px;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   text-decoration: none;
   color: #FFFDF7 !important;
   background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
@@ -3429,26 +3473,21 @@ a {
 }
 
 .site-footer-btn:hover {
-  background: linear-gradient(135deg, #AC0F1C 0%, #8A0A12 100%);
+  background: linear-gradient(135deg, #B50D19 0%, #8A0A12 100%);
   border-color: #F5C369;
   color: #FFFFFF !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(217, 154, 36, 0.35);
 }
 
-.site-footer-btn:active {
-  background: #63050B;
-  transform: translateY(1px);
-}
-
 .site-footer-signin-wrap {
-  margin-top: 0.85rem;
+  margin-top: 0.8rem;
   text-align: center;
 }
 
 .site-footer-signin {
-  color: rgba(255, 248, 233, 0.8);
-  font-size: 0.84rem;
+  color: rgba(255, 248, 233, 0.82);
+  font-size: 0.82rem;
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -3459,10 +3498,81 @@ a {
   color: #F5C369;
 }
 
-/* Footer Bottom Bar */
-.site-footer-bottom {
+/* 4. Blessing & Languages Section */
+.site-footer-blessing-section {
   border-top: 1px solid rgba(217, 154, 36, 0.2);
-  background: #140205;
+  border-bottom: 1px solid rgba(217, 154, 36, 0.2);
+  background: rgba(0, 0, 0, 0.22);
+  padding: 1.4rem 0;
+}
+
+.site-footer-blessing-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.site-footer-blessing-quote {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 600;
+  color: #F5C369;
+  letter-spacing: 0.01em;
+}
+
+.site-footer-blessing-sparkle {
+  color: #FFDF73;
+  flex-shrink: 0;
+}
+
+.site-footer-langs-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.site-footer-langs-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 248, 233, 0.6);
+}
+
+.site-footer-langs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.site-footer-lang-pill {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #F5C369;
+  background: rgba(217, 154, 36, 0.1);
+  border: 1px solid rgba(217, 154, 36, 0.32);
+  transition: all 0.2s ease;
+}
+
+.site-footer-lang-pill:hover {
+  background: rgba(217, 154, 36, 0.22);
+  color: #FFFDF8;
+}
+
+/* 5. Footer Bottom Legal & Trust Bar */
+.site-footer-bottom {
+  background: #0E0103;
+  padding: 1.15rem 0;
 }
 
 .site-footer-bottom-inner {
@@ -3471,8 +3581,6 @@ a {
   justify-content: space-between;
   gap: 1.2rem;
   flex-wrap: wrap;
-  padding-top: 1.2rem;
-  padding-bottom: 1.2rem;
   font-size: 0.82rem;
   color: rgba(255, 248, 233, 0.65);
 }
@@ -3496,18 +3604,36 @@ a {
   flex-shrink: 0;
 }
 
-@media (max-width: 960px) {
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .site-footer-trust-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .site-footer-main {
     grid-template-columns: 1fr 1fr;
     gap: 2.5rem 2rem;
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 640px) {
+  .site-footer-trust-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 1.25rem 0;
+  }
   .site-footer-main {
     grid-template-columns: 1fr;
-    padding-top: 2.5rem;
-    gap: 2rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    gap: 1.8rem;
+  }
+  .site-footer-blessing-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  .site-footer-langs-wrap {
+    justify-content: center;
   }
   .site-footer-bottom-inner {
     flex-direction: column;

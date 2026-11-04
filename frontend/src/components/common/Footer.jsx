@@ -2,7 +2,17 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Mail, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  Clock,
+  HeartHandshake,
+  Lock,
+  Mail,
+  MapPin,
+  PhoneCall,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
 
 const exploreLinks = [
   { href: '/', label: 'Home' },
@@ -10,24 +20,74 @@ const exploreLinks = [
   { href: '/#how-it-works', label: 'How It Works' },
   { href: '/#membership', label: 'Membership Plans' },
   { href: '/#privacy', label: 'Candidate Privacy' },
+  { href: '/#about', label: 'About Us' },
 ];
 
 const accountLinks = [
-  { href: '/register', label: 'Create Free Profile' },
+  { href: '/register', label: 'Register Free Profile' },
   { href: '/login', label: 'Member Sign In' },
   { href: '/membership', label: 'My Membership' },
-  { href: '/profile', label: 'My Profile' },
+  { href: '/profile', label: 'My Profile & Biodata' },
+  { href: '/members', label: 'Find Matches' },
   { href: '/forgot-password', label: 'Forgot Password' },
 ];
+
+const trustHighlights = [
+  {
+    icon: ShieldCheck,
+    title: '100% சரிபார்க்கப்பட்ட வரன்கள்',
+    subtitle: 'Verified biodata & family background',
+  },
+  {
+    icon: Lock,
+    title: 'பாதுகாப்பான தொலைபேசி எண்கள்',
+    subtitle: 'Strict privacy, numbers masked in all views',
+  },
+  {
+    icon: Sparkles,
+    title: 'பாரம்பரிய ஜாதக பொருத்தம்',
+    subtitle: 'Rasi, Nakshatiram & dosham details',
+  },
+  {
+    icon: PhoneCall,
+    title: 'நேரடி அலுவலக வழிகாட்டுதல்',
+    subtitle: 'Dedicated family support in Ranipet',
+  },
+];
+
+const languages = ['தமிழ்', 'English', 'తెలుగు', 'ಕನ್ನಡ', 'മലയാളം'];
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="site-footer" aria-labelledby="footer-brand">
+      {/* 1. Top Tier: 4-Card Trust & Highlights Bar */}
+      <div className="site-footer-trust-bar">
+        <div className="container">
+          <div className="site-footer-trust-grid">
+            {trustHighlights.map((item, idx) => {
+              const IconComponent = item.icon;
+              return (
+                <div key={idx} className="site-footer-trust-card">
+                  <div className="site-footer-trust-icon-wrap">
+                    <IconComponent size={22} className="site-footer-trust-card-icon" />
+                  </div>
+                  <div className="site-footer-trust-card-text">
+                    <h4 className="site-footer-trust-card-title">{item.title}</h4>
+                    <p className="site-footer-trust-card-sub">{item.subtitle}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Middle Tier: Balanced 4-Column Navigation */}
       <div className="container site-footer-main">
-        {/* Brand & Mission Column */}
-        <div className="site-footer-brand-col">
+        {/* Col 1: Brand & Office Details */}
+        <div className="site-footer-col site-footer-brand-col">
           <Link href="/" className="site-footer-brand" aria-label="Varaghi Matrimony Home">
             <img
               src="/logo.png"
@@ -35,43 +95,39 @@ export const Footer = () => {
               className="site-footer-logo"
             />
             <div className="site-footer-brand-text">
-              <span id="footer-brand" className="site-footer-brand-name">Varaghi Matrimony</span>
-              <span className="site-footer-brand-tagline">ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
+              <span id="footer-brand" className="site-footer-brand-name">
+                Varaghi Matrimony
+              </span>
+              <span className="site-footer-brand-tagline">
+                ஸ்ரீ வாராஹி திருமண தகவல் மையம்
+              </span>
             </div>
           </Link>
 
           <p className="site-footer-about">
-            தென்னிந்திய குடும்பங்களின் நம்பிக்கையான திருமண தகவல் மையம். பாரம்பரிய வரன் ஜாதகம், முழு பயோடேட்டா மற்றும் பாதுகாப்பான திருமண உறவுகளுக்கான உன்னத தளம்.
+            தென்னிந்திய குடும்பங்களின் நம்பிக்கையான திருமண தகவல் மையம். வரன் ஜாதகம், முழு பயோடேட்டா மற்றும் பாதுகாப்பான வரன் தேடல் தளம்.
           </p>
 
           <div className="site-footer-contact-list">
             <div className="site-footer-contact-item">
-              <MapPin size={14} className="site-footer-contact-icon" aria-hidden="true" />
-              <span>Ranipet, Tamil Nadu</span>
+              <MapPin size={15} className="site-footer-contact-icon" aria-hidden="true" />
+              <span>Ranipet, Tamil Nadu, India</span>
             </div>
             <div className="site-footer-contact-item">
-              <Mail size={14} className="site-footer-contact-icon" aria-hidden="true" />
+              <Mail size={15} className="site-footer-contact-icon" aria-hidden="true" />
               <a href="mailto:varaghiimatrimony@gmail.com">varaghiimatrimony@gmail.com</a>
             </div>
-          </div>
-
-          <div className="site-footer-blessing">
-            <Sparkles size={14} className="site-footer-blessing-icon" aria-hidden="true" />
-            <span>&ldquo;மங்கல வாழ்க்கை மலர ஸ்ரீ வாராஹி அம்மன் அருள் துணை நிற்கட்டும்&rdquo;</span>
-          </div>
-
-          <div className="site-footer-langs" aria-label="Languages supported">
-            <span className="site-footer-lang-pill">தமிழ்</span>
-            <span className="site-footer-lang-pill">English</span>
-            <span className="site-footer-lang-pill">తెలుగు</span>
-            <span className="site-footer-lang-pill">ಕನ್ನಡ</span>
+            <div className="site-footer-contact-item">
+              <Clock size={15} className="site-footer-contact-icon" aria-hidden="true" />
+              <span>Office Hours: 9:00 AM – 7:00 PM</span>
+            </div>
           </div>
         </div>
 
-        {/* Explore Links */}
-        <nav className="site-footer-col" aria-label="Explore Links">
+        {/* Col 2: Explore */}
+        <nav className="site-footer-col" aria-label="Quick Links">
           <h3 className="site-footer-col-title">
-            <span>Explore</span>
+            <span>Quick Links</span>
             <span className="site-footer-title-bar" aria-hidden="true" />
           </h3>
           <ul className="site-footer-links">
@@ -83,10 +139,10 @@ export const Footer = () => {
           </ul>
         </nav>
 
-        {/* Account Links */}
-        <nav className="site-footer-col" aria-label="Account Links">
+        {/* Col 3: Member Services */}
+        <nav className="site-footer-col" aria-label="Member Services">
           <h3 className="site-footer-col-title">
-            <span>Account</span>
+            <span>Member Services</span>
             <span className="site-footer-title-bar" aria-hidden="true" />
           </h3>
           <ul className="site-footer-links">
@@ -98,18 +154,19 @@ export const Footer = () => {
           </ul>
         </nav>
 
-        {/* CTA Card */}
-        <div className="site-footer-cta-col">
+        {/* Col 4: Action Card */}
+        <div className="site-footer-col site-footer-cta-col">
           <div className="site-footer-cta-card">
-            <h3 className="site-footer-col-title">
-              <span>Get Started</span>
-              <span className="site-footer-title-bar" aria-hidden="true" />
-            </h3>
+            <div className="site-footer-cta-badge">
+              <HeartHandshake size={14} />
+              <span>திருமண வரம் பெற</span>
+            </div>
+            <h3 className="site-footer-cta-title">Find Your Life Partner</h3>
             <p className="site-footer-cta-desc">
-              பதிவு முற்றிலும் இலவசம். தகுதியான வரன்களைப் பார்வையிட்டு, பிரத்யேக கிரெடிட்கள் மூலம் பாதுகாப்பாகத் தொடர்புகளைப் பெறுங்கள்.
+              பதிவு முற்றிலும் இலவசம். ஆயிரக்கணக்கான வரன்களைப் பார்வையிட்டு உங்கள் விருப்பத்திற்கேற்ப இணைந்திடுங்கள்.
             </p>
             <Link href="/register" className="site-footer-btn">
-              <span>Register Free</span>
+              <span>Register Free Today</span>
               <ArrowRight size={15} aria-hidden="true" />
             </Link>
             <div className="site-footer-signin-wrap">
@@ -121,15 +178,37 @@ export const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom Legal & Trust Bar */}
+      {/* 3. Sacred Blessing & Supported Languages Banner */}
+      <div className="site-footer-blessing-section">
+        <div className="container site-footer-blessing-inner">
+          <div className="site-footer-blessing-quote">
+            <Sparkles size={16} className="site-footer-blessing-sparkle" aria-hidden="true" />
+            <span>&ldquo;மங்கல வாழ்க்கை மலர ஸ்ரீ வாராஹி அம்மன் அருள் துணை நிற்கட்டும்&rdquo;</span>
+            <Sparkles size={16} className="site-footer-blessing-sparkle" aria-hidden="true" />
+          </div>
+
+          <div className="site-footer-langs-wrap" aria-label="Languages supported">
+            <span className="site-footer-langs-label">Supported Languages:</span>
+            <div className="site-footer-langs">
+              {languages.map((lang) => (
+                <span key={lang} className="site-footer-lang-pill">
+                  {lang}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Bottom Legal & Privacy Bar */}
       <div className="site-footer-bottom">
         <div className="container site-footer-bottom-inner">
           <div className="site-footer-copy">
             &copy; {currentYear} <strong>Varaghi Matrimony</strong> (ஸ்ரீ வாராஹி திருமண தகவல் மையம்). All rights reserved.
           </div>
           <div className="site-footer-trust-badge">
-            <ShieldCheck size={14} className="site-footer-trust-icon" aria-hidden="true" />
-            <span>100% பாதுகாப்பான வரன் விவரங்கள் • தொலைபேசி எண்கள் எப்போதும் ரகசியமாக வைக்கப்படும்</span>
+            <ShieldCheck size={15} className="site-footer-trust-icon" aria-hidden="true" />
+            <span>100% பாதுகாப்பான தளம் • வரன் தொலைபேசி எண்கள் எப்போதும் ரகசியமாக வைக்கப்படும்</span>
           </div>
         </div>
       </div>
