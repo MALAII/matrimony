@@ -8,11 +8,13 @@ import {
   ArrowRight,
   BadgeCheck,
   Briefcase,
+  Camera,
   Check,
   ChevronLeft,
   ChevronRight,
   Copy,
   CreditCard,
+  Eye,
   GraduationCap,
   Heart,
   Hourglass,
@@ -159,13 +161,22 @@ function Fact({ Icon, children }) {
 
 function SkeletonCard() {
   return (
-    <div className={`${styles.card} ${styles.skeleton}`} aria-hidden="true">
-      <div className={styles.skPhoto} />
-      <div className={styles.cardBody}>
-        <div className={styles.skLine} style={{ width: '70%' }} />
-        <div className={styles.skLine} style={{ width: '90%' }} />
-        <div className={styles.skLine} style={{ width: '60%' }} />
-        <div className={styles.skLine} style={{ width: '80%' }} />
+    <div className={`${styles.matchCard} ${styles.skeleton}`} aria-hidden="true">
+      <div className={styles.skPhotoCol} />
+      <div className={styles.skBioCol}>
+        <div className={styles.skLine} style={{ width: '40%', height: '22px' }} />
+        <div className={styles.skLine} style={{ width: '60%', height: '16px' }} />
+        <div className={styles.skGrid}>
+          <div className={styles.skLine} style={{ width: '90%', height: '14px' }} />
+          <div className={styles.skLine} style={{ width: '85%', height: '14px' }} />
+          <div className={styles.skLine} style={{ width: '90%', height: '14px' }} />
+          <div className={styles.skLine} style={{ width: '80%', height: '14px' }} />
+        </div>
+        <div className={styles.skLine} style={{ width: '100%', height: '36px', borderRadius: '8px' }} />
+      </div>
+      <div className={styles.skActionCol}>
+        <div className={styles.skLine} style={{ width: '100%', height: '42px', borderRadius: '10px' }} />
+        <div className={styles.skLine} style={{ width: '100%', height: '42px', borderRadius: '10px' }} />
       </div>
     </div>
   );
@@ -902,90 +913,138 @@ export default function MemberDirectoryPage() {
                       .filter(Boolean)
                       .join(' · ');
 
+                    const candidateRefId = `VM-${profile.id ? profile.id.slice(-6).toUpperCase() : 'MEMBER'}`;
+
                     return (
-                      <article key={profile.id} className={styles.card}>
-                        <Link href={`/members/${profile.id}`} className={styles.photo} aria-label={`View ${displayName}'s full profile`}>
-                          {profile.profilePhotoUrl ? (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img src={profile.profilePhotoUrl} alt={`${displayName} portrait`} loading="lazy" />
-                          ) : (
-                            <span className={styles.placeholder} aria-hidden="true">{initial}</span>
-                          )}
-                          <span className={styles.source}>
-                            <BadgeCheck size={12} aria-hidden="true" color="var(--rose-deep)" />
-                            Verified Biodata
-                          </span>
-                          {Array.isArray(profile.photos) && profile.photos.length > 1 && (
-                            <span
-                              style={{
-                                position: 'absolute',
-                                top: '0.9rem',
-                                right: isAlreadyUnlocked ? '6.5rem' : '0.9rem',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.3rem',
-                                padding: '0.25rem 0.55rem',
-                                borderRadius: '999px',
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
-                                background: 'rgba(0, 0, 0, 0.65)',
-                                color: '#ffffff',
-                                backdropFilter: 'blur(4px)',
-                              }}
-                            >
-                              📷 {profile.photos.length} Photos
+                      <article key={profile.id} className={styles.matchCard}>
+                        {/* Column 1: Portrait Photo */}
+                        <div className={styles.matchPhotoCol}>
+                          <Link href={`/members/${profile.id}`} className={styles.matchPhotoFrame} aria-label={`View ${displayName}'s full profile`}>
+                            {profile.profilePhotoUrl ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img src={profile.profilePhotoUrl} alt={`${displayName} portrait`} loading="lazy" />
+                            ) : (
+                              <div className={styles.matchPhotoPlaceholder}>
+                                <span>{initial}</span>
+                              </div>
+                            )}
+
+                            <span className={styles.matchVerifiedPill}>
+                              <CheckCircle2 size={12} aria-hidden="true" /> Verified Profile
                             </span>
-                          )}
-                          {isAlreadyUnlocked && (
-                            <span className={styles.unlockedTag}><BadgeCheck size={12} aria-hidden="true" /> Unlocked</span>
-                          )}
-                          <span className={styles.nameplate}>
-                            <strong>{displayName}</strong>
-                            <small>
-                              {p.age !== null && p.age !== undefined ? `${p.age} yrs` : 'Age n/a'}
-                              {p.height ? ` · ${Math.floor(p.height / 2.54 / 12)}'${Math.round((p.height / 2.54) % 12)}" (${p.height} cm)` : ''}
-                              {p.maritalStatus ? ` · ${p.maritalStatus}` : ''}
-                            </small>
-                          </span>
-                        </Link>
 
-                        <div className={styles.cardBody}>
-                          <ul className={styles.facts}>
-                            <Fact Icon={MapPin}>
-                              {[p.location, p.nativity ? `Native: ${p.nativity}` : (fam.familyLocation && fam.familyLocation !== p.location ? `Native: ${fam.familyLocation}` : null)].filter(Boolean).join(' · ') || 'Location not specified'}
-                            </Fact>
-                            <Fact Icon={GraduationCap}>{edu.educationalQualification || 'Education not specified'}</Fact>
-                            <Fact Icon={Briefcase}>
-                              {edu.occupation ? `${edu.occupation}${edu.company ? ` at ${edu.company}` : ''}` : 'Occupation not specified'}
-                            </Fact>
-                            <Fact Icon={Users}>{community || 'Community not specified'}</Fact>
-                            {horoscopeText && <Fact Icon={Sparkles}>{horoscopeText}</Fact>}
-                            {p.motherTongue && <Fact Icon={Languages}>{p.motherTongue}</Fact>}
-                          </ul>
+                            {Array.isArray(profile.photos) && profile.photos.length > 1 && (
+                              <span className={styles.matchPhotoCountPill}>
+                                <Camera size={12} aria-hidden="true" /> {profile.photos.length} Photos
+                              </span>
+                            )}
+                          </Link>
 
-                          {/* Quick Badges Row */}
-                          <div className={styles.tags}>
-                            {p.gender && <span>{p.gender}</span>}
-                            {p.diet && <span>{p.diet}</span>}
-                            {p.complexion && <span>{p.complexion}</span>}
-                            {edu.income && <span>₹ {edu.income}</span>}
+                          <Link href={`/members/${profile.id}`} className={styles.quickViewLink}>
+                            <Eye size={13} aria-hidden="true" /> View Full Profile
+                          </Link>
+                        </div>
+
+                        {/* Column 2: Structured Matrimonial Biodata */}
+                        <div className={styles.matchBioCol}>
+                          <div className={styles.matchBioHeader}>
+                            <div className={styles.matchNameRow}>
+                              <Link href={`/members/${profile.id}`} className={styles.matchNameLink}>
+                                <h3>{displayName}</h3>
+                              </Link>
+                              <span className={styles.matchIdTag}>ID: {candidateRefId}</span>
+                              {isAlreadyUnlocked && (
+                                <span className={styles.unlockedTag}><BadgeCheck size={12} aria-hidden="true" /> Unlocked</span>
+                              )}
+                            </div>
+
+                            <div className={styles.matchBasicPills}>
+                              <span className={styles.basicPill}><strong>{p.age !== null && p.age !== undefined ? `${p.age} Yrs` : 'Age N/A'}</strong></span>
+                              <span className={styles.basicPillDot}>•</span>
+                              <span className={styles.basicPill}><strong>{p.height ? `${Math.floor(p.height / 2.54 / 12)}' ${Math.round((p.height / 2.54) % 12)}" (${p.height} cm)` : 'Height N/A'}</strong></span>
+                              <span className={styles.basicPillDot}>•</span>
+                              <span className={styles.basicPill}>{p.maritalStatus || 'Never Married'}</span>
+                              {p.motherTongue && (
+                                <>
+                                  <span className={styles.basicPillDot}>•</span>
+                                  <span className={styles.basicPill}>{p.motherTongue}</span>
+                                </>
+                              )}
+                            </div>
                           </div>
 
+                          {/* 2-Column Matrimonial Spec Grid */}
+                          <div className={styles.matchSpecGrid}>
+                            <div className={styles.specItem}>
+                              <span className={styles.specLabel}><MapPin size={13} className={styles.specIcon} aria-hidden="true" /> Location &amp; Origin</span>
+                              <span className={styles.specValue}>
+                                {[p.location, p.nativity ? `Native: ${p.nativity}` : (fam.familyLocation && fam.familyLocation !== p.location ? `Native: ${fam.familyLocation}` : null)].filter(Boolean).join(' · ') || 'Location not specified'}
+                              </span>
+                            </div>
+
+                            <div className={styles.specItem}>
+                              <span className={styles.specLabel}><Users size={13} className={styles.specIcon} aria-hidden="true" /> Community &amp; Lineage</span>
+                              <span className={styles.specValue}>
+                                {community || 'Community not specified'}
+                              </span>
+                            </div>
+
+                            <div className={styles.specItem}>
+                              <span className={styles.specLabel}><GraduationCap size={13} className={styles.specIcon} aria-hidden="true" /> Education</span>
+                              <span className={styles.specValue}>
+                                {edu.educationalQualification || 'Education not specified'}
+                              </span>
+                            </div>
+
+                            <div className={styles.specItem}>
+                              <span className={styles.specLabel}><Sparkles size={13} className={styles.specIcon} aria-hidden="true" /> Star &amp; Rasi (ஜாதகம்)</span>
+                              <span className={styles.specValue}>
+                                {horoscopeText || 'Available upon request'}
+                              </span>
+                            </div>
+
+                            <div className={styles.specItem}>
+                              <span className={styles.specLabel}><Briefcase size={13} className={styles.specIcon} aria-hidden="true" /> Profession &amp; Income</span>
+                              <span className={styles.specValue}>
+                                {[
+                                  edu.occupation,
+                                  edu.company ? `at ${edu.company}` : null,
+                                  edu.income ? `(₹ ${edu.income})` : null
+                                ].filter(Boolean).join(' ') || 'Profession not specified'}
+                              </span>
+                            </div>
+
+                            <div className={styles.specItem}>
+                              <span className={styles.specLabel}><Ruler size={13} className={styles.specIcon} aria-hidden="true" /> Lifestyle &amp; Appearance</span>
+                              <span className={styles.specValue}>
+                                {[p.diet, p.complexion].filter(Boolean).join(' · ') || 'Traditional lifestyle'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Partner Expectations Highlight */}
                           {prefText && (
-                            <details className={styles.prefs}>
-                              <summary><Sparkles size={13} aria-hidden="true" /> Partner Expectations</summary>
-                              <p>{prefText}</p>
-                            </details>
+                            <div className={styles.matchExpectations}>
+                              <span className={styles.expectationsLabel}>
+                                <Heart size={13} className={styles.expectationsIcon} aria-hidden="true" /> Expectations:
+                              </span>
+                              <span className={styles.expectationsText}>{prefText}</span>
+                            </div>
                           )}
                         </div>
 
-                        <div className={styles.cardFoot}>
+                        {/* Column 3: Dedicated Action Column */}
+                        <div className={styles.matchActionCol}>
+                          <Link href={`/members/${profile.id}`} className={styles.btnActionView}>
+                            View Full Biodata <ArrowRight size={14} aria-hidden="true" />
+                          </Link>
+
                           {unlockedInfo ? (
                             <div className={styles.phoneBox} role="status" aria-live="polite">
                               <div>
-                                <a href={`tel:${unlockedInfo.candidatePhone}`}><Phone size={15} aria-hidden="true" /> {unlockedInfo.candidatePhone}</a>
+                                <a href={`tel:${unlockedInfo.candidatePhone}`}><Phone size={14} aria-hidden="true" /> {unlockedInfo.candidatePhone}</a>
                                 <small>
-                                  {unlockedInfo.alreadyUnlocked ? 'Previously unlocked · 0 credits deducted' : 'Contact unlocked · 1 credit deducted'}
+                                  {unlockedInfo.alreadyUnlocked ? 'Previously unlocked' : 'Contact unlocked · 1 credit'}
                                 </small>
                               </div>
                               <CopyButton value={unlockedInfo.candidatePhone} />
@@ -1000,11 +1059,11 @@ export default function MemberDirectoryPage() {
                                 title={isAlreadyUnlocked ? 'Click to reveal candidate contact (Free)' : 'Click to reveal candidate contact (1 Credit)'}
                               >
                                 <div className={styles.goldenPhoneDigitsRow} aria-hidden="true">
-                                  <Phone size={14} className={styles.goldenPhoneIcon} />
+                                  <Phone size={13} className={styles.goldenPhoneIcon} />
                                   <span className={styles.goldenPhoneBlurDigits}>+91 98401 28549</span>
                                 </div>
                                 <div className={styles.goldenPhoneActionPill}>
-                                  <KeyRound size={13} aria-hidden="true" />
+                                  <KeyRound size={12} aria-hidden="true" />
                                   <span>
                                     {isUnlocking
                                       ? 'Revealing…'
@@ -1012,7 +1071,7 @@ export default function MemberDirectoryPage() {
                                       ? 'Reveal Phone (Free)'
                                       : creditsExhausted
                                       ? 'Credits Exhausted'
-                                      : 'Reveal Phone · 1 Credit'}
+                                      : 'Unlock Phone (1 Credit)'}
                                   </span>
                                 </div>
                               </button>
@@ -1020,12 +1079,13 @@ export default function MemberDirectoryPage() {
                             </>
                           ) : (
                             <p className={styles.locked}>
-                              <Lock size={14} aria-hidden="true" /> Contact unlocking is paused during grace period.
+                              <Lock size={13} aria-hidden="true" /> Contact unlocking is paused during grace period.
                             </p>
                           )}
-                          <Link href={`/members/${profile.id}`} className={styles.viewLink}>
-                            View Full Biodata &amp; Horoscope <ArrowRight size={15} aria-hidden="true" />
-                          </Link>
+
+                          <div className={styles.trustReassurance}>
+                            <CheckCircle2 size={13} color="#15803d" aria-hidden="true" /> Verified Authentic Biodata
+                          </div>
                         </div>
                       </article>
                     );
