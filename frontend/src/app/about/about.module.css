@@ -1,0 +1,791 @@
+/* ==========================================================================
+   ABOUT US PAGE - Royal South Indian Temple Matrimonial Aesthetic
+   ========================================================================== */
+
+.page {
+  min-height: 100vh;
+  background-color: #FFFDF8;
+  color: #2D1810;
+  overflow-x: hidden;
+}
+
+/* ------------------------------ Hero Section ------------------------------ */
+.hero {
+  position: relative;
+  background: linear-gradient(135deg, #3A060C 0%, #200306 60%, #150204 100%);
+  color: #FFF8E9;
+  padding: 4.5rem 1.5rem 5.5rem;
+  overflow: hidden;
+  border-bottom: 3px solid #D99A24;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.heroBg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(217, 154, 36, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.mandalaWatermark {
+  position: absolute;
+  top: 50%;
+  right: -5%;
+  transform: translateY(-50%);
+  width: clamp(280px, 40vw, 560px);
+  height: auto;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.goldCornerTopRight {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: clamp(70px, 9vw, 130px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.goldCornerTopLeft {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: clamp(70px, 9vw, 130px);
+  transform: scaleX(-1);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.heroInner {
+  position: relative;
+  z-index: 2;
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.crumbs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+  color: rgba(255, 248, 233, 0.75);
+  margin-bottom: 1.25rem;
+}
+
+.crumbs a {
+  color: #FFDF73;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.crumbs a:hover {
+  text-decoration: underline;
+  color: #FFECA8;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #FFDF73;
+  text-transform: uppercase;
+  background: rgba(217, 154, 36, 0.15);
+  border: 1px solid rgba(217, 154, 36, 0.4);
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  margin-bottom: 1.25rem;
+}
+
+.heroTitle {
+  font-family: var(--font-playfair), "Playfair Display", Georgia, serif;
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.25;
+  color: #FFFFFF;
+  margin: 0 0 1.25rem;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+}
+
+.heroTitleGold {
+  background: linear-gradient(135deg, #FFDF73 0%, #D99A24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.heroSubtitle {
+  max-width: 44rem;
+  font-size: 1.08rem;
+  line-height: 1.75;
+  color: rgba(255, 248, 233, 0.9);
+  margin: 0 0 2rem;
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btnPrimaryHero {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1.85rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: #FFFDF7 !important;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  border: 1.5px solid #D99A24;
+  box-shadow: 0 6px 20px rgba(122, 8, 16, 0.45);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btnPrimaryHero:hover {
+  background: linear-gradient(135deg, #B50D19 0%, #8A0A12 100%);
+  border-color: #F5C369;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(217, 154, 36, 0.4);
+}
+
+.btnSecondaryHero {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1.65rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: #F8E5BF;
+  background: rgba(255, 248, 233, 0.08);
+  border: 1.5px solid rgba(217, 154, 36, 0.5);
+  backdrop-filter: blur(8px);
+  transition: all 0.25s ease;
+}
+
+.btnSecondaryHero:hover {
+  background: rgba(217, 154, 36, 0.2);
+  color: #FFFDF7;
+  border-color: #FFDF73;
+  transform: translateY(-2px);
+}
+
+/* ------------------------------ Stats Bar ------------------------------ */
+.statsSection {
+  background: #FFFDF8;
+  padding: 0 1.5rem;
+  margin-top: -2.2rem;
+  position: relative;
+  z-index: 5;
+}
+
+.statsContainer {
+  max-width: 1140px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  background: #FFFFFF;
+  border: 1.5px solid #EFE4D6;
+  border-radius: 18px;
+  padding: 1.6rem 1.8rem;
+  box-shadow: 0 10px 30px rgba(43, 26, 33, 0.07);
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.statItem:not(:last-child) {
+  border-right: 1px solid #F1E5D5;
+}
+
+.statIconWrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(217, 154, 36, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9E6400;
+  flex-shrink: 0;
+}
+
+.statText {
+  display: flex;
+  flex-direction: column;
+}
+
+.statNumber {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #650D18;
+  line-height: 1.15;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #7D6B60;
+  margin-top: 0.15rem;
+}
+
+/* ------------------------------ Mission / Story Grid ------------------------------ */
+.storySection {
+  max-width: 1140px;
+  margin: 4.5rem auto 0;
+  padding: 0 1.5rem;
+}
+
+.storyGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.storyText {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9E6400;
+  margin-bottom: 0.75rem;
+}
+
+.storyTitle {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: clamp(1.8rem, 2.8vw, 2.3rem);
+  font-weight: 800;
+  color: #35050B;
+  line-height: 1.32;
+  margin: 0 0 1.25rem;
+}
+
+.storyDesc {
+  font-size: 0.98rem;
+  line-height: 1.78;
+  color: #55443D;
+  margin: 0 0 1.1rem;
+}
+
+.storyDesc strong {
+  color: #650D18;
+  font-weight: 700;
+}
+
+.storyPoints {
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.storyPoint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #43332D;
+}
+
+.storyPointIcon {
+  color: #9E6400;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+/* Story Card Right */
+.storyCard {
+  background: linear-gradient(145deg, #FFFDF8 0%, #FFF5E2 100%);
+  border: 1.5px solid #E6C88A;
+  border-radius: 24px;
+  padding: 2.25rem 2rem;
+  box-shadow: 0 12px 35px rgba(217, 154, 36, 0.14);
+  position: relative;
+}
+
+.storyCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.storyCardLogo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.storyCardBrand {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #650D18;
+}
+
+.storyCardTagline {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #9E6400;
+}
+
+.storyCardBlessing {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  font-weight: 700;
+  color: #7A0810;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.25rem;
+  background: rgba(217, 154, 36, 0.1);
+  border-left: 3px solid #D99A24;
+  border-radius: 0 12px 12px 0;
+}
+
+.storyCardFeatures {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.storyCardFeatureItem {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #4A332B;
+}
+
+.storyCardFeatureIcon {
+  color: #9E6400;
+  flex-shrink: 0;
+}
+
+/* ------------------------------ Core Pillars Section ------------------------------ */
+.pillarsSection {
+  max-width: 1140px;
+  margin: 5.5rem auto 0;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.sectionHeader {
+  max-width: 38rem;
+  margin: 0 auto 3rem;
+}
+
+.sectionTitle {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+  font-weight: 800;
+  color: #35050B;
+  margin: 0.5rem 0 0.85rem;
+}
+
+.sectionSub {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #6F5E56;
+}
+
+.pillarsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  text-align: left;
+}
+
+.pillarCard {
+  background: #FFFFFF;
+  border: 1.5px solid #EFE4D6;
+  border-radius: 18px;
+  padding: 1.85rem 1.65rem;
+  box-shadow: 0 6px 20px rgba(43, 26, 33, 0.04);
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.pillarCard:hover {
+  transform: translateY(-4px);
+  border-color: #D99A24;
+  box-shadow: 0 12px 30px rgba(217, 154, 36, 0.16);
+}
+
+.pillarIconWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(217, 154, 36, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9E6400;
+  margin-bottom: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.pillarCard:hover .pillarIconWrap {
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  color: #FFDF73;
+}
+
+.pillarTamilTitle {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: #650D18;
+  margin: 0 0 0.35rem;
+  line-height: 1.35;
+}
+
+.pillarEngTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9E6400;
+  margin: 0 0 0.85rem;
+}
+
+.pillarDesc {
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: #55443D;
+  margin: 0;
+}
+
+/* ------------------------------ Official Management Advisory ------------------------------ */
+.advisorySection {
+  max-width: 1000px;
+  margin: 5rem auto 0;
+  padding: 0 1.5rem;
+}
+
+.advisoryBox {
+  background: linear-gradient(135deg, #FFFDF8 0%, #FFF7E7 100%);
+  border: 2px dashed #D99A24;
+  border-radius: 20px;
+  padding: 2.25rem 2.25rem;
+  box-shadow: 0 8px 24px rgba(217, 154, 36, 0.12);
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.advisoryIconWrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background: #650D18;
+  color: #FFDF73;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(101, 13, 24, 0.3);
+}
+
+.advisoryContent {
+  flex: 1;
+}
+
+.advisoryBadge {
+  display: inline-block;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9E6400;
+  margin-bottom: 0.45rem;
+}
+
+.advisoryHeading {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #650D18;
+  margin: 0 0 0.85rem;
+}
+
+.advisoryText {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: #49372F;
+  margin: 0 0 1rem;
+}
+
+.advisoryAuthor {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #7A0810;
+  display: inline-block;
+}
+
+/* ------------------------------ Office & Support HQ Card ------------------------------ */
+.officeSection {
+  max-width: 1140px;
+  margin: 5rem auto 0;
+  padding: 0 1.5rem;
+}
+
+.officeCard {
+  background: linear-gradient(135deg, #2D0509 0%, #170204 100%);
+  border: 1.5px solid #D99A24;
+  border-radius: 24px;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+  color: #FFFDF8;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.officeText {
+  display: flex;
+  flex-direction: column;
+}
+
+.officeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #FFDF73;
+  margin-bottom: 0.85rem;
+}
+
+.officeTitle {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: clamp(1.8rem, 2.6vw, 2.2rem);
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0 0 0.85rem;
+}
+
+.officeSubtitle {
+  font-size: 0.95rem;
+  line-height: 1.68;
+  color: rgba(255, 248, 233, 0.85);
+  margin: 0 0 1.5rem;
+}
+
+.officeDetailsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.officeDetailItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+  color: #F8E5BF;
+}
+
+.officeDetailIcon {
+  color: #FFDF73;
+  flex-shrink: 0;
+}
+
+.officeDetailItem a {
+  color: #FFDF73;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.officeDetailItem a:hover {
+  text-decoration: underline;
+  color: #FFFDF8;
+}
+
+/* Office Action Box Right */
+.officeActionBox {
+  background: rgba(255, 248, 233, 0.05);
+  border: 1px solid rgba(217, 154, 36, 0.4);
+  border-radius: 18px;
+  padding: 2rem 1.8rem;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.officeActionBoxTitle {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #FFDF73;
+  margin: 0 0 0.5rem;
+}
+
+.officeActionBoxSub {
+  font-size: 0.85rem;
+  color: rgba(255, 248, 233, 0.78);
+  margin: 0 0 1.4rem;
+}
+
+.officeButtons {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.btnOfficeCall {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: #FFFDF7 !important;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  border: 1.5px solid #D99A24;
+  box-shadow: 0 4px 12px rgba(122, 8, 16, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btnOfficeCall:hover {
+  background: linear-gradient(135deg, #B50D19 0%, #8A0A12 100%);
+  border-color: #F5C369;
+  transform: translateY(-2px);
+}
+
+.btnOfficeWhatsApp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: #1A3818;
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  border: 1.5px solid #16a34a;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btnOfficeWhatsApp:hover {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+/* ------------------------------ CTA Banner Bottom ------------------------------ */
+.bottomCtaSection {
+  max-width: 1140px;
+  margin: 5.5rem auto 5rem;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.bottomCtaCard {
+  background: linear-gradient(145deg, #FFFDF8 0%, #FFF5E2 100%);
+  border: 1.5px solid #E6C88A;
+  border-radius: 24px;
+  padding: 3.5rem 2rem;
+  box-shadow: 0 12px 36px rgba(217, 154, 36, 0.12);
+}
+
+.bottomCtaTitle {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 800;
+  color: #35050B;
+  margin: 0 0 0.85rem;
+}
+
+.bottomCtaSub {
+  max-width: 38rem;
+  margin: 0 auto 2rem;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #6F5E56;
+}
+
+/* ------------------------------ Responsive Breakpoints ------------------------------ */
+@media (max-width: 1024px) {
+  .statsContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .statItem:nth-child(2) {
+    border-right: none;
+  }
+  .storyGrid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .pillarsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .officeCard {
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+  }
+}
+
+@media (max-width: 680px) {
+  .hero {
+    padding: 3.5rem 1.25rem 4.5rem;
+  }
+  .statsContainer {
+    grid-template-columns: 1fr;
+    padding: 1.25rem 1rem;
+  }
+  .statItem:not(:last-child) {
+    border-right: none;
+    border-bottom: 1px solid #F1E5D5;
+    padding-bottom: 0.85rem;
+  }
+  .pillarsGrid {
+    grid-template-columns: 1fr;
+  }
+  .advisoryBox {
+    flex-direction: column;
+    padding: 1.5rem 1.25rem;
+  }
+  .officeCard {
+    padding: 2rem 1.25rem;
+  }
+}

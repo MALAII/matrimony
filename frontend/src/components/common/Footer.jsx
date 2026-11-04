@@ -20,7 +20,7 @@ const exploreLinks = [
   { href: '/#how-it-works', label: 'How It Works' },
   { href: '/#membership', label: 'Membership Plans' },
   { href: '/#privacy', label: 'Candidate Privacy' },
-  { href: '/#about', label: 'About Us' },
+  { href: '/about', label: 'About Us' },
 ];
 
 const accountLinks = [
