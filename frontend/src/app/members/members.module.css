@@ -793,28 +793,6 @@
   gap: 1.5rem;
 }
 
-.matchCardWrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.cardGoldMotifWrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 0.5rem 0;
-}
-
-.cardGoldMotif {
-  width: 220px;
-  height: auto;
-  opacity: 0.9;
-  filter: drop-shadow(0 1px 3px rgba(217, 154, 36, 0.35));
-}
-
 .matchCard {
   width: 100%;
   display: grid;
@@ -953,18 +931,44 @@
   gap: 1rem;
 }
 
-.idGroup {
+.nameGroup {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.65rem;
 }
 
-.candidateId {
+.candidateNameLink {
+  text-decoration: none;
+}
+
+.candidateName {
+  margin: 0;
   font-family: var(--serif);
   font-size: 1.55rem;
   font-weight: 700;
   color: #8B0D18;
   letter-spacing: -0.01em;
+  line-height: 1.2;
+  transition: color 0.2s ease;
+}
+
+.candidateNameLink:hover .candidateName {
+  color: #B91C1C;
+}
+
+.candidateIdTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-family: monospace;
+  font-weight: 700;
+  color: #7A0810;
+  background: #FDF4E2;
+  border: 1px solid rgba(217, 154, 36, 0.35);
+  letter-spacing: 0.04em;
 }
 
 .copyIdBtn {
@@ -1010,20 +1014,6 @@
   border-radius: 50%;
   background: #16A34A;
   box-shadow: 0 0 6px #16A34A;
-}
-
-.headerGoldFlourish {
-  width: 140px;
-  height: 10px;
-  margin-top: -0.3rem;
-  margin-bottom: 0.2rem;
-  opacity: 0.85;
-}
-
-.headerGoldFlourish img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 
 /* The Clean 2-Column Key-Value Spec Grid */

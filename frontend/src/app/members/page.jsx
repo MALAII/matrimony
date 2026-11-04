@@ -198,27 +198,24 @@ function CopyButton({ value }) {
 
 function SkeletonCard() {
   return (
-    <div className={styles.matchCardWrapper}>
-      <div className={`${styles.matchCard} ${styles.skeleton}`} aria-hidden="true">
-        <div className={styles.skPhotoCol} />
-        <div className={styles.skBioCol}>
-          <div className={styles.skLine} style={{ width: '40%', height: '26px' }} />
-          <div className={styles.skLine} style={{ width: '100px', height: '8px' }} />
-          <div className={styles.skGrid}>
-            <div className={styles.skLine} style={{ width: '90%', height: '18px' }} />
-            <div className={styles.skLine} style={{ width: '85%', height: '18px' }} />
-            <div className={styles.skLine} style={{ width: '90%', height: '18px' }} />
-            <div className={styles.skLine} style={{ width: '80%', height: '18px' }} />
-            <div className={styles.skLine} style={{ width: '90%', height: '18px' }} />
-            <div className={styles.skLine} style={{ width: '85%', height: '18px' }} />
-          </div>
-          <div className={styles.skLine} style={{ width: '100%', height: '40px', borderRadius: '10px' }} />
+    <div className={`${styles.matchCard} ${styles.skeleton}`} aria-hidden="true">
+      <div className={styles.skPhotoCol} />
+      <div className={styles.skBioCol}>
+        <div className={styles.skLine} style={{ width: '45%', height: '28px' }} />
+        <div className={styles.skGrid}>
+          <div className={styles.skLine} style={{ width: '90%', height: '18px' }} />
+          <div className={styles.skLine} style={{ width: '85%', height: '18px' }} />
+          <div className={styles.skLine} style={{ width: '90%', height: '18px' }} />
+          <div className={styles.skLine} style={{ width: '80%', height: '18px' }} />
+          <div className={styles.skLine} style={{ width: '90%', height: '18px' }} />
+          <div className={styles.skLine} style={{ width: '85%', height: '18px' }} />
         </div>
-        <div className={styles.skActionCol}>
-          <div className={styles.skLine} style={{ width: '100%', height: '42px', borderRadius: '12px' }} />
-          <div className={styles.skLine} style={{ width: '100%', height: '65px', borderRadius: '14px' }} />
-          <div className={styles.skLine} style={{ width: '100%', height: '40px', borderRadius: '12px' }} />
-        </div>
+        <div className={styles.skLine} style={{ width: '100%', height: '40px', borderRadius: '10px' }} />
+      </div>
+      <div className={styles.skActionCol}>
+        <div className={styles.skLine} style={{ width: '100%', height: '42px', borderRadius: '12px' }} />
+        <div className={styles.skLine} style={{ width: '100%', height: '65px', borderRadius: '14px' }} />
+        <div className={styles.skLine} style={{ width: '100%', height: '40px', borderRadius: '12px' }} />
       </div>
     </div>
   );
@@ -1032,69 +1029,63 @@ export default function MemberDirectoryPage() {
                     const isShortlisted = Boolean(shortlistedMap[profile.id]);
 
                     return (
-                      <div key={profile.id} className={styles.matchCardWrapper}>
-                        <div className={styles.cardGoldMotifWrap} aria-hidden="true">
-                          <img src="/images/varaghi/gold-divider.svg" alt="" className={styles.cardGoldMotif} />
+                      <article key={profile.id} className={styles.matchCard}>
+                        {/* Column 1: Portrait Photo */}
+                        <div className={styles.matchPhotoCol}>
+                          <div className={styles.matchPhotoFrame}>
+                            {profile.profilePhotoUrl ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img src={profile.profilePhotoUrl} alt={`${displayName} portrait`} loading="lazy" />
+                            ) : (
+                              <div className={styles.matchPhotoPlaceholder}>
+                                <span>{initial}</span>
+                              </div>
+                            )}
+
+                            <span className={styles.matchVerifiedPill}>
+                              <CheckCircle2 size={13} strokeWidth={2.5} aria-hidden="true" />
+                              <span>Verified</span>
+                            </span>
+
+                            <span className={styles.matchPhotoCountPill}>
+                              <Camera size={13} aria-hidden="true" />
+                              <span>{Array.isArray(profile.photos) && profile.photos.length > 0 ? `1 / ${profile.photos.length}` : '1 / 1'}</span>
+                            </span>
+
+                            {profile.profilePhotoUrl && (
+                              <button
+                                type="button"
+                                className={styles.matchPhotoZoomBtn}
+                                onClick={() => setZoomPhotoUrl(profile.profilePhotoUrl)}
+                                aria-label={`Zoom ${displayName}'s photo`}
+                                title="Zoom Photo"
+                              >
+                                <ZoomIn size={14} aria-hidden="true" />
+                              </button>
+                            )}
+                          </div>
                         </div>
 
-                        <article className={styles.matchCard}>
-                          {/* Column 1: Portrait Photo */}
-                          <div className={styles.matchPhotoCol}>
-                            <div className={styles.matchPhotoFrame}>
-                              {profile.profilePhotoUrl ? (
-                                /* eslint-disable-next-line @next/next/no-img-element */
-                                <img src={profile.profilePhotoUrl} alt={`${displayName} portrait`} loading="lazy" />
-                              ) : (
-                                <div className={styles.matchPhotoPlaceholder}>
-                                  <span>{initial}</span>
-                                </div>
-                              )}
-
-                              <span className={styles.matchVerifiedPill}>
-                                <CheckCircle2 size={13} strokeWidth={2.5} aria-hidden="true" />
-                                <span>Verified</span>
+                        {/* Column 2: Structured 2-Column Key-Value Spec Grid */}
+                        <div className={styles.matchBioCol}>
+                          <div className={styles.cleanHeader}>
+                            <div className={styles.nameGroup}>
+                              <Link href={`/members/${profile.id}`} className={styles.candidateNameLink}>
+                                <h3 className={styles.candidateName}>{displayName}</h3>
+                              </Link>
+                              <span className={styles.candidateIdTag}>ID: {candidateRefId}</span>
+                              <IdCopyButton value={candidateRefId} />
+                            </div>
+                            <div className={styles.statusGroup}>
+                              <span className={styles.recentlyActivePill}>
+                                <span className={styles.activeDot} />
+                                <span>Recently Active</span>
                               </span>
-
-                              <span className={styles.matchPhotoCountPill}>
-                                <Camera size={13} aria-hidden="true" />
-                                <span>{Array.isArray(profile.photos) && profile.photos.length > 0 ? `1 / ${profile.photos.length}` : '1 / 1'}</span>
-                              </span>
-
-                              {profile.profilePhotoUrl && (
-                                <button
-                                  type="button"
-                                  className={styles.matchPhotoZoomBtn}
-                                  onClick={() => setZoomPhotoUrl(profile.profilePhotoUrl)}
-                                  aria-label={`Zoom ${displayName}'s photo`}
-                                  title="Zoom Photo"
-                                >
-                                  <ZoomIn size={14} aria-hidden="true" />
-                                </button>
-                              )}
                             </div>
                           </div>
 
-                          {/* Column 2: Structured 2-Column Key-Value Spec Grid */}
-                          <div className={styles.matchBioCol}>
-                            <div className={styles.cleanHeader}>
-                              <div className={styles.idGroup}>
-                                <span className={styles.candidateId}>{candidateRefId}</span>
-                                <IdCopyButton value={candidateRefId} />
-                              </div>
-                              <div className={styles.statusGroup}>
-                                <span className={styles.recentlyActivePill}>
-                                  <span className={styles.activeDot} />
-                                  <span>Recently Active</span>
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className={styles.headerGoldFlourish} aria-hidden="true">
-                              <img src="/images/varaghi/gold-divider.svg" alt="" />
-                            </div>
-
-                            {/* 2-Column Clean Key-Value Spec Grid matching user reference image */}
-                            <div className={styles.cleanSpecTable}>
+                          {/* 2-Column Clean Key-Value Spec Grid matching user reference image */}
+                          <div className={styles.cleanSpecTable}>
                               {/* Left Column (7 rows) */}
                               <div className={styles.specCol}>
                                 <div className={styles.cleanRow}>
@@ -1311,13 +1302,8 @@ export default function MemberDirectoryPage() {
                             </button>
                           </div>
                         </article>
-
-                        <div className={styles.cardGoldMotifWrap} aria-hidden="true">
-                          <img src="/images/varaghi/gold-divider.svg" alt="" className={styles.cardGoldMotif} />
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
 
                 {pagination.totalPages > 1 && (
