@@ -433,18 +433,28 @@
   margin-top: 1.15rem;
   padding: 0.65rem 1rem;
   border-radius: 999px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--rose-deep);
-  background: var(--rose-light);
-  border: 1.5px solid var(--rose-deep);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #7A0810;
+  background: #FFFDF8;
+  border: 1.5px solid #D99A24;
   text-decoration: none;
+  box-shadow: 0 2px 8px rgba(217, 154, 36, 0.15);
   transition: all 0.2s var(--ease);
 }
 
 .btnSidebarPreview:hover {
-  background: var(--rose-deep);
-  color: #ffffff;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  border-color: #F5C369;
+  color: #FFFDF7 !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 16px rgba(217, 154, 36, 0.35);
+}
+
+.btnSidebarPreview:active {
+  background: #63050B;
+  border-color: #D99A24;
+  transform: translateY(1px);
 }
 
 /* Quick Section Jump Card */
@@ -987,17 +997,27 @@
   padding: 0.65rem 1.35rem;
   border-radius: 999px;
   font-size: 0.86rem;
-  font-weight: 600;
-  color: var(--rose-deep);
-  background: var(--rose-light);
-  border: 1.5px solid var(--rose-deep);
+  font-weight: 700;
+  color: #7A0810;
+  background: #FFFDF8;
+  border: 1.5px solid #D99A24;
+  box-shadow: 0 2px 8px rgba(217, 154, 36, 0.15);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .btnChoosePhoto:hover {
-  background: var(--rose-deep);
-  color: #ffffff;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  border-color: #F5C369;
+  color: #FFFDF7 !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(217, 154, 36, 0.35);
+}
+
+.btnChoosePhoto:active {
+  background: #63050B;
+  border-color: #D99A24;
+  transform: translateY(1px);
 }
 
 .btnUploadPhoto {
@@ -1007,23 +1027,35 @@
   padding: 0.65rem 1.45rem;
   border-radius: 999px;
   font-size: 0.86rem;
-  font-weight: 600;
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--rose-deep), #993a55);
-  border: none;
+  font-weight: 700;
+  color: #FFFDF7;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  border: 1.5px solid #D99A24;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(125, 49, 71, 0.35);
-  transition: transform 0.2s var(--ease), filter 0.2s;
+  box-shadow: 0 4px 14px rgba(122, 8, 16, 0.35);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s, background 0.2s;
 }
 
 .btnUploadPhoto:hover:not(:disabled) {
-  transform: translateY(-1px);
-  filter: brightness(1.08);
+  transform: translateY(-1.5px);
+  background: linear-gradient(135deg, #AC0F1C 0%, #8A0A12 100%);
+  border-color: #F5C369;
+  color: #FFFFFF;
+  box-shadow: 0 6px 20px rgba(217, 154, 36, 0.4), 0 2px 8px rgba(122, 8, 16, 0.4);
+}
+
+.btnUploadPhoto:active:not(:disabled) {
+  background: #63050B;
+  border-color: #D99A24;
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 .btnUploadPhoto:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .btnCancelPhoto {
@@ -1341,25 +1373,35 @@
   padding: 0.78rem 2.25rem;
   border-radius: 999px;
   font-size: 0.94rem;
-  font-weight: 600;
-  color: #ffffff;
-  border: 0;
-  background: linear-gradient(135deg, var(--rose-deep) 0%, #993a55 55%, var(--gold) 100%);
-  box-shadow: 0 8px 20px -4px rgba(125, 49, 71, 0.65);
+  font-weight: 700;
+  color: #FFFDF7;
+  border: 1.5px solid #D99A24;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  box-shadow: 0 8px 20px -4px rgba(122, 8, 16, 0.45);
   cursor: pointer;
-  transition: transform 0.2s var(--ease), box-shadow 0.2s, filter 0.2s;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s, background 0.2s;
 }
 
 .btnPrimarySave:hover:not(:disabled) {
   transform: translateY(-1.5px);
-  filter: brightness(1.08);
-  box-shadow: 0 12px 26px -4px rgba(125, 49, 71, 0.75);
+  background: linear-gradient(135deg, #AC0F1C 0%, #8A0A12 100%);
+  border-color: #F5C369;
+  color: #FFFFFF;
+  box-shadow: 0 12px 26px -4px rgba(217, 154, 36, 0.4), 0 4px 12px rgba(122, 8, 16, 0.4);
+}
+
+.btnPrimarySave:active:not(:disabled) {
+  background: #63050B;
+  border-color: #D99A24;
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 .btnPrimarySave:disabled {
   opacity: 0.65;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 .btnPreviewCard {
@@ -1369,17 +1411,28 @@
   padding: 0.72rem 1.35rem;
   border-radius: 999px;
   font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--rose-deep);
-  background: #ffffff;
-  border: 1.5px solid var(--rose-deep);
+  font-weight: 700;
+  color: #7A0810;
+  background: #FFFDF8;
+  border: 1.5px solid #D99A24;
   cursor: pointer;
   text-decoration: none;
+  box-shadow: 0 2px 8px rgba(217, 154, 36, 0.15);
   transition: all 0.2s;
 }
 
 .btnPreviewCard:hover {
-  background: var(--rose-light);
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  border-color: #F5C369;
+  color: #FFFDF7 !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(217, 154, 36, 0.35);
+}
+
+.btnPreviewCard:active {
+  background: #63050B;
+  border-color: #D99A24;
+  transform: translateY(1px);
 }
 
 .spinner {
@@ -1457,10 +1510,27 @@
   gap: 0.5rem;
   padding: 0.75rem 1.75rem;
   border-radius: 999px;
-  background: var(--rose-deep);
-  color: #ffffff;
-  font-weight: 600;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  border: 1.5px solid #D99A24;
+  color: #FFFDF7 !important;
+  font-weight: 700;
   text-decoration: none;
+  box-shadow: 0 4px 14px rgba(122, 8, 16, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btnSignIn:hover {
+  background: linear-gradient(135deg, #AC0F1C 0%, #8A0A12 100%);
+  border-color: #F5C369;
+  color: #FFFFFF !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(217, 154, 36, 0.4), 0 2px 8px rgba(122, 8, 16, 0.4);
+}
+
+.btnSignIn:active {
+  background: #63050B;
+  border-color: #D99A24;
+  transform: translateY(1px);
 }
 
 /* ------------------------------ Responsive Media Queries ------------------------------ */

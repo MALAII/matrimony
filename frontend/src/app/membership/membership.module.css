@@ -82,38 +82,69 @@
 }
 
 .btnPrimary {
-  color: #fff;
-  background: var(--rose-deep);
-  border: 0;
-  box-shadow: 0 12px 26px -12px rgba(125, 49, 71, 0.8);
+  color: #FFFDF7;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  border: 1.5px solid #D99A24;
+  box-shadow: 0 8px 20px -6px rgba(122, 8, 16, 0.5);
 }
 
 .btnPrimary:hover:not(:disabled) {
   transform: translateY(-2px);
-  background: #692640;
+  background: linear-gradient(135deg, #AC0F1C 0%, #8A0A12 100%);
+  border-color: #F5C369;
+  color: #FFFFFF;
+  box-shadow: 0 12px 24px -6px rgba(217, 154, 36, 0.4), 0 4px 12px rgba(122, 8, 16, 0.4);
+}
+
+.btnPrimary:active:not(:disabled) {
+  background: #63050B;
+  border-color: #D99A24;
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 .btnOutline {
-  color: var(--rose-deep);
-  background: #fff;
-  border: 1.5px solid var(--rose-deep);
+  color: #7A0810;
+  background: #FFFDF8;
+  border: 1.5px solid #D99A24;
+  box-shadow: 0 2px 8px rgba(217, 154, 36, 0.15);
 }
 
 .btnOutline:hover:not(:disabled) {
-  background: var(--rose-deep);
-  color: #fff;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  border-color: #F5C369;
+  color: #FFFDF7 !important;
   transform: translateY(-2px);
+  box-shadow: 0 8px 20px -6px rgba(217, 154, 36, 0.35), 0 2px 8px rgba(122, 8, 16, 0.3);
+}
+
+.btnOutline:active:not(:disabled) {
+  background: #63050B;
+  border-color: #D99A24;
+  color: #FFFDF7 !important;
+  transform: translateY(1px);
 }
 
 .btnGold {
-  color: var(--plum);
-  background: var(--gold-bright);
-  border: 0;
+  color: #FFFDF7;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  border: 1.5px solid #D99A24;
+  box-shadow: 0 8px 20px -6px rgba(122, 8, 16, 0.5);
+  font-weight: 700;
 }
 
 .btnGold:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 16px 30px -12px rgba(224, 189, 119, 0.8);
+  background: linear-gradient(135deg, #AC0F1C 0%, #8A0A12 100%);
+  border-color: #F5C369;
+  color: #FFFFFF;
+  box-shadow: 0 12px 24px -6px rgba(217, 154, 36, 0.4), 0 4px 12px rgba(122, 8, 16, 0.4);
+}
+
+.btnGold:active:not(:disabled) {
+  background: #63050B;
+  border-color: #D99A24;
+  transform: translateY(1px);
 }
 
 .btnPrimary:disabled,

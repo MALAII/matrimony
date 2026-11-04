@@ -406,22 +406,31 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.62rem 1.3rem;
+  padding: 0.68rem 1.35rem;
   border-radius: 999px;
-  font: 600 0.88rem var(--sans);
-  color: #ffffff;
-  border: 0;
-  background: linear-gradient(135deg, var(--rose-deep) 0%, #993a55 55%, var(--gold) 100%);
-  box-shadow: 0 6px 16px -4px rgba(125, 49, 71, 0.65);
+  font: 700 0.9rem var(--sans);
+  color: #FFFDF7;
+  border: 1.5px solid #D99A24;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  box-shadow: 0 4px 14px rgba(122, 8, 16, 0.35);
   cursor: pointer;
-  transition: transform 0.2s var(--ease), box-shadow 0.2s, filter 0.2s;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s, background 0.2s;
   margin-top: 0.25rem;
 }
 
 .btnPrimary:hover:not(:disabled) {
   transform: translateY(-1.5px);
-  filter: brightness(1.08);
-  box-shadow: 0 10px 22px -4px rgba(125, 49, 71, 0.75);
+  background: linear-gradient(135deg, #AC0F1C 0%, #8A0A12 100%);
+  border-color: #F5C369;
+  color: #FFFFFF;
+  box-shadow: 0 6px 20px rgba(217, 154, 36, 0.4), 0 2px 8px rgba(122, 8, 16, 0.4);
+}
+
+.btnPrimary:active:not(:disabled) {
+  background: #63050B;
+  border-color: #D99A24;
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 .btnPrimary:disabled {
@@ -437,21 +446,31 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.62rem 1.3rem;
+  padding: 0.68rem 1.35rem;
   border-radius: 999px;
-  font: 600 0.88rem var(--sans);
-  color: var(--rose-deep);
-  background: #ffffff;
-  border: 1.5px solid var(--rose-deep);
+  font: 700 0.9rem var(--sans);
+  color: #7A0810;
+  background: #FFFDF8;
+  border: 1.5px solid #D99A24;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.2s, color 0.2s, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(217, 154, 36, 0.15);
+  transition: all 0.2s ease;
 }
 
 .btnOutline:hover:not(:disabled) {
-  background: var(--rose-deep);
-  color: #ffffff;
+  background: linear-gradient(135deg, #990B15 0%, #7A0810 100%);
+  border-color: #F5C369;
+  color: #FFFDF7 !important;
   transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(217, 154, 36, 0.35), 0 2px 8px rgba(122, 8, 16, 0.3);
+}
+
+.btnOutline:active:not(:disabled) {
+  background: #63050B;
+  border-color: #D99A24;
+  color: #FFFDF7 !important;
+  transform: translateY(1px);
 }
 
 .btnOutlineDanger {
