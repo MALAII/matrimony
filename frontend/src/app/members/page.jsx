@@ -152,32 +152,6 @@ function formatHeightDisplay(heightVal) {
   return `${feet} ft ${inches} in (${num} cm)`;
 }
 
-function IdCopyButton({ value }) {
-  const [copied, setCopied] = useState(false);
-  const copy = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    } catch {
-      /* clipboard unavailable */
-    }
-  };
-  return (
-    <button
-      type="button"
-      className={styles.copyIdBtn}
-      onClick={copy}
-      aria-label={`Copy profile ID ${value}`}
-      title="Copy Profile ID"
-    >
-      {copied ? <Check size={14} color="#15803d" /> : <Copy size={14} />}
-    </button>
-  );
-}
-
 function CopyButton({ value }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
@@ -1066,15 +1040,13 @@ export default function MemberDirectoryPage() {
                           </div>
                         </div>
 
-                        {/* Column 2: Structured 2-Column Key-Value Spec Grid */}
+                        {/* Column 2: Essential Matrimonial Biodata (Streamlined & Clean) */}
                         <div className={styles.matchBioCol}>
                           <div className={styles.cleanHeader}>
                             <div className={styles.nameGroup}>
                               <Link href={`/members/${profile.id}`} className={styles.candidateNameLink}>
                                 <h3 className={styles.candidateName}>{displayName}</h3>
                               </Link>
-                              <span className={styles.candidateIdTag}>ID: {candidateRefId}</span>
-                              <IdCopyButton value={candidateRefId} />
                             </div>
                             <div className={styles.statusGroup}>
                               <span className={styles.recentlyActivePill}>
@@ -1084,150 +1056,100 @@ export default function MemberDirectoryPage() {
                             </div>
                           </div>
 
-                          {/* 2-Column Clean Key-Value Spec Grid matching user reference image */}
+                          {/* 2-Column Clean Key-Value Spec Grid (Core Essentials) */}
                           <div className={styles.cleanSpecTable}>
-                              {/* Left Column (7 rows) */}
-                              <div className={styles.specCol}>
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <Calendar size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Age</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal}>{ageDisplay}</span>
+                            {/* Left Column (Core Personal & Origin) */}
+                            <div className={styles.specCol}>
+                              <div className={styles.cleanRow}>
+                                <div className={styles.cleanKey}>
+                                  <Calendar size={15} className={styles.rowIcon} aria-hidden="true" />
+                                  <span>Age / Height</span>
                                 </div>
-
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <Heart size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Marital Status</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal}>{maritalStatusDisplay}</span>
-                                </div>
-
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <MapPin size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Current City</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal} title={currentCityDisplay}>{currentCityDisplay}</span>
-                                </div>
-
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <Briefcase size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Profession</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal} title={professionDisplay}>{professionDisplay}</span>
-                                </div>
-
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <Users size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Caste</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal}>{casteDisplay}</span>
-                                </div>
-
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <Landmark size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Gothram</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal}>{gothramDisplay}</span>
-                                </div>
-
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <Moon size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Rasi</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal}>{rasiDisplay}</span>
-                                </div>
+                                <span className={styles.colon}>:</span>
+                                <span className={styles.cleanVal}>
+                                  {p.age ? `${p.age} Yrs` : '–'}{p.height ? `, ${heightDisplay}` : ''}
+                                </span>
                               </div>
 
-                              {/* Right Column (7 rows) */}
-                              <div className={styles.specCol}>
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <Ruler size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Height</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal}>{heightDisplay}</span>
+                              <div className={styles.cleanRow}>
+                                <div className={styles.cleanKey}>
+                                  <Heart size={15} className={styles.rowIcon} aria-hidden="true" />
+                                  <span>Marital Status</span>
                                 </div>
+                                <span className={styles.colon}>:</span>
+                                <span className={styles.cleanVal}>{maritalStatusDisplay}</span>
+                              </div>
 
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <Compass size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Native Place</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal} title={nativePlaceDisplay}>{nativePlaceDisplay}</span>
+                              <div className={styles.cleanRow}>
+                                <div className={styles.cleanKey}>
+                                  <MapPin size={15} className={styles.rowIcon} aria-hidden="true" />
+                                  <span>Location</span>
                                 </div>
+                                <span className={styles.colon}>:</span>
+                                <span className={styles.cleanVal} title={currentCityDisplay}>{currentCityDisplay}</span>
+                              </div>
 
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <GraduationCap size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Education</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal} title={educationDisplay}>{educationDisplay}</span>
+                              <div className={styles.cleanRow}>
+                                <div className={styles.cleanKey}>
+                                  <Users size={15} className={styles.rowIcon} aria-hidden="true" />
+                                  <span>Community</span>
                                 </div>
-
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <Coins size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Income</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal} title={incomeDisplay}>{incomeDisplay}</span>
-                                </div>
-
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <Layers size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Subcaste</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal}>{subcasteDisplay}</span>
-                                </div>
-
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <Star size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Nakshathiram</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal}>{nakshatramDisplay}</span>
-                                </div>
-
-                                <div className={styles.cleanRow}>
-                                  <div className={styles.cleanKey}>
-                                    <ShieldCheck size={15} className={styles.rowIcon} aria-hidden="true" />
-                                    <span>Dosham</span>
-                                  </div>
-                                  <span className={styles.colon}>:</span>
-                                  <span className={styles.cleanVal}>{doshamDisplay}</span>
-                                </div>
+                                <span className={styles.colon}>:</span>
+                                <span className={styles.cleanVal} title={community || '–'}>{community || '–'}</span>
                               </div>
                             </div>
 
-                            {/* Partner Expectation banner */}
-                            <div className={styles.partnerExpectationBox}>
-                              <Handshake size={18} className={styles.expectationIcon} aria-hidden="true" />
-                              <div className={styles.expectationContent}>
-                                <strong className={styles.expectationTitle}>Partner Expectation:</strong>{' '}
-                                <span className={styles.expectationBody}>{partnerExpectationText}</span>
+                            {/* Right Column (Career, Income & Astrology) */}
+                            <div className={styles.specCol}>
+                              <div className={styles.cleanRow}>
+                                <div className={styles.cleanKey}>
+                                  <GraduationCap size={15} className={styles.rowIcon} aria-hidden="true" />
+                                  <span>Education</span>
+                                </div>
+                                <span className={styles.colon}>:</span>
+                                <span className={styles.cleanVal} title={educationDisplay}>{educationDisplay}</span>
+                              </div>
+
+                              <div className={styles.cleanRow}>
+                                <div className={styles.cleanKey}>
+                                  <Briefcase size={15} className={styles.rowIcon} aria-hidden="true" />
+                                  <span>Profession</span>
+                                </div>
+                                <span className={styles.colon}>:</span>
+                                <span className={styles.cleanVal} title={professionDisplay}>{professionDisplay}</span>
+                              </div>
+
+                              <div className={styles.cleanRow}>
+                                <div className={styles.cleanKey}>
+                                  <Coins size={15} className={styles.rowIcon} aria-hidden="true" />
+                                  <span>Income</span>
+                                </div>
+                                <span className={styles.colon}>:</span>
+                                <span className={styles.cleanVal} title={incomeDisplay}>{incomeDisplay}</span>
+                              </div>
+
+                              <div className={styles.cleanRow}>
+                                <div className={styles.cleanKey}>
+                                  <Star size={15} className={styles.rowIcon} aria-hidden="true" />
+                                  <span>Star &amp; Rasi</span>
+                                </div>
+                                <span className={styles.colon}>:</span>
+                                <span className={styles.cleanVal} title={horoscopeText || '–'}>
+                                  {[h.nakshatram, h.rasi].filter(Boolean).join(' · ') || 'Available upon request'}
+                                </span>
                               </div>
                             </div>
                           </div>
+
+                          {/* Partner Expectation banner */}
+                          <div className={styles.partnerExpectationBox}>
+                            <Handshake size={17} className={styles.expectationIcon} aria-hidden="true" />
+                            <div className={styles.expectationContent}>
+                              <strong className={styles.expectationTitle}>Partner Expectation:</strong>{' '}
+                              <span className={styles.expectationBody}>{partnerExpectationText}</span>
+                            </div>
+                          </div>
+                        </div>
 
                           {/* Column 3: Dedicated Action Column */}
                           <div className={styles.matchActionCol}>

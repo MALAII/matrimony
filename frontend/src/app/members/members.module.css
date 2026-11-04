@@ -945,49 +945,16 @@
 .candidateName {
   margin: 0;
   font-family: var(--serif);
-  font-size: 1.55rem;
+  font-size: 1.65rem;
   font-weight: 700;
-  color: #8B0D18;
+  color: #A36605;
   letter-spacing: -0.01em;
   line-height: 1.2;
   transition: color 0.2s ease;
 }
 
 .candidateNameLink:hover .candidateName {
-  color: #B91C1C;
-}
-
-.candidateIdTag {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.2rem 0.55rem;
-  border-radius: 6px;
-  font-size: 0.78rem;
-  font-family: monospace;
-  font-weight: 700;
-  color: #7A0810;
-  background: #FDF4E2;
-  border: 1px solid rgba(217, 154, 36, 0.35);
-  letter-spacing: 0.04em;
-}
-
-.copyIdBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  border: 1px solid #EAD8C3;
-  background: #FFFDF8;
-  color: #8B0D18;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.copyIdBtn:hover {
-  background: #FDF4E2;
-  border-color: #D99A24;
+  color: #C58A24;
 }
 
 .statusGroup {
@@ -1021,20 +988,20 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   column-gap: 1.6rem;
-  row-gap: 0.25rem;
+  row-gap: 0.35rem;
 }
 
 .specCol {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.45rem;
 }
 
 .cleanRow {
   display: grid;
   grid-template-columns: 140px 14px minmax(0, 1fr);
   align-items: center;
-  padding: 0.15rem 0;
+  padding: 0.18rem 0;
   font-size: 0.88rem;
   line-height: 1.35;
 }
@@ -1044,24 +1011,24 @@
   align-items: center;
   gap: 0.45rem;
   font-weight: 700;
-  color: #8B0D18;
+  color: #9E6400;
   white-space: nowrap;
 }
 
 .rowIcon {
-  color: #8B0D18;
+  color: #C58A24;
   flex-shrink: 0;
 }
 
 .colon {
-  color: #55443D;
+  color: #B57F24;
   font-weight: 600;
   text-align: center;
 }
 
 .cleanVal {
-  font-weight: 500;
-  color: #241C19;
+  font-weight: 600;
+  color: #850E18;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1072,11 +1039,32 @@
   display: flex;
   align-items: flex-start;
   gap: 0.65rem;
-  padding: 0.65rem 0.95rem;
+  padding: 0.6rem 0.95rem;
   border-radius: 12px;
-  background: #FFF7ED;
-  border: 1px solid #F6E2CA;
-  margin-top: 0.3rem;
+  background: #FFF9F0;
+  border: 1px solid #F5DEBF;
+  margin-top: 0.35rem;
+}
+
+.expectationIcon {
+  color: #C58A24;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.expectationContent {
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.expectationTitle {
+  font-weight: 700;
+  color: #9E6400;
+}
+
+.expectationBody {
+  color: #850E18;
+  font-weight: 600;
 }
 
 .expectationIcon {
