@@ -140,13 +140,6 @@ export const Header = () => {
                 Membership Plans
               </Link>
               <Link
-                href="/#how-it-works"
-                className="nav-link"
-                onClick={closeMobileMenu}
-              >
-                How It Works
-              </Link>
-              <Link
                 href="/about"
                 className={`nav-link ${pathname === '/about' ? 'nav-link-active' : ''}`}
                 onClick={closeMobileMenu}
