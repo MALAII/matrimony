@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Heart, Lock } from 'lucide-react';
+import { ArrowRight, Mail, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
 
 const exploreLinks = [
   { href: '/', label: 'Home' },
@@ -13,7 +13,7 @@ const exploreLinks = [
 ];
 
 const accountLinks = [
-  { href: '/register', label: 'Create Profile' },
+  { href: '/register', label: 'Create Free Profile' },
   { href: '/login', label: 'Member Sign In' },
   { href: '/membership', label: 'My Membership' },
   { href: '/profile', label: 'My Profile' },
@@ -26,77 +26,111 @@ export const Footer = () => {
   return (
     <footer className="site-footer" aria-labelledby="footer-brand">
       <div className="container site-footer-main">
-        <div>
-          <Link href="/" className="brand-logo site-footer-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+        {/* Brand & Mission Column */}
+        <div className="site-footer-brand-col">
+          <Link href="/" className="site-footer-brand" aria-label="Varaghi Matrimony Home">
             <img
               src="/logo.png"
-              alt="Varaghi Matrimony"
-              style={{ width: '44px', height: '44px', objectFit: 'contain' }}
+              alt="Varaghi Matrimony Logo"
+              className="site-footer-logo"
             />
-            <span className="brand-text-wrap">
-              <span id="footer-brand" className="brand-name" style={{ fontSize: '1.25rem', fontWeight: 800 }}>Varaghi Matrimony</span>
-              <span className="brand-tagline" style={{ color: '#f0c354', fontSize: '0.74rem' }}>ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
-            </span>
+            <div className="site-footer-brand-text">
+              <span id="footer-brand" className="site-footer-brand-name">Varaghi Matrimony</span>
+              <span className="site-footer-brand-tagline">ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
+            </div>
           </Link>
+
           <p className="site-footer-about">
-            தென்னிந்திய குடும்பங்களின் நம்பிக்கையான திருமண தகவல் மையம். வரன் ஜாதகம், முழு பயோடேட்டா மற்றும் பாதுகாப்பான வரன் தேடல் தளம்.
+            தென்னிந்திய குடும்பங்களின் நம்பிக்கையான திருமண தகவல் மையம். பாரம்பரிய வரன் ஜாதகம், முழு பயோடேட்டா மற்றும் பாதுகாப்பான திருமண உறவுகளுக்கான உன்னத தளம்.
           </p>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#f7d794', opacity: 0.9 }}>
-            📍 Ranipet, Tamil Nadu &bull; ✉️ varaghiimatrimony@gmail.com
-          </p>
-          <p style={{ marginTop: '0.65rem', fontSize: '0.85rem', color: '#f0c354', fontStyle: 'italic', fontFamily: 'var(--font-serif)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <img
-              src="/images/varaghi/motifs/varaghi-bottom-emblem.png"
-              alt=""
-              aria-hidden="true"
-              style={{ width: '22px', height: '18px', objectFit: 'contain' }}
-            />
+
+          <div className="site-footer-contact-list">
+            <div className="site-footer-contact-item">
+              <MapPin size={14} className="site-footer-contact-icon" aria-hidden="true" />
+              <span>Ranipet, Tamil Nadu</span>
+            </div>
+            <div className="site-footer-contact-item">
+              <Mail size={14} className="site-footer-contact-icon" aria-hidden="true" />
+              <a href="mailto:varaghiimatrimony@gmail.com">varaghiimatrimony@gmail.com</a>
+            </div>
+          </div>
+
+          <div className="site-footer-blessing">
+            <Sparkles size={14} className="site-footer-blessing-icon" aria-hidden="true" />
             <span>&ldquo;மங்கல வாழ்க்கை மலர ஸ்ரீ வாராஹி அம்மன் அருள் துணை நிற்கட்டும்&rdquo;</span>
-          </p>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.74rem', color: 'rgba(255,248,233,0.7)', lineHeight: 1.5 }}>
-            மணமக்கள் பற்றிய தகவல்களை நீங்களே நன்கு விசாரித்து முடிவுக்கு வரவும். எமது நிறுவனத்தின் சேவை தகவல் தருவதற்காக மட்டுமே.
-          </p>
-          <div className="site-footer-langs" aria-label="Languages served">
-            <span>தமிழ்</span>
-            <span>English</span>
-            <span>தெலுங்கு</span>
-            <span>கன்னடம்</span>
+          </div>
+
+          <div className="site-footer-langs" aria-label="Languages supported">
+            <span className="site-footer-lang-pill">தமிழ்</span>
+            <span className="site-footer-lang-pill">English</span>
+            <span className="site-footer-lang-pill">తెలుగు</span>
+            <span className="site-footer-lang-pill">ಕನ್ನಡ</span>
           </div>
         </div>
 
-        <nav aria-label="Explore">
-          <h3>Explore</h3>
+        {/* Explore Links */}
+        <nav className="site-footer-col" aria-label="Explore Links">
+          <h3 className="site-footer-col-title">
+            <span>Explore</span>
+            <span className="site-footer-title-bar" aria-hidden="true" />
+          </h3>
           <ul className="site-footer-links">
             {exploreLinks.map((l) => (
-              <li key={l.href}><Link href={l.href}>{l.label}</Link></li>
+              <li key={l.href}>
+                <Link href={l.href}>{l.label}</Link>
+              </li>
             ))}
           </ul>
         </nav>
 
-        <nav aria-label="Account">
-          <h3>Account</h3>
+        {/* Account Links */}
+        <nav className="site-footer-col" aria-label="Account Links">
+          <h3 className="site-footer-col-title">
+            <span>Account</span>
+            <span className="site-footer-title-bar" aria-hidden="true" />
+          </h3>
           <ul className="site-footer-links">
             {accountLinks.map((l) => (
-              <li key={l.href}><Link href={l.href}>{l.label}</Link></li>
+              <li key={l.href}>
+                <Link href={l.href}>{l.label}</Link>
+              </li>
             ))}
           </ul>
         </nav>
 
-        <div className="site-footer-cta">
-          <h3>Get started</h3>
-          <p>Registration is free. Browse with a membership and unlock contacts with monthly credits.</p>
-          <Link href="/register" className="site-footer-btn">
-            Register free <ArrowRight size={15} aria-hidden="true" />
-          </Link>
-          <br />
-          <Link href="/login" className="site-footer-signin">Already a member? Sign in</Link>
+        {/* CTA Card */}
+        <div className="site-footer-cta-col">
+          <div className="site-footer-cta-card">
+            <h3 className="site-footer-col-title">
+              <span>Get Started</span>
+              <span className="site-footer-title-bar" aria-hidden="true" />
+            </h3>
+            <p className="site-footer-cta-desc">
+              பதிவு முற்றிலும் இலவசம். தகுதியான வரன்களைப் பார்வையிட்டு, பிரத்யேக கிரெடிட்கள் மூலம் பாதுகாப்பாகத் தொடர்புகளைப் பெறுங்கள்.
+            </p>
+            <Link href="/register" className="site-footer-btn">
+              <span>Register Free</span>
+              <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+            <div className="site-footer-signin-wrap">
+              <Link href="/login" className="site-footer-signin">
+                Already a member? Sign In &rarr;
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Bottom Legal & Trust Bar */}
       <div className="site-footer-bottom">
-        <div className="container">
-          <span>&copy; {currentYear} <strong>Varaghi Matrimony</strong> (ஸ்ரீ வாராஹி திருமண தகவல் மையம்). All rights reserved.</span>
-          <span><Lock size={13} aria-hidden="true" /> வரன் தொலைபேசி எண்கள் எப்போதும் ரகசியமாக வைக்கப்படும்</span>
+        <div className="container site-footer-bottom-inner">
+          <div className="site-footer-copy">
+            &copy; {currentYear} <strong>Varaghi Matrimony</strong> (ஸ்ரீ வாராஹி திருமண தகவல் மையம்). All rights reserved.
+          </div>
+          <div className="site-footer-trust-badge">
+            <ShieldCheck size={14} className="site-footer-trust-icon" aria-hidden="true" />
+            <span>100% பாதுகாப்பான வரன் விவரங்கள் • தொலைபேசி எண்கள் எப்போதும் ரகசியமாக வைக்கப்படும்</span>
+          </div>
         </div>
       </div>
     </footer>

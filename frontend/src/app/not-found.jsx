@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { Compass } from 'lucide-react';
 
 export default function NotFound() {
   return (
@@ -15,9 +16,21 @@ export default function NotFound() {
         backgroundColor: 'var(--bg-primary, #FFF8F2)',
       }}
     >
-      <span style={{ fontSize: '3.5rem', display: 'block', marginBottom: '1rem' }} aria-hidden="true">
-        🌸
-      </span>
+      <div
+        style={{
+          width: '64px',
+          height: '64px',
+          borderRadius: '50%',
+          backgroundColor: 'rgba(217, 154, 36, 0.12)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '1.25rem',
+          color: '#D99A24',
+        }}
+      >
+        <Compass size={32} />
+      </div>
       <h1
         style={{
           fontSize: '2.5rem',
