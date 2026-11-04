@@ -1,22 +1,36 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002/api';
 
 /**
- * Token management helpers for resilient cross-origin authentication
+ * Token management helpers for resilient cross-origin authentication.
+ * Uses sessionStorage so the authentication session automatically terminates
+ * when the browser/window is closed, requiring re-login for security.
  */
 export function getStoredToken() {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('matrimony_token') || '';
+    // Check sessionStorage (session-scoped: automatically cleared when browser closes)
+    try {
+      return sessionStorage.getItem('matrimony_token') || '';
+    } catch (_) {
+      return '';
+    }
   }
   return '';
 }
 
 export function setStoredToken(token) {
   if (typeof window !== 'undefined') {
-    if (token) {
-      localStorage.setItem('matrimony_token', token);
-    } else {
+    // Purge any legacy persistent localStorage token to prevent auto-login on browser reopen
+    try {
       localStorage.removeItem('matrimony_token');
-    }
+    } catch (_) {}
+
+    try {
+      if (token) {
+        sessionStorage.setItem('matrimony_token', token);
+      } else {
+        sessionStorage.removeItem('matrimony_token');
+      }
+    } catch (_) {}
   }
 }
 

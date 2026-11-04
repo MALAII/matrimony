@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   getMyProfileApi,
   createProfileApi,
@@ -210,6 +211,7 @@ const calculateAge = (dobString) => {
 };
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { currentUser, authLoading, checkAuth } = useAuth();
   const [profileLoading, setProfileLoading] = useState(true);
   const [isExistingProfile, setIsExistingProfile] = useState(false);
@@ -350,6 +352,11 @@ export default function ProfilePage() {
 
       if (!user) {
         setProfileLoading(false);
+        return;
+      }
+
+      if (user.role === 'admin') {
+        router.replace('/admin');
         return;
       }
 

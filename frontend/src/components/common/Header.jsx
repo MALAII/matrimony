@@ -111,53 +111,57 @@ export const Header = () => {
           {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
 
-        {/* Navigation Links Group */}
+        {/* Navigation Links Group - Hidden for Admins */}
         <nav
           className={`nav-group ${mobileMenuOpen ? 'mobile-open' : ''}`}
           aria-label="Main Navigation"
         >
-          <Link
-            href="/"
-            className={`nav-link ${pathname === '/' ? 'nav-link-active' : ''}`}
-            onClick={closeMobileMenu}
-          >
-            Home
-          </Link>
-          <Link
-            href="/members"
-            className={`nav-link ${pathname === '/members' || pathname.startsWith('/members/') ? 'nav-link-active' : ''}`}
-            onClick={closeMobileMenu}
-          >
-            Browse Profiles
-          </Link>
-          <Link
-            href="/membership"
-            className={`nav-link ${pathname === '/membership' ? 'nav-link-active' : ''}`}
-            onClick={closeMobileMenu}
-          >
-            Membership Plans
-          </Link>
-          <Link
-            href="/#how-it-works"
-            className="nav-link"
-            onClick={closeMobileMenu}
-          >
-            How It Works
-          </Link>
-          <Link
-            href="/about"
-            className={`nav-link ${pathname === '/about' ? 'nav-link-active' : ''}`}
-            onClick={closeMobileMenu}
-          >
-            About Us
-          </Link>
-          <Link
-            href="/contact"
-            className={`nav-link ${pathname === '/contact' ? 'nav-link-active' : ''}`}
-            onClick={closeMobileMenu}
-          >
-            Contact
-          </Link>
+          {currentUser?.role !== 'admin' && (
+            <>
+              <Link
+                href="/"
+                className={`nav-link ${pathname === '/' ? 'nav-link-active' : ''}`}
+                onClick={closeMobileMenu}
+              >
+                Home
+              </Link>
+              <Link
+                href="/members"
+                className={`nav-link ${pathname === '/members' || pathname.startsWith('/members/') ? 'nav-link-active' : ''}`}
+                onClick={closeMobileMenu}
+              >
+                Browse Profiles
+              </Link>
+              <Link
+                href="/membership"
+                className={`nav-link ${pathname === '/membership' ? 'nav-link-active' : ''}`}
+                onClick={closeMobileMenu}
+              >
+                Membership Plans
+              </Link>
+              <Link
+                href="/#how-it-works"
+                className="nav-link"
+                onClick={closeMobileMenu}
+              >
+                How It Works
+              </Link>
+              <Link
+                href="/about"
+                className={`nav-link ${pathname === '/about' ? 'nav-link-active' : ''}`}
+                onClick={closeMobileMenu}
+              >
+                About Us
+              </Link>
+              <Link
+                href="/contact"
+                className={`nav-link ${pathname === '/contact' ? 'nav-link-active' : ''}`}
+                onClick={closeMobileMenu}
+              >
+                Contact
+              </Link>
+            </>
+          )}
 
           <div className="nav-auth-actions" aria-busy={authLoading}>
             {authLoading ? (

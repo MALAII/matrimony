@@ -20,6 +20,7 @@ const generateToken = (id) => {
 
 /**
  * Get environment-appropriate cookie options
+ * Creates a secure session cookie that automatically expires when the browser is closed.
  */
 const getCookieOptions = () => {
   const isCrossSiteOrProd =
@@ -31,7 +32,7 @@ const getCookieOptions = () => {
     httpOnly: true,
     secure: isCrossSiteOrProd,
     sameSite: isCrossSiteOrProd ? 'none' : 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+    // Session cookie: no maxAge/expires so browser purges on close
   };
 };
 
@@ -244,10 +245,15 @@ const getCurrentUser = async (req, res) => {
  * @access  Public / Private
  */
 const logoutUser = async (req, res) => {
+  const isCrossSiteOrProd =
+    process.env.NODE_ENV === 'production' ||
+    Boolean(process.env.RENDER) ||
+    Boolean(process.env.CLIENT_URL && !process.env.CLIENT_URL.includes('localhost'));
+
   res.clearCookie('token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: isCrossSiteOrProd,
+    sameSite: isCrossSiteOrProd ? 'none' : 'lax',
   });
 
   return res.status(200).json({

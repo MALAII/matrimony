@@ -79,7 +79,6 @@ export default function AdminLayout({ children }) {
                 : 'The service is temporarily unreachable. Please check your network connection or try again shortly.'}
             </p>
             <div className="adm-row">
-              <Link href="/" className="btn-secondary">Home</Link>
               <Link href="/login" className="btn-primary">Sign in</Link>
             </div>
           </div>
@@ -111,11 +110,6 @@ export default function AdminLayout({ children }) {
               </Link>
             );
           })}
-          <span className="adm-menu-label">Site</span>
-          <Link href="/" target="_blank">
-            <ExternalLink size={18} />
-            <span>View website</span>
-          </Link>
         </nav>
         <div className="adm-user">
           <span className="adm-avatar">{(admin.name || 'A').charAt(0).toUpperCase()}</span>
