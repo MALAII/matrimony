@@ -965,6 +965,23 @@ export default function MemberDirectoryPage() {
                       profile.refId ||
                       `VM${profile.id ? profile.id.replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase() : '123456'}`;
 
+                    const community = [
+                      comm.caste,
+                      comm.subcaste,
+                      comm.gothram ? `Gothram: ${comm.gothram}` : null,
+                      !comm.caste ? comm.religion : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ');
+
+                    const horoscopeText = [
+                      h.nakshatram ? `Star: ${h.nakshatram}` : null,
+                      h.rasi ? `Rasi: ${h.rasi}` : null,
+                      h.dosham && h.dosham !== 'None' && h.dosham !== 'No Dosham' ? `Dosham: ${h.dosham}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ');
+
                     // Formatted row data matching reference image exactly
                     const ageDisplay = p.age !== null && p.age !== undefined && p.age !== '' ? `${p.age} Years` : '–';
                     const maritalStatusDisplay = p.maritalStatus || 'Never Married';
