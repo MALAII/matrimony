@@ -366,6 +366,12 @@ export default function MemberDirectoryPage() {
 
   const activeFilterCount = chips.length;
 
+  const handleQuickGender = (val) => {
+    setForm((f) => ({ ...f, gender: val }));
+    setActiveFilters((a) => ({ ...a, gender: val }));
+    setPage(1);
+  };
+
   // Sorting profiles client-side
   const sortedProfiles = useMemo(() => {
     const list = [...profiles];
@@ -776,11 +782,40 @@ export default function MemberDirectoryPage() {
                 aria-label="Search profiles"
               />
               <button type="submit" disabled={loading}>Search</button>
-              <button type="button" className={styles.filterToggle} onClick={() => setDrawerOpen(true)}>
-                <SlidersHorizontal size={16} aria-hidden="true" /> Filters
-                {activeFilterCount > 0 && <b>{activeFilterCount}</b>}
-              </button>
             </form>
+
+            {/* Top Quick Filters & Filter Trigger */}
+            <div className={styles.topFilterBar}>
+              <div className={styles.quickGenderGroup} role="radiogroup" aria-label="Looking For">
+                <button
+                  type="button"
+                  className={`${styles.quickGenderBtn} ${!activeFilters.gender ? styles.quickGenderActive : ''}`}
+                  onClick={() => handleQuickGender('')}
+                >
+                  All Matches
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.quickGenderBtn} ${activeFilters.gender === 'Female' ? styles.quickGenderActive : ''}`}
+                  onClick={() => handleQuickGender('Female')}
+                >
+                  👰 Brides (மணமகள்)
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.quickGenderBtn} ${activeFilters.gender === 'Male' ? styles.quickGenderActive : ''}`}
+                  onClick={() => handleQuickGender('Male')}
+                >
+                  🤵 Grooms (மணமகன்)
+                </button>
+              </div>
+
+              <button type="button" className={styles.filterTriggerBtn} onClick={() => setDrawerOpen(true)}>
+                <SlidersHorizontal size={15} aria-hidden="true" />
+                <span>All Filters (வடிகட்டிகள்)</span>
+                {activeFilterCount > 0 && <span className={styles.filterBadge}>{activeFilterCount}</span>}
+              </button>
+            </div>
 
             <div className={styles.toolbar}>
               <p className={styles.count}>
@@ -1040,10 +1075,13 @@ export default function MemberDirectoryPage() {
                           </Link>
 
                           {unlockedInfo ? (
-                            <div className={styles.phoneBox} role="status" aria-live="polite">
-                              <div>
-                                <a href={`tel:${unlockedInfo.candidatePhone}`}><Phone size={14} aria-hidden="true" /> {unlockedInfo.candidatePhone}</a>
-                                <small>
+                            <div className={styles.waterPhoneBoxRevealed} role="status" aria-live="polite">
+                              <div className={styles.revealedPhoneDigitsCol}>
+                                <a href={`tel:${unlockedInfo.candidatePhone}`} className={styles.revealedPhoneNumberLink}>
+                                  <Phone size={14} aria-hidden="true" />
+                                  <span className={styles.revealingWaterNumber}>{unlockedInfo.candidatePhone}</span>
+                                </a>
+                                <small className={styles.revealedPhoneNote}>
                                   {unlockedInfo.alreadyUnlocked ? 'Previously unlocked' : 'Contact unlocked · 1 credit'}
                                 </small>
                               </div>
@@ -1055,23 +1093,27 @@ export default function MemberDirectoryPage() {
                                 type="button"
                                 onClick={() => handleUnlockContact(profile.id)}
                                 disabled={isUnlocking || creditsExhausted}
-                                className={`${styles.goldenUnlockCard} ${isAlreadyUnlocked ? styles.goldenUnlockCardFree : ''}`}
+                                className={styles.waterPhoneBoxLocked}
                                 title={isAlreadyUnlocked ? 'Click to reveal candidate contact (Free)' : 'Click to reveal candidate contact (1 Credit)'}
                               >
-                                <div className={styles.goldenPhoneDigitsRow} aria-hidden="true">
-                                  <Phone size={13} className={styles.goldenPhoneIcon} />
-                                  <span className={styles.goldenPhoneBlurDigits}>+91 98401 28549</span>
+                                <div className={styles.waterPhoneDigitsRow} aria-hidden="true">
+                                  <span className={styles.waterBlurredDigits}>+91 98401 28549</span>
                                 </div>
-                                <div className={styles.goldenPhoneActionPill}>
-                                  <KeyRound size={12} aria-hidden="true" />
+
+                                <div className={styles.waterLockBadge}>
+                                  {isUnlocking ? (
+                                    <span className={styles.lockSpinner} aria-hidden="true" />
+                                  ) : (
+                                    <Lock size={14} aria-hidden="true" />
+                                  )}
                                   <span>
                                     {isUnlocking
-                                      ? 'Revealing…'
+                                      ? 'Unlocking…'
                                       : isAlreadyUnlocked
-                                      ? 'Reveal Phone (Free)'
+                                      ? 'Free'
                                       : creditsExhausted
-                                      ? 'Credits Exhausted'
-                                      : 'Unlock Phone (1 Credit)'}
+                                      ? 'Exhausted'
+                                      : '1 Credit'}
                                   </span>
                                 </div>
                               </button>

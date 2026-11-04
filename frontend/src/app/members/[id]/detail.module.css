@@ -491,9 +491,10 @@
   font-size: 1.12rem;
   font-weight: 800;
   letter-spacing: 0.1em;
-  color: #351B1B;
-  filter: blur(5px);
-  opacity: 0.65;
+  color: #4A3525;
+  filter: url(#water-blur) blur(3.5px);
+  -webkit-filter: url(#water-blur) blur(3.5px);
+  opacity: 0.7;
   user-select: none;
 }
 
@@ -574,6 +575,32 @@
   align-items: center;
   gap: 0.45rem;
   letter-spacing: 0.02em;
+}
+
+.phoneLink span {
+  display: inline-block;
+  animation: waterSmoothDissolve 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes waterSmoothDissolve {
+  0% {
+    filter: url(#water-blur) blur(5px);
+    opacity: 0.5;
+    transform: scale(0.96);
+  }
+  30% {
+    filter: url(#water-blur) blur(3px);
+    opacity: 0.75;
+  }
+  70% {
+    filter: blur(1.5px);
+    opacity: 0.92;
+  }
+  100% {
+    filter: none;
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .phoneLink:hover {

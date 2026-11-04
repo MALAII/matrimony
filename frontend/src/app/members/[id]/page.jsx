@@ -690,7 +690,7 @@ export default function CandidateDetailPage() {
                 <div className={s.unlockedPhoneBox}>
                   <div className={s.phoneRow}>
                     <a href={`tel:${unlockedContact.candidatePhone}`} className={s.phoneLink}>
-                      <Phone size={18} /> {unlockedContact.candidatePhone}
+                      <Phone size={18} /> <span>{unlockedContact.candidatePhone}</span>
                     </a>
                     <button
                       type="button"

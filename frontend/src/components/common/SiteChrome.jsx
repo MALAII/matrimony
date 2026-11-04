@@ -71,6 +71,16 @@ export function SiteChrome({ children }) {
 
   return (
     <div className="site-container">
+      {/* Universal Water Ripple Blur Filter for Contact Numbers */}
+      <svg style={{ position: 'absolute', width: 0, height: 0, pointerEvents: 'none' }} aria-hidden="true">
+        <defs>
+          <filter id="water-blur" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04 0.08" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+            <feGaussianBlur in="displaced" stdDeviation="3.6" />
+          </filter>
+        </defs>
+      </svg>
       <Header />
       <main className="main-content">{children}</main>
       {!isAuthPage && <Footer />}
