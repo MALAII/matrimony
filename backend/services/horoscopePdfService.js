@@ -58,8 +58,8 @@ const transformToRoyalGoldChart = (rawSvg, chartType = 'rasi', candidateInfo = {
 
   let contentSvg = rawSvg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
 
-  // Remove existing center texts so we can replace with royal gold center styling
-  contentSvg = contentSvg.replace(/<text[^>]*>(?:ராசி|நவாம்சம்|Rasi|Navamsa)<\/text>/g, '');
+  // Remove existing center texts so we can replace with royal gold center styling (handles any trailing ZWNJ or whitespace)
+  contentSvg = contentSvg.replace(/<text[^>]*>\s*(?:ராசி|நவாம்ச[^<]*|Rasi|Navamsa)\s*<\/text>/gi, '');
   if (extractedDate) {
     const escDate = extractedDate.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
     contentSvg = contentSvg.replace(new RegExp(`<text[^>]*>${escDate}<\\/text>`, 'g'), '');
@@ -508,9 +508,9 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
         .text('வரன் மற்றும் பிறப்பு விவரங்கள் (CANDIDATE & BIRTH PARTICULARS)', margin + 10, curY + 4);
 
       const col1X = margin + 12;
-      const col2X = margin + contentWidth / 2 + 8;
-      const labelW1 = 105;
-      const labelW2 = 115;
+      const col2X = margin + 242;
+      const labelW1 = 100;
+      const labelW2 = 130;
       const rowY1 = curY + 21;
       const rowY2 = curY + 37;
       const rowY3 = curY + 53;
