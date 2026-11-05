@@ -20,6 +20,175 @@ const resolveTamilFonts = () => {
   return { regular: 'Helvetica', bold: 'Helvetica-Bold', available: false };
 };
 
+const formatAstroDate = (dateVal) => {
+  if (!dateVal) return '';
+  try {
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return String(dateVal);
+    const day = String(d.getDate()).padStart(2, '0');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} - ${month} - ${year}`;
+  } catch (_) {
+    return String(dateVal);
+  }
+};
+
+/**
+ * Transforms raw Prokerala chart SVG into Royal Gold South Indian Temple Astrological Chart
+ * Preserves 100% of real planetary positions, numbers, and lagna slash from Prokerala.
+ */
+const transformToRoyalGoldChart = (rawSvg, chartType = 'rasi', candidateInfo = {}) => {
+  if (!rawSvg || typeof rawSvg !== 'string') return rawSvg;
+  if (rawSvg.includes('id="royalGoldFrame"')) return rawSvg;
+
+  const isNavamsa = chartType.toLowerCase().includes('navamsa') || rawSvg.includes('நவாம்சம்') || rawSvg.includes('Navamsa');
+  const tamilTitle = isNavamsa ? 'நவாம்சம்' : 'ராசி';
+  const badgeTitle = isNavamsa ? 'நவாம்ச கட்டம் (Navamsa Chart)' : 'ராசி கட்டம் (Rasi Chart)';
+
+  let extractedDate = candidateInfo.dob || '';
+  let extractedTime = candidateInfo.tob || '';
+
+  const dateMatch = rawSvg.match(/<text[^>]*>(\d{1,2}\s*-\s*[A-Za-z]{3}\s*-\s*\d{4})<\/text>/);
+  if (dateMatch) extractedDate = dateMatch[1];
+
+  const timeMatch = rawSvg.match(/<text[^>]*>(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm|AM|PM)?)<\/text>/);
+  if (timeMatch) extractedTime = timeMatch[1];
+
+  let contentSvg = rawSvg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+
+  // Remove existing center texts so we can replace with royal gold center styling
+  contentSvg = contentSvg.replace(/<text[^>]*>(?:ராசி|நவாம்சம்|Rasi|Navamsa)<\/text>/g, '');
+  if (extractedDate) {
+    const escDate = extractedDate.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    contentSvg = contentSvg.replace(new RegExp(`<text[^>]*>${escDate}<\\/text>`, 'g'), '');
+  }
+  if (extractedTime) {
+    const escTime = extractedTime.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    contentSvg = contentSvg.replace(new RegExp(`<text[^>]*>${escTime}<\\/text>`, 'g'), '');
+  }
+
+  // Replace plain grid lines with royal antique gold
+  contentSvg = contentSvg.replace(/stroke="#000000"/g, 'stroke="#C59933"');
+  contentSvg = contentSvg.replace(/stroke-width="1"/g, 'stroke-width="1.6"');
+
+  // Replace house numbers with refined antique bronze/maroon
+  contentSvg = contentSvg.replace(/<text([^>]*)>(\d{1,2})<\/text>/g, (match, attrs, num) => {
+    return `<text${attrs} font-family="'Noto Sans Tamil', 'Nirmala UI', sans-serif" font-weight="700" fill="#7A4E1A">${num}</text>`;
+  });
+
+  // Style planet glyphs with deep regal maroon and bold weight
+  contentSvg = contentSvg.replace(/<text([^>]*)class="([^"]*pk-planet-[^"]*)"([^>]*)>([^<]+)<\/text>/g, (match, before, cls, after, glyph) => {
+    return `<text${before}class="${cls}"${after} font-family="'Noto Sans Tamil', 'Nirmala UI', sans-serif" font-weight="bold" fill="#650D18">${glyph}</text>`;
+  });
+
+  // Style Lagna diagonal lines with distinct gold & maroon double slash
+  contentSvg = contentSvg.replace(/(<line[^>]*stroke-width="2"[^>]*>)/g, (match) => {
+    return match.replace(/stroke="[^"]*"/, 'stroke="#8B0000"').replace(/stroke-width="2"/, 'stroke-width="2.8" stroke-linecap="round"');
+  });
+
+  const typeSuffix = chartType.toLowerCase().includes('navamsa') ? 'nav' : 'rasi';
+
+  return `
+<svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 480 540" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldGrad_${typeSuffix}" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C158" />
+      <stop offset="25%" stop-color="#FFF0A5" />
+      <stop offset="50%" stop-color="#CFA035" />
+      <stop offset="75%" stop-color="#9E731B" />
+      <stop offset="100%" stop-color="#F3D375" />
+    </linearGradient>
+
+    <linearGradient id="maroonGrad_${typeSuffix}" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#550810" />
+      <stop offset="50%" stop-color="#720E1A" />
+      <stop offset="100%" stop-color="#42060C" />
+    </linearGradient>
+
+    <linearGradient id="cellParchment_${typeSuffix}" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF9" />
+      <stop offset="100%" stop-color="#FFF7E8" />
+    </linearGradient>
+
+    <linearGradient id="centerParchment_${typeSuffix}" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF7" />
+      <stop offset="100%" stop-color="#FFF2DC" />
+    </linearGradient>
+
+    <g id="templeCorner_${typeSuffix}">
+      <path d="M 0,0 L 28,0 C 22,4 16,10 14,18 C 12,24 6,26 0,28 Z" fill="url(#goldGrad_${typeSuffix})" opacity="0.85" />
+      <path d="M 3,3 L 20,3 C 16,6 12,10 10,16 C 8,20 5,21 3,23 Z" fill="#7A4E1A" opacity="0.6" />
+      <circle cx="8" cy="8" r="2.5" fill="#FFF0A5" />
+      <circle cx="16" cy="6" r="1.5" fill="#FFF0A5" />
+      <circle cx="6" cy="16" r="1.5" fill="#FFF0A5" />
+    </g>
+  </defs>
+
+  <!-- 1. Header Royal Maroon Badge -->
+  <g transform="translate(60, 8)">
+    <path d="M 12,0 L 348,0 C 354,0 360,6 360,12 L 360,24 C 360,30 354,36 348,36 L 12,36 C 6,36 0,30 0,24 L 0,12 C 0,6 6,0 12,0 Z"
+          fill="url(#maroonGrad_${typeSuffix})" stroke="url(#goldGrad_${typeSuffix})" stroke-width="1.8" />
+    <path d="M 14,3 L 346,3 C 350,3 355,7 355,12 L 355,24 C 355,29 350,33 346,33 L 14,33 C 10,33 5,29 5,24 L 5,12 C 5,7 10,3 14,3 Z"
+          fill="none" stroke="#F5C369" stroke-width="0.6" opacity="0.7" />
+    <circle cx="20" cy="18" r="2.2" fill="url(#goldGrad_${typeSuffix})" />
+    <circle cx="340" cy="18" r="2.2" fill="url(#goldGrad_${typeSuffix})" />
+    <text x="180" y="23" font-family="'Noto Sans Tamil', 'Nirmala UI', sans-serif" font-size="13" font-weight="bold" fill="#FFF8E9" text-anchor="middle" letter-spacing="0.5">
+      ${badgeTitle}
+    </text>
+  </g>
+
+  <!-- 2. Chart Main Body Group -->
+  <g id="royalGoldFrame" transform="translate(0, 52)">
+    <rect x="10" y="10" width="462" height="462" rx="4" fill="url(#cellParchment_${typeSuffix})" />
+
+    <!-- Center 2x2 Box Background -->
+    <rect x="126" y="126" width="232" height="232" fill="url(#centerParchment_${typeSuffix})" stroke="url(#goldGrad_${typeSuffix})" stroke-width="2.2" />
+    <rect x="130" y="130" width="224" height="224" fill="none" stroke="#D4AF37" stroke-width="0.8" opacity="0.6" />
+
+    <!-- Raw Prokerala SVG Content (Grid Lines, Numbers, Planets, Lagna Slash) -->
+    ${contentSvg}
+
+    <!-- Center Box Content -->
+    <text x="242" y="206" font-family="'Noto Sans Tamil', 'Nirmala UI', Georgia, serif" font-size="22" font-weight="bold" fill="#650D18" text-anchor="middle">
+      ${tamilTitle}
+    </text>
+
+    ${extractedDate ? `
+    <text x="242" y="236" font-family="'Noto Sans Tamil', 'Nirmala UI', sans-serif" font-size="13.5" font-weight="700" fill="#351B1B" text-anchor="middle">
+      ${extractedDate}
+    </text>` : ''}
+
+    ${extractedTime ? `
+    <text x="242" y="258" font-family="'Noto Sans Tamil', 'Nirmala UI', sans-serif" font-size="12" font-weight="600" fill="#6B5555" text-anchor="middle">
+      ${extractedTime}
+    </text>` : ''}
+
+    <!-- Royal Gold Filigree Divider Motif -->
+    <g transform="translate(242, 280) scale(0.85)">
+      <path d="M 0,-5 L 5,0 L 0,5 L -5,0 Z" fill="url(#goldGrad_${typeSuffix})" stroke="#7A4E1A" stroke-width="0.5" />
+      <circle cx="0" cy="0" r="1.5" fill="#550810" />
+      <path d="M -8,0 C -18,-5 -30,5 -42,0 C -34,-2 -22,-2 -10,0" fill="none" stroke="url(#goldGrad_${typeSuffix})" stroke-width="1.4" stroke-linecap="round" />
+      <circle cx="-42" cy="0" r="1.8" fill="url(#goldGrad_${typeSuffix})" />
+      <path d="M 8,0 C 18,-5 30,5 42,0 C 34,-2 22,-2 10,0" fill="none" stroke="url(#goldGrad_${typeSuffix})" stroke-width="1.4" stroke-linecap="round" />
+      <circle cx="42" cy="0" r="1.8" fill="url(#goldGrad_${typeSuffix})" />
+    </g>
+
+    <!-- Dual Heavy Gold Outer Frame -->
+    <rect x="8" y="8" width="466" height="466" rx="5" fill="none" stroke="url(#goldGrad_${typeSuffix})" stroke-width="3.8" />
+    <rect x="12" y="12" width="458" height="458" rx="3" fill="none" stroke="#D4AF37" stroke-width="1" opacity="0.8" />
+
+    <!-- Four Temple Gold Filigree Corners -->
+    <use href="#templeCorner_${typeSuffix}" x="8" y="8" />
+    <use href="#templeCorner_${typeSuffix}" transform="translate(474, 8) scale(-1, 1)" />
+    <use href="#templeCorner_${typeSuffix}" transform="translate(8, 474) scale(1, -1)" />
+    <use href="#templeCorner_${typeSuffix}" transform="translate(474, 474) scale(-1, -1)" />
+  </g>
+</svg>
+`.trim();
+};
+
 const formatDate = (dateVal) => {
   if (!dateVal) return 'Not Specified';
   try {
@@ -424,29 +593,45 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
         .font(regFont).fillColor('#351B1B')
         .text(dasaText);
 
-      curY += summaryStripHeight + 10;
+      curY += summaryStripHeight + 8;
 
       // -------------------------------------------------------------
-      // 5. SOUTH INDIAN SQUARE CHARTS
+      // 5. SOUTH INDIAN SQUARE CHARTS (ROYAL TEMPLE GOLD DESIGN)
       // -------------------------------------------------------------
-      doc.font(boldFont).fontSize(9.8).fillColor('#650D18')
-        .text('தென்னிந்திய முறை ஜாதக கட்டங்கள் (SOUTH INDIAN HOROSCOPE CHARTS)', margin, curY, {
-          width: contentWidth,
-          align: 'center',
-          characterSpacing: 0.5,
-        });
-
-      curY += 15;
-
-      const chartSize = 250;
-      const chartGap = contentWidth - chartSize * 2;
+      const chartWidth = 254;
+      const chartHeight = 262;
+      const chartGap = contentWidth - chartWidth * 2;
       const chart1X = margin;
-      const chart2X = margin + chartSize + chartGap;
+      const chart2X = margin + chartWidth + chartGap;
 
-      embedSvgChart(doc, horoscope.rasiChartSvg, chart1X, curY, chartSize, chartSize, 'ராசி கட்டம் (D1)', fontConfig);
-      embedSvgChart(doc, horoscope.navamsaChartSvg, chart2X, curY, chartSize, chartSize, 'நவாம்ச கட்டம் (D9)', fontConfig);
+      const astroDate = formatAstroDate(profile.dateOfBirth || profile.personalDetails?.dateOfBirth);
+      const astroTime = horoscope.timeOfBirth || '';
 
-      curY += chartSize + 10;
+      const styledRasiSvg = transformToRoyalGoldChart(horoscope.rasiChartSvg, 'rasi', { dob: astroDate, tob: astroTime });
+      const styledNavamsaSvg = transformToRoyalGoldChart(horoscope.navamsaChartSvg, 'navamsa', { dob: astroDate, tob: astroTime });
+
+      embedSvgChart(doc, styledRasiSvg, chart1X, curY, chartWidth, chartHeight, 'ராசி கட்டம் (Rasi Chart)', fontConfig);
+      embedSvgChart(doc, styledNavamsaSvg, chart2X, curY, chartWidth, chartHeight, 'நவாம்ச கட்டம் (Navamsa Chart)', fontConfig);
+
+      curY += chartHeight + 4;
+
+      // Centered Golden Lotus Ornament between charts and guidelines
+      const lotusPath = path.join(__dirname, '..', 'assets', 'lotus-ornament.svg');
+      if (fs.existsSync(lotusPath)) {
+        try {
+          const lotusW = 56;
+          const lotusH = 16;
+          const lotusSvg = fs.readFileSync(lotusPath, 'utf8');
+          SVGtoPDF(doc, lotusSvg, margin + (contentWidth - lotusW) / 2, curY, {
+            width: lotusW,
+            height: lotusH,
+            preserveAspectRatio: 'xMidYMid meet',
+          });
+          curY += lotusH + 4;
+        } catch (_) {}
+      } else {
+        curY += 4;
+      }
 
       // -------------------------------------------------------------
       // 6. ASTROLOGICAL GUIDELINES & MATCHING NOTES
@@ -571,6 +756,8 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
 
 module.exports = {
   formatDate,
+  formatAstroDate,
+  transformToRoyalGoldChart,
   embedSvgChart,
   generateHoroscopePdfBuffer,
   resolveTamilFonts,

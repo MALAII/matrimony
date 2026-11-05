@@ -182,14 +182,18 @@ const TAMIL_PLANET_SYMBOLS = {
   Ke: 'கே',
 };
 
+const { transformToRoyalGoldChart } = require('./horoscopePdfService');
+
 /**
- * Safely localizes an astrological chart SVG into Tamil if it contains English abbreviations
- * Preserves all coordinates, geometry, and already-localized Tamil glyphs.
+ * Safely localizes an astrological chart SVG into Tamil and transforms it into the
+ * Royal Gold South Indian Temple design (matching Varaghi Matrimony standards).
  *
  * @param {string} svgString - SVG XML markup
- * @returns {string} Tamil-localized SVG markup
+ * @param {string} [chartType='rasi'] - 'rasi' or 'navamsa'
+ * @param {object} [candidateInfo={}] - { dob, tob }
+ * @returns {string} Royal Gold Tamil-localized SVG markup
  */
-const localizeChartSvgToTamil = (svgString) => {
+const localizeChartSvgToTamil = (svgString, chartType = 'rasi', candidateInfo = {}) => {
   if (!svgString || typeof svgString !== 'string') return svgString;
 
   let localized = svgString;
@@ -198,7 +202,7 @@ const localizeChartSvgToTamil = (svgString) => {
   localized = localized.replace(/>\s*RASI CHART \(D1\)\s*</g, '>ராசி கட்டம் (D1)<');
   localized = localized.replace(/>\s*NAVAMSA CHART \(D9\)\s*</g, '>நவாம்ச கட்டம் (D9)<');
   localized = localized.replace(/>\s*Rasi\s*</g, '>ராசி<');
-  localized = localized.replace(/>\s*Navamsa\s*</g, '>நவாம்சம்‌<');
+  localized = localized.replace(/>\s*Navamsa\s*</g, '>நவாம்சம்<');
   localized = localized.replace(/>\s*South Indian 12-House Grid\s*</g, '>தென்னிந்திய 12 கட்ட அமைப்பு<');
 
   // 2. Planet abbreviations localization in Prokerala SVG classes
@@ -233,7 +237,7 @@ const localizeChartSvgToTamil = (svgString) => {
     localized = localized.split(`>${h.en}<`).join(`>${h.ta}<`);
   });
 
-  return localized;
+  return transformToRoyalGoldChart(localized, chartType, candidateInfo);
 };
 
 /**
@@ -411,8 +415,8 @@ const generateSouthIndianChartSvg = (chartTitle = 'RASI CHART (D1)', housePlanet
     `;
   });
 
-  return `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="100%" height="100%" style="max-width: 400px; display: block; margin: 0 auto; background: #FFF8F2; border-radius: 8px; box-shadow: 0 4px 12px rgba(167,131,69,0.12);">
+  const rawSimSvg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="100%" height="100%" style="max-width: 400px; display: block; margin: 0 auto; background: #FFF8F2; border-radius: 8px;">
       <rect x="0" y="0" width="${width}" height="${height}" fill="#FFF8F2" />
       ${cellsSvg}
       <!-- Center Box -->
@@ -421,6 +425,9 @@ const generateSouthIndianChartSvg = (chartTitle = 'RASI CHART (D1)', housePlanet
       <text x="${width / 2}" y="${height / 2 + 12}" font-family="sans-serif" font-size="9" fill="#A78345" text-anchor="middle">${isTamil ? 'தென்னிந்திய 12 கட்ட அமைப்பு' : 'South Indian 12-House Grid'}</text>
     </svg>
   `.trim();
+
+  const chartCategory = (defaultTitle.includes('D9') || defaultTitle.toLowerCase().includes('navamsa')) ? 'navamsa' : 'rasi';
+  return transformToRoyalGoldChart(rawSimSvg, chartCategory);
 };
 
 /**
@@ -593,7 +600,7 @@ const generateHoroscope = async ({ datetime, coordinates, placeName = '', langua
       headers: { Authorization: `Bearer ${token}`, Accept: 'image/svg+xml, application/json' },
     });
     const rawRasiChartSvg = rasiChartRes.ok ? await rasiChartRes.text() : null;
-    const rasiChartSvg = rawRasiChartSvg ? (lang === 'ta' ? localizeChartSvgToTamil(rawRasiChartSvg) : rawRasiChartSvg) : null;
+    const rasiChartSvg = rawRasiChartSvg ? (lang === 'ta' ? localizeChartSvgToTamil(rawRasiChartSvg, 'rasi', { dob: datetime }) : rawRasiChartSvg) : null;
 
     // 3. Fetch South Indian Navamsa Chart (D9) SVG
     const navamsaChartParams = new URLSearchParams(queryParams);
@@ -603,7 +610,7 @@ const generateHoroscope = async ({ datetime, coordinates, placeName = '', langua
       headers: { Authorization: `Bearer ${token}`, Accept: 'image/svg+xml, application/json' },
     });
     const rawNavamsaChartSvg = navamsaChartRes.ok ? await navamsaChartRes.text() : null;
-    const navamsaChartSvg = rawNavamsaChartSvg ? (lang === 'ta' ? localizeChartSvgToTamil(rawNavamsaChartSvg) : rawNavamsaChartSvg) : null;
+    const navamsaChartSvg = rawNavamsaChartSvg ? (lang === 'ta' ? localizeChartSvgToTamil(rawNavamsaChartSvg, 'navamsa', { dob: datetime }) : rawNavamsaChartSvg) : null;
 
     // 4. Fetch Mangal / Chevvai Dosham (use from kundli response if available to preserve rate limit)
     let hasChevvai = false;
