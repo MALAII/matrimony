@@ -11,7 +11,6 @@ import {
   MapPin,
   Calendar,
   User,
-  RefreshCw,
   Eye,
   Phone,
   Mail,
@@ -213,16 +212,6 @@ export default function AdminHoroscopePage() {
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={loadData}
-              disabled={isLoading}
-              style={{ fontSize: '0.85rem', padding: '0.55rem 1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-            >
-              <RefreshCw size={14} className={isLoading ? 'status-spinner' : ''} /> Refresh
-            </button>
-
             {/* Generated Charts Table Button */}
             <Link
               href="/admin/horoscope/history"

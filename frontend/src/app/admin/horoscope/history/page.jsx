@@ -8,7 +8,6 @@ import {
   Search,
   Download,
   Eye,
-  RefreshCw,
   AlertCircle,
   Calendar,
   Clock,
@@ -248,15 +247,6 @@ export default function AdminHoroscopeHistoryPage() {
             <p>Complete historical archive of all calculated South Indian square charts (Rasi D1 &amp; Navamsa D9) with PDF downloads.</p>
           </div>
           <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={loadHoroscopes}
-              className="btn-secondary"
-              disabled={isLoading}
-              style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-            >
-              <RefreshCw size={14} className={isLoading ? 'status-spinner' : ''} /> Refresh
-            </button>
             <Link
               href="/admin/horoscope"
               className="btn-primary"
