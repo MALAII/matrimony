@@ -333,9 +333,19 @@ a.adm-kpi:hover { transform: translateY(-2px); border-color: var(--a-brand); box
   background: radial-gradient(320px 240px at 100% 0%, rgba(162, 13, 22, 0.), transparent 70%), linear-gradient(175deg, #650D18, #4A0810 55%, #351B1B);
   border-right: 1px solid rgba(224, 189, 119, 0.18);
 }
-.adm-brand { padding: 1.6rem 1.4rem 1.2rem; gap: .85rem; }
-.adm-brand strong { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 600; letter-spacing: .01em; }
-.adm-brand small { color: var(--a-gold-bright); text-transform: uppercase; letter-spacing: .18em; font-size: .62rem; font-weight: 700; }
+.adm-brand { padding: 1.4rem 1.25rem 1.2rem; gap: .85rem; display: flex; align-items: center; text-decoration: none; }
+.adm-brand-logo-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(217, 154, 36, 0.45));
+  flex-shrink: 0;
+  transition: transform 0.25s var(--a-ease);
+}
+.adm-brand:hover .adm-brand-logo-img { transform: scale(1.06); }
+.adm-brand-text { display: flex; flex-direction: column; min-width: 0; }
+.adm-brand strong { font-family: var(--font-serif); font-size: 1.15rem; font-weight: 700; letter-spacing: .01em; color: #fff; white-space: nowrap; }
+.adm-brand small { color: var(--a-gold-bright); text-transform: uppercase; letter-spacing: .16em; font-size: .62rem; font-weight: 700; }
 .adm-logo {
   width: 42px; height: 42px; border-radius: 50%; font-family: var(--font-serif); font-size: 1.25rem;
   background: #fff; color: var(--a-brand);

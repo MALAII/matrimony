@@ -92,13 +92,17 @@ export default function AdminLayout({ children }) {
   return (
     <div className="adm">
       <aside className={`adm-side ${open ? 'open' : ''}`}>
-        <div className="adm-brand">
-          <span className="adm-logo">M</span>
-          <div>
-            <strong>Matrimony</strong>
+        <Link href="/admin" className="adm-brand" style={{ textDecoration: 'none' }}>
+          <img
+            src="/logo.png"
+            alt="Varaghi Matrimony"
+            className="adm-brand-logo-img"
+          />
+          <div className="adm-brand-text">
+            <strong>Varaghi Matrimony</strong>
             <small>Admin Console</small>
           </div>
-        </div>
+        </Link>
         <nav className="adm-menu" aria-label="Admin">
           <span className="adm-menu-label">Manage</span>
           {NAV.map((n) => {
