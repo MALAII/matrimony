@@ -696,22 +696,22 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
         .text('அலுவலகச் சான்றொப்பம் & அங்கீகாரம் (OFFICIAL VERIFICATION & ENDORSEMENT)', margin + 10, curY + 3.8);
 
       const authCol1 = margin + 14;
-      const authCol2 = margin + contentWidth / 2 - 10;
-      const authLabelW2 = 122;
+      const authCol2 = margin + 270;
+      const authLabelW2 = 132;
 
       const r1Y = curY + 23;
       const r2Y = curY + 41;
       const r3Y = curY + 60;
 
-      // Col 1 (Left): Official Authority & Signatory
+      // Col 1 (Left): Official Authority & Signatory (strictly constrained width to guarantee zero collision)
       doc.font(boldFont).fontSize(8.5).fillColor('#650D18')
         .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', authCol1, r1Y);
 
-      doc.font(regFont).fontSize(7.3).fillColor('#6B5555')
-        .text('அங்கீகரிக்கப்பட்ட வரன் ஜாதகக் குறிப்பு அறிக்கை (Official Matrimonial Dossier)', authCol1, r2Y);
+      doc.font(regFont).fontSize(7.4).fillColor('#6B5555')
+        .text('அங்கீகரிக்கப்பட்ட வரன் ஜாதகம் (Official Dossier)', authCol1, r2Y);
 
       doc.font(boldFont).fontSize(7.4).fillColor('#351B1B')
-        .text('பதிவாளர் கையொப்பம் (Authorized Signatory): ________________________', authCol1, r3Y);
+        .text('பதிவாளர் கையொப்பம்: ________________________', authCol1, r3Y);
 
       // Col 2 (Right): Dossier Identification & Verification Status
       // Row 1: Dossier ID
