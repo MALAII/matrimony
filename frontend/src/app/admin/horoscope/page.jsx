@@ -463,16 +463,7 @@ export default function AdminHoroscopePage() {
               </div>
 
               {/* Action Bar */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.85rem', paddingTop: '1.1rem', borderTop: '1px solid var(--a-line)' }}>
-                <button
-                  type="button"
-                  onClick={handleResetForm}
-                  className="btn-secondary"
-                  style={{ fontSize: '0.85rem', padding: '0.55rem 1.1rem' }}
-                >
-                  Clear Form
-                </button>
-
+              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: '0.85rem', paddingTop: '1.1rem', borderTop: '1px solid var(--a-line)' }}>
                 <button
                   type="submit"
                   className="btn-primary"
