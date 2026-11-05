@@ -113,12 +113,6 @@ export default function AboutPage() {
         />
 
         <div className={styles.heroInner}>
-          <nav className={styles.crumbs} aria-label="Breadcrumb">
-            <Link href="/">Home</Link>
-            <ChevronRight size={14} aria-hidden="true" />
-            <span>About Us</span>
-          </nav>
-
           <div className={styles.kicker}>
             <Sparkles size={14} aria-hidden="true" />
             <span>ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>

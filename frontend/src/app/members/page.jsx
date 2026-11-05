@@ -744,12 +744,7 @@ export default function MemberDirectoryPage() {
 
         <div className={styles.heroInner}>
           <div className={styles.heroTextWrap}>
-            <nav className={styles.crumbs} aria-label="Breadcrumb">
-              <Link href="/">Home</Link>
-              <ChevronRight size={14} aria-hidden="true" />
-              <span>Verified Matches</span>
-            </nav>
-            <span className={styles.kicker} style={{ marginTop: '0.4rem' }}>ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
+            <span className={styles.kicker}>ஸ்ரீ வாராஹி திருமண தகவல் மையம்</span>
             <h1>உண்மையான வரன்கள் — Browse Matches</h1>
             <p>தமிழ்நாட்டில் மிகவும் நம்பகரமான திருமணத்தகவல் சேவை. மதம், ஜாதி, எல்லை கடந்து இணைக்கும் உண்மையான உறவுகள்.</p>
           </div>

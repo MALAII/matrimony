@@ -454,18 +454,12 @@ export default function CandidateDetailPage() {
   return (
     <div className={base.page}>
       <div className={s.container}>
-        {/* ------------------------------ Breadcrumbs & Top Actions ------------------------------ */}
-        <nav className={s.topbar} aria-label="Breadcrumb">
+        {/* ------------------------------ Top Navigation & Actions ------------------------------ */}
+        <nav className={s.topbar} aria-label="Page Navigation">
           <div className={s.crumbs}>
             <Link href="/members">
               <ArrowLeft size={16} aria-hidden="true" /> Back to Matches
             </Link>
-            <ChevronRight size={14} aria-hidden="true" />
-            <span>
-              {p.gender === 'Female' ? 'Bride' : p.gender === 'Male' ? 'Groom' : 'Candidate'} Profile
-            </span>
-            <ChevronRight size={14} aria-hidden="true" />
-            <span>{displayName} (#{candidateIdShort})</span>
           </div>
 
           <div className={s.topActions}>

@@ -361,11 +361,6 @@ export default function MembershipPage() {
 
         <div className={styles.heroInner}>
           <div className={styles.heroContent}>
-            <nav className={styles.crumbs} aria-label="Breadcrumb">
-              <Link href="/">Home</Link>
-              <ChevronRight size={13} />
-              <span>Membership Plans</span>
-            </nav>
             <div className={styles.kickerPill}>
               <Sparkles size={13} /> ஸ்ரீ வாராஹி திருமண தகவல் மையம் &bull; Membership &amp; Privileges
             </div>
