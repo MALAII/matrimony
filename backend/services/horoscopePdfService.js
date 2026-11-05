@@ -500,7 +500,7 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
       // -------------------------------------------------------------
       // 7. BROKER OFFICIAL ENDORSEMENT & VERIFICATION SECTION
       // -------------------------------------------------------------
-      const authBoxHeight = 88;
+      const authBoxHeight = 82;
       doc.roundedRect(margin, curY, contentWidth, authBoxHeight, 5)
         .fillAndStroke('#FFF8E9', '#D99A24');
 
@@ -510,60 +510,42 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
         .fontSize(7.8)
         .text('அலுவலகச் சான்றொப்பம் & அங்கீகாரம் (OFFICIAL VERIFICATION & ENDORSEMENT)', margin + 10, curY + 3.8);
 
-      const sealBoxWidth = 114;
-      const authLeftX = margin + 12;
-      const sealBoxX = margin + contentWidth - sealBoxWidth - 10;
+      const authCol1 = margin + 14;
+      const authCol2 = margin + contentWidth / 2 - 10;
+      const authLabelW2 = 122;
 
-      // Col 1: Official Dossier Information & Verification
+      const r1Y = curY + 23;
+      const r2Y = curY + 41;
+      const r3Y = curY + 60;
+
+      // Col 1 (Left): Official Authority & Signatory
       doc.font(boldFont).fontSize(8.5).fillColor('#650D18')
-        .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', authLeftX, curY + 22);
+        .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', authCol1, r1Y);
+
       doc.font(regFont).fontSize(7.3).fillColor('#6B5555')
-        .text('அங்கீகரிக்கப்பட்ட வரன் ஜாதகக் குறிப்பு அறிக்கை (Official Matrimonial Dossier)', authLeftX, curY + 35);
+        .text('அங்கீகரிக்கப்பட்ட வரன் ஜாதகக் குறிப்பு அறிக்கை (Official Matrimonial Dossier)', authCol1, r2Y);
 
-      // Dossier ID & Issued Date in one clean line
       doc.font(boldFont).fontSize(7.4).fillColor('#351B1B')
-        .text('பதிவு எண் (Dossier ID): ', authLeftX, curY + 49, { continued: true })
-        .font(boldFont).fillColor('#D99A24').text(displayProfileId, { continued: true })
-        .font(regFont).fillColor('#888888').text('    •    ')
-        .font(boldFont).fillColor('#351B1B').text('வெளியிட்ட தேதி (Issued Date): ', { continued: true })
-        .font(regFont).fillColor('#351B1B').text(generatedDate);
+        .text('பதிவாளர் கையொப்பம் (Authorized Signatory): ________________________', authCol1, r3Y);
 
-      // Verification Status
-      doc.font(boldFont).fontSize(7.4).fillColor('#351B1B')
-        .text('சரிபார்ப்பு நிலை (Status): ', authLeftX, curY + 62, { continued: true })
-        .font(boldFont).fillColor('#1E6B38').text('சரிபார்க்கப்பட்டது (Verified Record)');
+      // Col 2 (Right): Dossier Identification & Verification Status
+      // Row 1: Dossier ID
+      doc.font(boldFont).fontSize(7.5).fillColor('#351B1B')
+        .text('பதிவு எண் (Dossier ID):', authCol2, r1Y);
+      doc.font(boldFont).fontSize(7.5).fillColor('#D99A24')
+        .text(displayProfileId, authCol2 + authLabelW2, r1Y);
 
-      // Signatory line
-      doc.font(boldFont).fontSize(7.2).fillColor('#351B1B')
-        .text('பதிவாளர் கையொப்பம் (Authorized Signatory): ________________________', authLeftX, curY + 75);
+      // Row 2: Issued Date
+      doc.font(boldFont).fontSize(7.5).fillColor('#351B1B')
+        .text('வெளியிட்ட தேதி (Issued Date):', authCol2, r2Y);
+      doc.font(regFont).fontSize(7.5).fillColor('#351B1B')
+        .text(generatedDate, authCol2 + authLabelW2, r2Y);
 
-      // Dedicated Official Seal Badge Box on the Right
-      doc.roundedRect(sealBoxX, curY + 20, sealBoxWidth, 62, 4)
-        .lineWidth(0.8).strokeColor('#E8D3BC').fillAndStroke('#FFFFFF', '#E8D3BC');
-
-      const emblemPaths = [
-        path.join(__dirname, '..', 'assets', 'varaghi-bottom-emblem.png'),
-        path.join(__dirname, '..', 'assets', 'motifs', 'varaghi-bottom-emblem.png'),
-      ];
-      const foundEmblem = emblemPaths.find((p) => fs.existsSync(p));
-      if (foundEmblem) {
-        try {
-          const embW = 32;
-          const embH = 26;
-          doc.image(foundEmblem, sealBoxX + (sealBoxWidth - embW) / 2, curY + 23, {
-            fit: [embW, embH],
-            align: 'center',
-            valign: 'center',
-          });
-        } catch (_) {}
-      }
-
-      doc.font(boldFont).fontSize(6.8).fillColor('#650D18')
-        .text('அங்கீகார முத்திரை', sealBoxX, curY + 52, { width: sealBoxWidth, align: 'center' });
-      doc.font(boldFont).fontSize(6.2).fillColor('#A20D16')
-        .text('[ ஸ்ரீ வாராஹி சுப முத்திரை ]', sealBoxX, curY + 62, { width: sealBoxWidth, align: 'center' });
-      doc.font(regFont).fontSize(5.5).fillColor('#888888')
-        .text('OFFICIAL SEAL', sealBoxX, curY + 71, { width: sealBoxWidth, align: 'center' });
+      // Row 3: Verification Status
+      doc.font(boldFont).fontSize(7.5).fillColor('#351B1B')
+        .text('சரிபார்ப்பு நிலை (Status):', authCol2, r3Y);
+      doc.font(boldFont).fontSize(7.5).fillColor('#1E6B38')
+        .text('சரிபார்க்கப்பட்டது (Verified Record)', authCol2 + authLabelW2, r3Y);
 
       curY += authBoxHeight + 8;
 
