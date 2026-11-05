@@ -438,7 +438,7 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
 
       curY += 15;
 
-      const chartSize = 254;
+      const chartSize = 250;
       const chartGap = contentWidth - chartSize * 2;
       const chart1X = margin;
       const chart2X = margin + chartSize + chartGap;
@@ -451,7 +451,25 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
       // -------------------------------------------------------------
       // 6. ASTROLOGICAL GUIDELINES & MATCHING NOTES
       // -------------------------------------------------------------
-      const notesBoxHeight = 84;
+      const guidelines = [
+        'திருக்கணித பஞ்சாங்க முறைப்படி கிரக பாதசாரங்கள், தசா இருப்பு மற்றும் லக்ன நிலைகள் துல்லியமாக கணிக்கப்பட்டுள்ளன.',
+        'திருமண பொருத்தத்திற்கு தினப் பொருத்தம், கணப் பொருத்தம், ராசி, யோனி, ரஜ்ஜு உள்ளிட்ட 10 பொருத்தங்களை ஒப்பிட்டுப் பார்க்கவும்.',
+        'செவ்வாய் / சனி பார்வை நிலைகள் மற்றும் தசா-புக்தி சமநிலையை அனுபவமிக்க குடும்ப ஜோதிடரிடம் சரிபார்த்துக் கொள்ள பரிந்துரைக்கப்படுகிறது.',
+        'இரு குடும்பத்தினர் முன்னிலையில் வரன் ஜாதகத்தை பரிசீலித்து சுப முகூர்த்த முடிவுகளை மேற்கொள்ளவும்.',
+      ];
+
+      const noteX = margin + 12;
+      const noteTextWidth = contentWidth - 28;
+      const bulletIndent = 12;
+
+      // Pre-measure dynamic height so the box expands gracefully to contain all lines
+      doc.font(regFont).fontSize(7.4);
+      let notesTextTotalH = 0;
+      guidelines.forEach((g) => {
+        notesTextTotalH += doc.heightOfString(g, { width: noteTextWidth - bulletIndent, lineGap: 1.5 }) + 4;
+      });
+
+      const notesBoxHeight = Math.max(88, Math.ceil(20 + notesTextTotalH + 5));
       doc.roundedRect(margin, curY, contentWidth, notesBoxHeight, 5)
         .fillAndStroke('#FFFFFF', '#E8D3BC');
 
@@ -461,11 +479,21 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
         .fontSize(7.8)
         .text('ஜாதகக் குறிப்பு & பொருத்த வழிகாட்டுதல் (ASTROLOGICAL GUIDELINES & MATCHING NOTES)', margin + 10, curY + 3.8);
 
-      doc.font(regFont).fontSize(7.4).fillColor('#351B1B');
-      doc.text('• திருக்கணித பஞ்சாங்க முறைப்படி கிரக பாதசாரங்கள், தசா இருப்பு மற்றும் லக்ன நிலைகள் துல்லியமாக கணிக்கப்பட்டுள்ளன.', margin + 10, curY + 21);
-      doc.text('• திருமண பொருத்தத்திற்கு தினப் பொருத்தம், கணப் பொருத்தம், ராசி, யோனி, ரஜ்ஜு உள்ளிட்ட 10 பொருத்தங்களை ஒப்பிட்டுப் பார்க்கவும்.', margin + 10, curY + 35);
-      doc.text('• செவ்வாய் / சனி பார்வை நிலைகள் மற்றும் தசா-புக்தி சமநிலையை அனுபவமிக்க குடும்ப ஜோதிடரிடம் சரிபார்த்துக் கொள்ள பரிந்துரைக்கப்படுகிறது.', margin + 10, curY + 49);
-      doc.text('• இரு குடும்பத்தினர் முன்னிலையில் வரன் ஜாதகத்தை பரிசீலித்து சுப முகூர்த்த முடிவுகளை மேற்கொள்ளவும்.', margin + 10, curY + 63);
+      let noteY = curY + 22;
+      guidelines.forEach((g) => {
+        // Gold bullet dot
+        doc.font(boldFont).fontSize(7.4).fillColor('#D99A24')
+          .text('•', noteX, noteY, { lineBreak: false });
+
+        // Text with clean hanging indent and dynamic line height flow
+        doc.font(regFont).fontSize(7.4).fillColor('#351B1B');
+        const textH = doc.heightOfString(g, { width: noteTextWidth - bulletIndent, lineGap: 1.5 });
+        doc.text(g, noteX + bulletIndent, noteY, {
+          width: noteTextWidth - bulletIndent,
+          lineGap: 1.5,
+        });
+        noteY += textH + 4;
+      });
 
       curY += notesBoxHeight + 8;
 
@@ -482,31 +510,37 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
         .fontSize(7.8)
         .text('அலுவலகச் சான்றொப்பம் & அங்கீகாரம் (OFFICIAL VERIFICATION & ENDORSEMENT)', margin + 10, curY + 3.8);
 
-      const authCol1 = margin + 12;
-      const authCol2 = margin + contentWidth / 2 + 10;
+      const sealBoxWidth = 114;
+      const authLeftX = margin + 12;
+      const sealBoxX = margin + contentWidth - sealBoxWidth - 10;
 
-      // Col 1
+      // Col 1: Official Dossier Information & Verification
       doc.font(boldFont).fontSize(8.5).fillColor('#650D18')
-        .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', authCol1, curY + 22);
-      doc.font(regFont).fontSize(7.4).fillColor('#6B5555')
-        .text('அங்கீகரிக்கப்பட்ட வரன் ஜாதகக் குறிப்பு அறிக்கை (Official Dossier)', authCol1, curY + 36);
-      doc.font(boldFont).fontSize(7.5).fillColor('#351B1B')
-        .text('பதிவாளர் கையொப்பம் (Authorized Signatory): ________________________', authCol1, curY + 54);
+        .text('ஸ்ரீ வாராஹி திருமண தகவல் மையம்', authLeftX, curY + 22);
+      doc.font(regFont).fontSize(7.3).fillColor('#6B5555')
+        .text('அங்கீகரிக்கப்பட்ட வரன் ஜாதகக் குறிப்பு அறிக்கை (Official Matrimonial Dossier)', authLeftX, curY + 35);
 
-      // Col 2
-      doc.font(boldFont).fontSize(7.5).fillColor('#351B1B')
-        .text('பதிவு எண் (Dossier ID): ', authCol2, curY + 22, { continued: true })
-        .font(boldFont).fillColor('#D99A24').text(displayProfileId);
-      doc.font(boldFont).fontSize(7.5).fillColor('#351B1B')
-        .text('வெளியிட்ட தேதி (Issued Date): ', authCol2, curY + 36, { continued: true })
+      // Dossier ID & Issued Date in one clean line
+      doc.font(boldFont).fontSize(7.4).fillColor('#351B1B')
+        .text('பதிவு எண் (Dossier ID): ', authLeftX, curY + 49, { continued: true })
+        .font(boldFont).fillColor('#D99A24').text(displayProfileId, { continued: true })
+        .font(regFont).fillColor('#888888').text('    •    ')
+        .font(boldFont).fillColor('#351B1B').text('வெளியிட்ட தேதி (Issued Date): ', { continued: true })
         .font(regFont).fillColor('#351B1B').text(generatedDate);
-      doc.font(boldFont).fontSize(7.5).fillColor('#351B1B')
-        .text('சரிபார்ப்பு நிலை (Status): ', authCol2, curY + 50, { continued: true })
-        .font(boldFont).fillColor('#1E6B38').text('சரிபார்க்கப்பட்டது (Verified Record)');
-      doc.font(boldFont).fontSize(7.4).fillColor('#A20D16')
-        .text('அங்கீகார முத்திரை (Official Seal): [ ஸ்ரீ வாராஹி சுப முத்திரை ]', authCol2, curY + 64);
 
-      // Embed the official Varaghi bottom emblem right beside the seal text
+      // Verification Status
+      doc.font(boldFont).fontSize(7.4).fillColor('#351B1B')
+        .text('சரிபார்ப்பு நிலை (Status): ', authLeftX, curY + 62, { continued: true })
+        .font(boldFont).fillColor('#1E6B38').text('சரிபார்க்கப்பட்டது (Verified Record)');
+
+      // Signatory line
+      doc.font(boldFont).fontSize(7.2).fillColor('#351B1B')
+        .text('பதிவாளர் கையொப்பம் (Authorized Signatory): ________________________', authLeftX, curY + 75);
+
+      // Dedicated Official Seal Badge Box on the Right
+      doc.roundedRect(sealBoxX, curY + 20, sealBoxWidth, 62, 4)
+        .lineWidth(0.8).strokeColor('#E8D3BC').fillAndStroke('#FFFFFF', '#E8D3BC');
+
       const emblemPaths = [
         path.join(__dirname, '..', 'assets', 'varaghi-bottom-emblem.png'),
         path.join(__dirname, '..', 'assets', 'motifs', 'varaghi-bottom-emblem.png'),
@@ -514,13 +548,22 @@ const generateHoroscopePdfBuffer = (profile, options = {}) => {
       const foundEmblem = emblemPaths.find((p) => fs.existsSync(p));
       if (foundEmblem) {
         try {
-          doc.image(foundEmblem, authCol2 + 208, curY + 54, {
-            fit: [22, 18],
+          const embW = 32;
+          const embH = 26;
+          doc.image(foundEmblem, sealBoxX + (sealBoxWidth - embW) / 2, curY + 23, {
+            fit: [embW, embH],
             align: 'center',
             valign: 'center',
           });
         } catch (_) {}
       }
+
+      doc.font(boldFont).fontSize(6.8).fillColor('#650D18')
+        .text('அங்கீகார முத்திரை', sealBoxX, curY + 52, { width: sealBoxWidth, align: 'center' });
+      doc.font(boldFont).fontSize(6.2).fillColor('#A20D16')
+        .text('[ ஸ்ரீ வாராஹி சுப முத்திரை ]', sealBoxX, curY + 62, { width: sealBoxWidth, align: 'center' });
+      doc.font(regFont).fontSize(5.5).fillColor('#888888')
+        .text('OFFICIAL SEAL', sealBoxX, curY + 71, { width: sealBoxWidth, align: 'center' });
 
       curY += authBoxHeight + 8;
 
